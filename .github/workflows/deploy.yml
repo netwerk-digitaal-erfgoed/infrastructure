@@ -19,4 +19,6 @@ jobs:
         run: doctl kubernetes cluster kubeconfig save nde
 
       - name: Deploy to DigitalOcean Kubernetes
-        run: kubectl apply -f $GITHUB_WORKSPACE/
+        run: |
+          kubectl get pods
+          kubectl apply -f $GITHUB_WORKSPACE/
