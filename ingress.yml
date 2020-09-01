@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  tls:
+    - hosts:
+        - termen.netwerkdigitaalerfgoed.nl
+      secretName: tls
+  rules:
+    - host: termen.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - backend:
+              serviceName: network-of-terms-comunica
+              servicePort: 80
