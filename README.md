@@ -1,6 +1,7 @@
 # NDE Infrastructure
 
-This repository contains generic Kubernetes infrastructure configuration for NDE applications.
+This repository contains generic infrastructure configuration
+for running NDE applications in a Kubernetes cluster.
 
 The configuration is based on existing documentation, in particular
 [How to Set Up an Nginx Ingress with Cert-Manager on DigitalOcean Kubernetes](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-with-cert-manager-on-digitalocean-kubernetes)
