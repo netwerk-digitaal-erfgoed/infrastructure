@@ -20,4 +20,4 @@ jobs:
 
       - name: Deploy to DigitalOcean Kubernetes
         run: |
-          kubectl apply -f $GITHUB_WORKSPACE/
+          kubectl apply -R -f $GITHUB_WORKSPACE/k8s
