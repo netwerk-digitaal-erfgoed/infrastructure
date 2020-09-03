@@ -22,6 +22,17 @@ This generic infrastructure includes:
 - ingress configuration for routing hostnames to applications
 - auto-provisioning and renewal of a Let’s Encrypt TLS certificate for each hostname.
 
+## Making changes
+
+We make changes to the infrastructure through declarative configuration files. 
+So to change the infrastructure, just follow your regular Git workflow:
+
+1. clone this repository;
+2. make changes to any of the Kubernetes manifests, which you can find in the `k8s/` directory;
+3. push your changes pack to GitHub.
+
+A [GitHub action](.github/workflows/deploy.yml) then automatically applies the changes to our Kubernetes cluster.
+
 ## Set up a DigitalOcean cluster from scratch
 
 Start by creating a Kubernetes cluster in the DigitalOcean web interface.
@@ -37,7 +48,7 @@ kubectl annotate -n ingress-nginx service ingress-nginx-controller service.beta.
 And apply the configuration from this repository by cloning it and then running:
 
 ```bash
-kubectl apply -f .
+kubectl apply -R -f k8s
 ```
 
 ### DNS
