@@ -9,6 +9,7 @@ spec:
   tls:
     - hosts:
         - termen.netwerkdigitaalerfgoed.nl
+        - termen-demo-netwerkdigitaalerfgoed.nl
       secretName: tls
   rules:
     - host: termen.netwerkdigitaalerfgoed.nl
@@ -16,4 +17,10 @@ spec:
         paths:
           - backend:
               serviceName: network-of-terms-comunica
+              servicePort: 80
+    - host: termen-demo.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - backend:
+              serviceName: network-of-terms-demo
               servicePort: 80
