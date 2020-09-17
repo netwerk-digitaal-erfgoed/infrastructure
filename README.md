@@ -45,7 +45,14 @@ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.1
 kubectl annotate -n ingress-nginx service ingress-nginx-controller service.beta.kubernetes.io/do-loadbalancer-hostname="kubernetes.netwerkdigitaalerfgoed.nl"
 ```
 
-And apply the configuration from this repository by cloning it and then running:
+Create secrets so Kubernetes can pull from the GitHub container registry:
+
+```bash
+kubectl create secret docker-registry regcred --docker-server=docker.pkg.github.com --docker-username=YOUR_GITHUB_USERNAME --docker-password=ACCESS_TOKEN_FROM_GITHUB_WITH_READ_PACKAGES_PERMISSION --docker-email=YOUR_GITHUB_EMAIL
+kubectl create secret docker-registry ghcr --docker-server=ghcr.io --docker-username=YOUR_GITHUB_USERNAME --docker-password=ACCESS_TOKEN_FROM_GITHUB_WITH_READ_PACKAGES_PERMISSION --docker-email=YOUR_GITHUB_EMAIL
+```
+
+Finally, apply the configuration from this repository by cloning it and then running:
 
 ```bash
 kubectl apply -R -f k8s
