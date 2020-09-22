@@ -24,3 +24,9 @@ spec:
           - backend:
               serviceName: network-of-terms-demo
               servicePort: 80
+    - host: ldwizard.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - backend:
+              serviceName: ldwizard-erfgoedwizard
+              servicePort: 80
