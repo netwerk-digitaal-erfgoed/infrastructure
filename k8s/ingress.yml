@@ -9,8 +9,10 @@ metadata:
 spec:
   tls:
     - hosts:
+        - demo.netwerkdigitaalerfgoed.nl
         - termen.netwerkdigitaalerfgoed.nl
         - termen-demo-netwerkdigitaalerfgoed.nl
+        - ldwizard.netwerkdigitaalerfgoed.nl
       secretName: tls
   rules:
     - host: demo.netwerkdigitaalerfgoed.nl
