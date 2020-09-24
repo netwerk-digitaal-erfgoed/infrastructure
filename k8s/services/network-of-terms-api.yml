@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: network-of-terms-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: network-of-terms-api
+  template:
+    metadata:
+      labels:
+        app: network-of-terms-api
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-api
+          ports:
+            - containerPort: 3123
+      imagePullSecrets:
+        - name: ghcr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: network-of-terms-api
+spec:
+  ports:
+    - port: 80
+      targetPort: 3123
+  selector:
+    app: network-of-terms-api
