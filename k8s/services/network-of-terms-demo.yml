@@ -13,12 +13,12 @@ spec:
         app: network-of-terms-demo
     spec:
       containers:
-        - name: network-of-terms-demo
-          image: docker.pkg.github.com/netwerk-digitaal-erfgoed/network-of-terms-demo/network-of-terms-demo
+        - name: app
+          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-demo
           ports:
             - containerPort: 80
       imagePullSecrets:
-        - name: regcred
+        - name: ghcr
 ---
 apiVersion: v1
 kind: Service
