@@ -5,13 +5,13 @@ metadata:
   name: datasets
   annotations:
     kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
     - host: demo.netwerkdigitaalerfgoed.nl
       http:
         paths:
-          - path: /datasets
+          - path: /datasets(/|$)(.*)
             backend:
               serviceName: datasets
               servicePort: 80
