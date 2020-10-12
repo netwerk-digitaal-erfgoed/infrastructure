@@ -1,0 +1,37 @@
+# See https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/basic-configuration/
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: demo
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  tls:
+    - hosts:
+         - demo.netwerkdigitaalerfgoed.nl
+      secretName: demo-tls
+  rules:
+    - host: demo.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - backend:
+              serviceName: demo
+              servicePort: 80
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: demo-network-of-terms-redirect
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/permanent-redirect: https://termennetwerk.netwerkdigitaalerfgoed.nl
+spec:
+  rules:
+    - host: demo.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /termennetwerk
+            backend: # unused, but each rule must have a backend
+              serviceName: demo
+              servicePort: 80

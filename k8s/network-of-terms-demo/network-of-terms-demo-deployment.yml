@@ -19,14 +19,3 @@ spec:
             - containerPort: 80
       imagePullSecrets:
         - name: ghcr
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: network-of-terms-demo
-spec:
-  ports:
-    - port: 80
-      targetPort: 80
-  selector:
-    app: network-of-terms-demo

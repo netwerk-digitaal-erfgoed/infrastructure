@@ -19,14 +19,3 @@ spec:
             - containerPort: 80
       imagePullSecrets:
         - name: ghcr
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ldwizard-erfgoedwizard
-spec:
-  ports:
-    - port: 80
-      targetPort: 80
-  selector:
-    app: ldwizard-erfgoedwizard
