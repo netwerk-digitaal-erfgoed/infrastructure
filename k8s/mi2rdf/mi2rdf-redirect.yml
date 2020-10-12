@@ -1,0 +1,17 @@
+# See https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/basic-configuration/
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: mi2rdf-redirect
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/permanent-redirect: https://mi2rdf.netwerkdigitaalerfgoed.nl
+spec:
+  rules:
+    - host: demo.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /mi2rdf
+            backend: # unused, but each rule must have a backend
+              serviceName: demo
+              servicePort: 80
