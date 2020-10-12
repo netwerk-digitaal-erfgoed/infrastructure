@@ -9,7 +9,8 @@ metadata:
 spec:
   tls:
     - hosts:
-#        - demo.netwerkdigitaalerfgoed.nl
+        # Enable after DNS has been changed:
+        # - demo.netwerkdigitaalerfgoed.nl
         - termennetwerk.netwerkdigitaalerfgoed.nl
         - termennetwerk-api.netwerkdigitaalerfgoed.nl
         - ldwizard.netwerkdigitaalerfgoed.nl
@@ -27,6 +28,13 @@ spec:
           - path: /stories
             backend:
               serviceName: stories
+              servicePort: 80
+    - host: demo.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /datasets
+            backend:
+              serviceName: datasets
               servicePort: 80
     - host: termennetwerk-api.netwerkdigitaalerfgoed.nl
       http:

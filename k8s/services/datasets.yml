@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datasets
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datasets
+  template:
+    metadata:
+      labels:
+        app: datasets
+    spec:
+      containers:
+        - name: nginx
+          image: ghcr.io/netwerk-digitaal-erfgoed/datasets-nginx
+          ports:
+            - containerPort: 80
+        - name: php
+          image: ghcr.io/netwerk-digitaal-erfgoed/datasets-php
+          ports:
+            - containerPort: 9000
+      imagePullSecrets:
+        - name: ghcr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: datasets
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+    - name: php-fpm
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: datasets
