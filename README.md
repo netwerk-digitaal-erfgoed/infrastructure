@@ -61,4 +61,13 @@ kubectl apply -R -f k8s
 ### DNS
 
 Configure an A record for each application hostname and for `kubernetes.netwerkdigitaalerfgoed.nl`
-pointing to your load balancer’s public IP address. 
+pointing to your load balancer’s public IP address. Our current settings are (`kubectl get ingress`):
+
+Load balancer public IP address: `178.128.138.52`.
+
+Hostnames:
+
+- demo.netwerkdigitaalerfgoed.nl
+- ldwizard.netwerkdigitaalerfgoed.nl
+- termennetwerk.netwerkdigitaalerfgoed.nl
+- termennetwerk-api.netwerkdigitaalerfgoed.nl
