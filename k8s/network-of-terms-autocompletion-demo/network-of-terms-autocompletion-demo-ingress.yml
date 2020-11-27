@@ -1,0 +1,16 @@
+# See https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/basic-configuration/
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: network-of-terms-autocompletion-demo
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: demo.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /autocomplete
+            backend:
+              serviceName: network-of-terms-autocompletion-demo
+              servicePort: 80
