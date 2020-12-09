@@ -1,0 +1,23 @@
+name: Validate configuration
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Store DigitalOcean credentials
+        run: doctl kubernetes cluster kubeconfig save nde
+
+      - name: Dry run apply to validate manifests
+        run: |
+          kubectl apply -R -f $GITHUB_WORKSPACE/k8s --dry-run=server

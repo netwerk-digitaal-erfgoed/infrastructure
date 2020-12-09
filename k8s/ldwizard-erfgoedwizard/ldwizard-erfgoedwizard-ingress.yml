@@ -1,11 +1,11 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ldwizard-erfgoedwizard
   annotations:
-    kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt
 spec:
+  ingressClassName: nginx
   tls:
     - hosts:
         - ldwizard.netwerkdigitaalerfgoed.nl
@@ -14,6 +14,10 @@ spec:
     - host: ldwizard.netwerkdigitaalerfgoed.nl
       http:
         paths:
-          - backend:
-              serviceName: ldwizard-erfgoedwizard
-              servicePort: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ldwizard-erfgoedwizard
+                port:
+                  number: 80

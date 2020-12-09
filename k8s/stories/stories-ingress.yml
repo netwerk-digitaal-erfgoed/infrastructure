@@ -1,5 +1,5 @@
 # See https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/basic-configuration/
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: stories
@@ -12,6 +12,9 @@ spec:
       http:
         paths:
           - path: /stories(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
-              serviceName: stories
-              servicePort: 80
+              service:
+                name: stories
+                port:
+                  number: 80
