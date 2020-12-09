@@ -1,5 +1,5 @@
 # See https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/basic-configuration/
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: mi2rdf-redirect
@@ -12,6 +12,9 @@ spec:
       http:
         paths:
           - path: /mi2rdf
+            pathType: Prefix
             backend: # unused, but each rule must have a backend
-              serviceName: demo
-              servicePort: 80
+              service:
+                name: demo
+                port:
+                  number: 80
