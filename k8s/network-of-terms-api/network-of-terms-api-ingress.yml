@@ -4,7 +4,6 @@ kind: Ingress
 metadata:
   name: network-of-terms-api
   annotations:
-    kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt
 spec:
   ingressClassName: nginx

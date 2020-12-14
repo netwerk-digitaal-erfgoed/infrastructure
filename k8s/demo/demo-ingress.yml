@@ -42,4 +42,3 @@ spec:
                 name: demo
                 port:
                   number: 80
-
