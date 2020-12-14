@@ -5,14 +5,16 @@ metadata:
   name: copyright-tool
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
+        - www.regeljerechten.nl
         - regeljerechten.nl
-      secretName: regeljerechten-tls
+      secretName: www-regeljerechten-tls
   rules:
-    - host: regeljerechten.nl
+    - host: www.regeljerechten.nl
       http:
         paths:
           - path: /
