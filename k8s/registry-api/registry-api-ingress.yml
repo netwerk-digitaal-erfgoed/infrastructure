@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: registry-api
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: demo.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /register(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: registry-api
+                port:
+                  number: 80
