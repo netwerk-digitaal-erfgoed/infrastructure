@@ -4,6 +4,8 @@ metadata:
   name: registry-demo
 spec:
   replicas: 1 # Cannot be more than 1 because of PersistentVolumeClaim is ReadWriteOnce.
+  strategy:
+    type: Recreate # See https://stackoverflow.com/a/62230273
   selector:
     matchLabels:
       app: registry-demo
