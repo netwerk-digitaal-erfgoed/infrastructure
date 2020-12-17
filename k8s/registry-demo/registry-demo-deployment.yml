@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry-demo
+spec:
+  replicas: 1 # Cannot be more than 1 because of PersistentVolumeClaim is ReadWriteOnce.
+  selector:
+    matchLabels:
+      app: registry-demo
+  template:
+    metadata:
+      labels:
+        app: registry-demo
+    spec:
+      containers:
+        - name: php
+          image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php-fpm
+          volumeMounts:
+            - mountPath: "/datasetdescriptions"
+              name: registry-demo-datasets
+          ports:
+            - containerPort: 9000
+        - name: nginx
+          image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-nginx
+          volumeMounts:
+            - mountPath: "/datasetdescriptions"
+              name: registry-demo-datasets
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: ghcr
+      volumes:
+        - name: registry-demo-datasets
+          persistentVolumeClaim:
+            claimName: registry-demo-datasets
