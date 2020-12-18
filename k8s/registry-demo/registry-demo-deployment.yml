@@ -35,3 +35,5 @@ spec:
         - name: registry-demo-datasets
           persistentVolumeClaim:
             claimName: registry-demo-datasets
+      securityContext:
+        fsGroup: 82 # www-data
