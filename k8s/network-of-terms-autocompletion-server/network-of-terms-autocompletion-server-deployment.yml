@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: network-of-terms-autocompletion-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: network-of-terms-autocompletion-server
+  template:
+    metadata:
+      labels:
+        app: network-of-terms-autocompletion-server
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-autocompletion-server
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: ghcr
