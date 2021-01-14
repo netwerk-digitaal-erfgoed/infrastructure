@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: graphdb
+spec:
+  ingressClassName: nginx
+  rules:
+    # GraphDB doesn't support running under a path (/graphdb) so must run on a (sub)domain.
+    - host: graphdb.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: graphdb
+                port:
+                  number: 80
