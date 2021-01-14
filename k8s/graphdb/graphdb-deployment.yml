@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graphdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graphdb
+  template:
+    metadata:
+      labels:
+        app: graphdb
+    spec:
+      containers:
+        - name: database
+          image: ghcr.io/netwerk-digitaal-erfgoed/graphdb:9.5.0-free
+          volumeMounts:
+            - mountPath: "/opt/graphdb/home"
+              name: graphdb
+          ports:
+            - containerPort: 7200
+      imagePullSecrets:
+        - name: ghcr
+      volumes:
+        - name: graphdb
+          persistentVolumeClaim:
+            claimName: graphdb
