@@ -1,18 +1,19 @@
+# See https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/basic-configuration/
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: graphdb
+  name: graphdb-redirect
   annotations:
+    nginx.ingress.kubernetes.io/permanent-redirect: https://triplestore.netwerkdigitaalerfgoed.nl
     cert-manager.io/cluster-issuer: letsencrypt
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - triplestore.netwerkdigitaalerfgoed.nl
-      secretName: graphdb-tls
+        - graphdb.ddeboer.nl
+      secretName: graphdb-redirect-tls
   rules:
-    # GraphDB doesn't support running under a path (/graphdb) so must run on a (sub)domain.
-    - host: triplestore.netwerkdigitaalerfgoed.nl
+    - host: graphdb.ddeboer.nl
       http:
         paths:
           - path: /
