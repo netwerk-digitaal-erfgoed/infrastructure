@@ -19,6 +19,8 @@ spec:
             - name: GDB_JAVA_OPTS
               value: |
                 -Dgraphdb.workbench.cors.enable=true
+            - name: GDB_HEAP_SIZE
+              value: 3g
           volumeMounts:
             - mountPath: "/opt/graphdb/home"
               name: graphdb
