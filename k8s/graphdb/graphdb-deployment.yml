@@ -4,6 +4,8 @@ metadata:
   name: graphdb
 spec:
   replicas: 1
+  strategy:
+    type: Recreate # See https://stackoverflow.com/a/62230273
   selector:
     matchLabels:
       app: graphdb
@@ -19,8 +21,9 @@ spec:
             - name: GDB_JAVA_OPTS
               value: |
                 -Dgraphdb.workbench.cors.enable=true
+                -Dgraphdb.engine.parallel-import=false
             - name: GDB_HEAP_SIZE
-              value: 3g
+              value: 1g
           volumeMounts:
             - mountPath: "/opt/graphdb/home"
               name: graphdb
