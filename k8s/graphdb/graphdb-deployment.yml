@@ -17,6 +17,11 @@ spec:
       containers:
         - name: database
           image: ghcr.io/netwerk-digitaal-erfgoed/graphdb:9.5.0-free
+          resources:
+            requests:
+              memory: 1.5Gi
+            limits:
+              memory: 3Gi
           env:
             - name: GDB_JAVA_OPTS
               value: |
