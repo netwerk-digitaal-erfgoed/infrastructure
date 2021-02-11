@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: database
-          image: ghcr.io/netwerk-digitaal-erfgoed/graphdb:9.5.0-free
+          image: docker-registry.ontotext.com/graphdb-free:9.6.0-adoptopenjdk11
           resources:
             requests:
               memory: 1.5Gi
