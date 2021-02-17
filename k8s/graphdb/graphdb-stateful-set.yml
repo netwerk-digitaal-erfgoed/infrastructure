@@ -1,14 +1,16 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet # https://www.digitalocean.com/docs/kubernetes/resources/clusterlint-errors/#dobs-pod-owner
 metadata:
   name: graphdb
+annotations:
+#  pre.hook.backup.velero.io/command: ls
+#  post.hook.backup.velero.io/command: ls
 spec:
   replicas: 1
-  strategy:
-    type: Recreate # See https://stackoverflow.com/a/62230273
   selector:
     matchLabels:
       app: graphdb
+  serviceName: graphdb
   template:
     metadata:
       labels:
@@ -31,12 +33,18 @@ spec:
               value: 1g
           volumeMounts:
             - mountPath: "/opt/graphdb/home"
-              name: graphdb
+              name: data
           ports:
             - containerPort: 7200
       imagePullSecrets:
         - name: ghcr
-      volumes:
-        - name: graphdb
-          persistentVolumeClaim:
-            claimName: graphdb
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 8Gi
+        storageClassName: do-block-storage

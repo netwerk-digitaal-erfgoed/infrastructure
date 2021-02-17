@@ -1,14 +1,13 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet # https://www.digitalocean.com/docs/kubernetes/resources/clusterlint-errors/#dobs-pod-owner
 metadata:
   name: registry-demo
 spec:
-  replicas: 1 # Cannot be more than 1 because of PersistentVolumeClaim is ReadWriteOnce.
-  strategy:
-    type: Recreate # See https://stackoverflow.com/a/62230273
+  replicas: 1
   selector:
     matchLabels:
       app: registry-demo
+  serviceName: registry-demo
   template:
     metadata:
       labels:
@@ -19,21 +18,27 @@ spec:
           image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php-fpm
           volumeMounts:
             - mountPath: "/datasetdescriptions"
-              name: registry-demo-datasets
+              name: data
           ports:
             - containerPort: 9000
         - name: nginx
           image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-nginx
           volumeMounts:
             - mountPath: "/datasetdescriptions"
-              name: registry-demo-datasets
+              name: data
           ports:
             - containerPort: 80
       imagePullSecrets:
         - name: ghcr
-      volumes:
-        - name: registry-demo-datasets
-          persistentVolumeClaim:
-            claimName: registry-demo-datasets
       securityContext:
         fsGroup: 82 # www-data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: do-block-storage
