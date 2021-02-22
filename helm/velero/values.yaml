@@ -1,0 +1,36 @@
+# https://github.com/vmware-tanzu/helm-charts/blob/main/charts/velero/values.yaml
+# https://blah.cloud/automation/using-velero-for-k8s-backup-and-restore-of-csi-volumes/
+image:
+  tag: v1.5.3
+configuration:
+  provider: velero.io/aws
+  backupStorageLocation:
+    bucket: nde-backups # Name of the DigitalOcean Space.
+    config:
+      region: ams3
+      s3Url: https://ams3.digitaloceanspaces.com
+  volumeSnapshotLocation: # Enable CSI volume snapshots.
+    name: default
+    provider: digitalocean.com/velero
+
+credentials:
+  useSecret: true
+  secretContents:
+    cloud: |
+      [default]
+      aws_access_key_id=YOUR_S3_ACCESS_KEY_ID
+      aws_secret_access_key=YOUR_S3_ACCESS_SECRET
+  extraEnvVars:
+    DIGITALOCEAN_TOKEN: YOUR_DIGITALOCEAN_ACCESS_TOKEN
+    AWS_SHARED_CREDENTIALS_FILE: /credentials/cloud
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.1.0
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+  - name: velero-plugin-for-digitalocean
+    image: digitalocean/velero-plugin:v1.0.0
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
