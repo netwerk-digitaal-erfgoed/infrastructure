@@ -28,6 +28,8 @@ spec:
                 secretKeyRef:
                   name: graphdb
                   key: password
+            - name: DOCS_URL
+              value: "/register-api"
           ports:
             - containerPort: 3000
       imagePullSecrets:
