@@ -4,8 +4,7 @@ This repository contains generic infrastructure configuration for running NDE ap
 
 The configuration is based on existing documentation, in particular
 [How to Set Up an Nginx Ingress with Cert-Manager on DigitalOcean Kubernetes](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-with-cert-manager-on-digitalocean-kubernetes)
-and [How To Set Up an Nginx Ingress on DigitalOcean Kubernetes Using Helm](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-on-digitalocean-kubernetes-using-helm)
-, with as few modifications as possible.
+and [How To Set Up an Nginx Ingress on DigitalOcean Kubernetes Using Helm](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-on-digitalocean-kubernetes-using-helm), with as few modifications as possible.
 
 We apply this configuration to a
 [DigitalOcean managed Kubernetes cluster](https://www.digitalocean.com/products/kubernetes/).
