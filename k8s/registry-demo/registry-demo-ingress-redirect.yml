@@ -1,21 +1,21 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: registry-api
+  name: registry-demo-redirect
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/permanent-redirect: https://datasetregister.netwerkdigitaalerfgoed.nl
     nginx.ingress.kubernetes.io/configuration-snippet: |
-      rewrite ^(/api)$ $1/ redirect;
+      rewrite ^(/register)$ $1/ redirect;
 spec:
   ingressClassName: nginx
   rules:
-    - host: datasetregister.netwerkdigitaalerfgoed.nl
+    - host: demo.netwerkdigitaalerfgoed.nl
       http:
         paths:
-          - path: /api(/|$)(.*)
+          - path: /register(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
               service:
-                name: registry-api
+                name: registry-demo
                 port:
                   number: 80
