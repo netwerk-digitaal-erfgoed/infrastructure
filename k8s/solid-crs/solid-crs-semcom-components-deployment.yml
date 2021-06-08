@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: solid-crs-semcom-components
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: solid-crs-semcom-components
+  template:
+    metadata:
+      labels:
+        app: solid-crs-semcom-components
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/netwerk-digitaal-erfgoed/solid-crs-semcom-components
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: ghcr
