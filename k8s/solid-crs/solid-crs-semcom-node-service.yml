@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: solid-crs-semcom-node
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: solid-crs-semcom-node
