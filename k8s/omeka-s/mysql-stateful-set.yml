@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: omeka-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: omeka-mysql
+  serviceName: omeka-mysql
+  template:
+    metadata:
+      labels:
+        app: omeka-mysql
+    spec:
+      containers:
+        - name: mariadb
+          image: mariadb:10.6.2
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: omeka-mysql
+                  key: root-password
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: omeka-mysql
+                  key: username
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: omeka-mysql
+                  key: password
+            - name: MYSQL_DATABASE
+              value: omeka
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - mountPath: "/var/lib/mysql"
+              name: omeka-s-mysql-data
+  volumeClaimTemplates:
+    - metadata:
+        name: omeka-s-mysql-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 8Gi
+        storageClassName: do-block-storage
