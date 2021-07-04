@@ -2,9 +2,6 @@ apiVersion: apps/v1
 kind: StatefulSet # https://www.digitalocean.com/docs/kubernetes/resources/clusterlint-errors/#dobs-pod-owner
 metadata:
   name: graphdb
-annotations:
-#  pre.hook.backup.velero.io/command: ls
-#  post.hook.backup.velero.io/command: ls
 spec:
   replicas: 1
   selector:
