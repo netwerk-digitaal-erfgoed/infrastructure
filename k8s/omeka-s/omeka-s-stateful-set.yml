@@ -18,6 +18,9 @@ spec:
           image: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-nginx
           ports:
             - containerPort: 80
+          volumeMounts:
+            - name: omeka-s-files
+              mountPath: /var/www/html/files/
         - name: php
           image: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-php
           env:
