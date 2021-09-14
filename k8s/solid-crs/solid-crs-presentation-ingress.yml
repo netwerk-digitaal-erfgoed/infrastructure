@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: solid-crs-presentation
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - solid-crs-presentatie.netwerkdigitaalerfgoed.nl
+      secretName: solid-crs-presentatie
+  rules:
+    - host: solid-crs-presentatie.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: solid-crs-presentation
+                port:
+                  number: 80
