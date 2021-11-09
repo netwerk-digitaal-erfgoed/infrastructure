@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pods
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - pods.netwerkdigitaalerfgoed.nl
+      secretName: pods
+  rules:
+    - host: pods.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: solid-crs-pods
+                port:
+                  number: 80
