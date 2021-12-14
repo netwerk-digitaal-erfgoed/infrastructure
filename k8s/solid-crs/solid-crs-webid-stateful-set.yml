@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: solid-crs-webid
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: solid-crs-webid
+  serviceName: solid-crs-webid
+  template:
+    metadata:
+      labels:
+        app: solid-crs-webid
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/netwerk-digitaal-erfgoed/solid-crs-webid
+          ports:
+            - containerPort: 80
+          command: ["/bin/sh", "-c"]
+          args: ["cp -R data/production/. /data && node ./node_modules/.bin/community-solid-server -l silly -p 80 -b https://webid.netwerkdigitaalerfgoed.nl -c config/file.json -f /data"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      imagePullSecrets:
+        - name: ghcr
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: do-block-storage
