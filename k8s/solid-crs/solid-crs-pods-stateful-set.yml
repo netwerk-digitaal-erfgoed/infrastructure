@@ -19,7 +19,7 @@ spec:
           ports:
             - containerPort: 80
           command: ["node", "./node_modules/.bin/community-solid-server"]
-          args: ["-l", "silly", "-p", "80", "-b", "https://pods.netwerkdigitaalerfgoed.nl", "-c", "config/file.json", "-f", "/data"]
+          args: ["-m", ".", "-l", "silly", "-p", "80", "-b", "https://pods.netwerkdigitaalerfgoed.nl", "-c", "config/file.json", "-f", "/data"]
           volumeMounts:
             - name: data
               mountPath: /data
