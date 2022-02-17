@@ -22,3 +22,10 @@ spec:
                 name: network-of-terms-api
                 port:
                   number: 80
+          - path: /(reconcile|preview)(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: network-of-terms-reconciliation
+                port:
+                  number: 80
