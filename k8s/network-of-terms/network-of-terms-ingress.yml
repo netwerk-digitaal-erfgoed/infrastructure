@@ -5,6 +5,7 @@ metadata:
   name: network-of-terms-api
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   tls:
@@ -15,17 +16,17 @@ spec:
     - host: termennetwerk-api.netwerkdigitaalerfgoed.nl
       http:
         paths:
+          - path: /(reconcile|preview)/
+            pathType: Prefix
+            backend:
+              service:
+                name: network-of-terms-reconciliation
+                port:
+                  number: 80
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: network-of-terms-api
-                port:
-                  number: 80
-          - path: /(reconcile|preview)(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: network-of-terms-reconciliation
+                name: network-of-terms-graphql
                 port:
                   number: 80

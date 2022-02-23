@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-api
+          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-reconciliation
           ports:
             - containerPort: 3123
       imagePullSecrets:
