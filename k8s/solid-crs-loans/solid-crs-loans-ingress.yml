@@ -9,11 +9,11 @@ spec:
   ingressClassName: nginx
   tls:
       - hosts:
-          - solid-crs-loans-presentatie.netwerkdigitaalerfgoed.nl
-          - solid-crs-loans.netwerkdigitaalerfgoed.nl
+          - solid-crs-loan-presentatie.netwerkdigitaalerfgoed.nl
+          - solid-crs-loan.netwerkdigitaalerfgoed.nl
         secretName: solid-crs-loans
   rules:
-    - host: solid-crs-loans.netwerkdigitaalerfgoed.nl
+    - host: solid-crs-loan.netwerkdigitaalerfgoed.nl
       http:
         paths:
           - path: /
@@ -37,7 +37,7 @@ spec:
                 name: solid-crs-loans-semcom-components
                 port:
                   number: 80
-    - host: solid-crs-loans-presentatie.netwerkdigitaalerfgoed.nl
+    - host: solid-crs-loan-presentation.netwerkdigitaalerfgoed.nl
       http:
         paths:
           - path: /
