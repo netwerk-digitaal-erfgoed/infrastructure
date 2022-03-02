@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/netwerk-digitaal-erfgoed/solid-crs-loans-semcom-components
+          image: ghcr.io/netwerk-digitaal-erfgoed/solid-crs-semcom-components:loans
           ports:
             - containerPort: 80
       imagePullSecrets:

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/netwerk-digitaal-erfgoed/solid-crs-loans-manage
+          image: ghcr.io/netwerk-digitaal-erfgoed/solid-crs-manage:loans
           ports:
             - containerPort: 80
       imagePullSecrets:
