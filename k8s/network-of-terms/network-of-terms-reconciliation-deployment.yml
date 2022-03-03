@@ -15,6 +15,12 @@ spec:
       containers:
         - name: app
           image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-reconciliation
+          env:
+            - name: GTAA_CREDENTIALS
+              valueFrom:
+                secretKeyRef:
+                  name: network-of-terms
+                  key: gtaaCredentials
           ports:
             - containerPort: 3123
       imagePullSecrets:
