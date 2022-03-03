@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: solid-crs-loans
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
     cert-manager.io/cluster-issuer: letsencrypt
 spec:
   ingressClassName: nginx
@@ -16,22 +16,22 @@ spec:
     - host: solid-crs-loan.netwerkdigitaalerfgoed.nl
       http:
         paths:
-          - path: /
+          - path: /(.*)
             pathType: Prefix
             backend:
               service:
                 name: solid-crs-loans-manage
                 port:
                   number: 80
-          - path: /semcom(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /semcom(?:/|$)(.*)
+            pathType: Prefix
             backend:
               service:
                 name: solid-crs-loans-semcom-node
                 port:
                   number: 80
-          - path: /semcom-components(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /semcom-components(?:/|$)(.*)
+            pathType: Prefix
             backend:
               service:
                 name: solid-crs-loans-semcom-components
