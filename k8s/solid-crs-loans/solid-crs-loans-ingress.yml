@@ -9,9 +9,9 @@ spec:
   ingressClassName: nginx
   tls:
       - hosts:
-          - solid-crs-loan-presentatie.netwerkdigitaalerfgoed.nl
+          - solid-crs-loan-presentation.netwerkdigitaalerfgoed.nl
           - solid-crs-loan.netwerkdigitaalerfgoed.nl
-        secretName: solid-crs-loans
+        secretName: solid-crs-loan
   rules:
     - host: solid-crs-loan.netwerkdigitaalerfgoed.nl
       http:
