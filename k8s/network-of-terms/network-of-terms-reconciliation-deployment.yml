@@ -23,5 +23,9 @@ spec:
                   key: gtaaCredentials
           ports:
             - containerPort: 3123
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3123
       imagePullSecrets:
         - name: ghcr
