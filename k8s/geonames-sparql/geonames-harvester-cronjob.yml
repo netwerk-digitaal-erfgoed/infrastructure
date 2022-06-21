@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: geonames-sparql-harvester
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: harvester
+              image: ghcr.io/netwerk-digitaal-erfgoed/geonames-harvester
+              command: ["/bin/sh", "-c", "./geonames-download.sh && ./map.sh"]
+              volumeMounts:
+                - name: data
+                  mountPath: /app/data
+          restartPolicy: OnFailure
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: data-geonames-sparql-0
