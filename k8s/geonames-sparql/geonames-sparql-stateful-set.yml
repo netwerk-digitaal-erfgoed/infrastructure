@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: geonames-sparql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: geonames-sparql
+  serviceName: geonames-sparql
+  template:
+    metadata:
+      labels:
+        app: geonames-sparql
+    spec:
+      initContainers:
+        - name: harvester
+          image: ghcr.io/netwerk-digitaal-erfgoed/geonames-harvester
+          command: ["/bin/sh", "-c", "./geonames-download.sh && ./map.sh"]
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+      containers:
+        - name: app
+          image: atomgraph/fuseki:9985c4edd850c9277d241f6edc0d883013713ad3
+          args: ["--file=/data/geonames.nt", "/geonames"]
+          ports:
+            - containerPort: 3030
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      imagePullSecrets:
+        - name: ghcr
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: do-block-storage
