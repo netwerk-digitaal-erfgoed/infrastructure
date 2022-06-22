@@ -20,3 +20,5 @@ spec:
             - name: data
               persistentVolumeClaim:
                 claimName: data-geonames-sparql-0
+          imagePullSecrets:
+            - name: ghcr
