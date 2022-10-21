@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heritageflix
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: heritageflix
+  template:
+    metadata:
+      labels:
+        app: heritageflix
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/netwerk-digitaal-erfgoed/heritageflix
+          ports:
+            - containerPort: 3000
+      imagePullSecrets:
+        - name: ghcr
