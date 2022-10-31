@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: atomgraph/fuseki:9985c4edd850c9277d241f6edc0d883013713ad3
+          image: atomgraph/fuseki:4.6.1
           args: ["--file=/data/geonames.nt", "/geonames"]
           ports:
             - containerPort: 3030
