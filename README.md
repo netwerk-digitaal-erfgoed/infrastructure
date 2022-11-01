@@ -2,7 +2,7 @@
 
 This repository contains generic infrastructure configuration for running NDE applications in a Kubernetes cluster.
 
-This configuration follows the [NDE Infrastructure Requirements](https://github.com/netwerk-digitaal-erfgoed/requirements-infrastructure).
+This configuration follows the [CLARIAH Infrastructure Requirements](https://github.com/CLARIAH/clariah-plus/blob/main/requirements/infrastructure-requirements.md).
 It is based on existing documentation, in particular
 [How to Set Up an Nginx Ingress with Cert-Manager on DigitalOcean Kubernetes](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-with-cert-manager-on-digitalocean-kubernetes)
 and [How To Set Up an Nginx Ingress on DigitalOcean Kubernetes Using Helm](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-on-digitalocean-kubernetes-using-helm), with as few modifications as possible.
