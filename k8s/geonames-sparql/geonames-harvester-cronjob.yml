@@ -8,6 +8,16 @@ spec:
     spec:
       template:
         spec:
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - geonames-sparql
+                  topologyKey: kubernetes.io/hostname
           serviceAccountName: statefulset-manager
           initContainers:
             - name: harvester
