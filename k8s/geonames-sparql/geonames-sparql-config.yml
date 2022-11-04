@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: geonames-sparql-config
+data:
+  config: |
+    @prefix :       <#> .
+    @prefix ja:     <http://jena.hpl.hp.com/2005/11/Assembler#> .
+    @prefix text:   <http://jena.apache.org/text#> .
+    @prefix fuseki: <http://jena.apache.org/fuseki#> .
+    @prefix gn:     <https://www.geonames.org/ontology#> .
+    
+    [] a fuseki:Server ;
+      fuseki:services (:geonames) .
+    
+    :geonames a fuseki:Service ;
+      fuseki:name "geonames" ;
+      fuseki:label "GeoNames" ;
+      fuseki:serviceQuery "sparql" ;
+      fuseki:serviceReadGraphStore "get" ;
+      fuseki:dataset :textDataset ;
+    .
+    
+    :textDataset a text:TextDataset ;
+      text:dataset :memoryDataset ;
+      text:index :index ;
+    .
+    
+    :memoryDataset a ja:MemoryDataset ;
+      ja:data <file:/data/geonames.nt>
+    .
+    
+    :index a text:TextIndexLucene ;
+      text:directory <file:/index> ;
+      text:entityMap :entityMap ;
+    .
+    
+    :entityMap a text:EntityMap ;
+      text:defaultField "name" ;
+      text:entityField "uri" ;
+      text:map (
+        [
+          text:field "name" ;
+          text:predicate gn:name ;
+        ]
+        [
+          text:field "alternateName" ;
+          text:predicate gn:alternateName ;
+        ]    
+      ) ;
+    .
