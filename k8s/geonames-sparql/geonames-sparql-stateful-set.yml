@@ -13,17 +13,42 @@ spec:
       labels:
         app: geonames-sparql
     spec:
-      containers:
-        - name: app
+      initContainers:
+        - name: indexer
           image: atomgraph/fuseki:4.6.1
-          args: ["--file=/data/geonames.nt", "/geonames"]
+          command: ["sh", "-c", '$JAVA_HOME/bin/java -cp $FUSEKI_JAR jena.textindexer --desc=config.ttl']
           ports:
             - containerPort: 3030
           volumeMounts:
             - name: data
               mountPath: /data
+            - name: lucene-index
+              mountPath: /index
+            - name: config
+              mountPath: /fuseki/config.ttl
+              subPath: config
+      containers:
+        - name: app
+          image: atomgraph/fuseki:4.6.1
+          args: ["--config=config.ttl"]
+          ports:
+            - containerPort: 3030
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: lucene-index
+              mountPath: /index
+            - name: config
+              mountPath: /fuseki/config.ttl
+              subPath: config
       imagePullSecrets:
         - name: ghcr
+      volumes:
+        - name: lucene-index
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: geonames-sparql-config
   volumeClaimTemplates:
     - metadata:
         name: data
