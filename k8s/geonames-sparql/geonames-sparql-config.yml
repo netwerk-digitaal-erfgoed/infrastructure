@@ -33,6 +33,11 @@ data:
     :index a text:TextIndexLucene ;
       text:directory <file:/index> ;
       text:entityMap :entityMap ;
+      text:analyzer [
+        a text:ConfigurableAnalyzer ;
+        text:tokenizer text:StandardTokenizer ;
+        text:filters ( text:ASCIIFoldingFilter text:LowerCaseFilter ) ;
+      ] ;
     .
     
     :entityMap a text:EntityMap ;
