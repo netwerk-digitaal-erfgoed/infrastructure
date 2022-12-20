@@ -1,0 +1,24 @@
+# See https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/basic-configuration/
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gvn
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - gvn.demo.netwerkdigitaalerfgoed.nl
+      secretName: gvn-tls
+  rules:
+    - host: gvn.demo.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: gvn-search-find
+                port:
+                  number: 80
