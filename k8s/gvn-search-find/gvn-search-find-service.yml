@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gvn-search-find
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: gvn-search-find
