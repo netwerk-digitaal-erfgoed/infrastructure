@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dataset-browser
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dataset-browser
+  template:
+    metadata:
+      labels:
+        app: dataset-browser
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/netwerk-digitaal-erfgoed/dataset-browser
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: ghcr

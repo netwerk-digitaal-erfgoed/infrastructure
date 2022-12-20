@@ -1,0 +1,24 @@
+# See https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/basic-configuration/
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dataset-browser
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - datasetbrowser.demo.netwerkdigitaalerfgoed.nl
+      secretName: dataset-browser-tls
+  rules:
+    - host: datasetbrowser.demo.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dataset-browser
+                port:
+                  number: 80
