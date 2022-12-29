@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: heritageflix-churches
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - heritageflix-churches.demo.netwerkdigitaalerfgoed.nl
+      secretName: heritageflix-churches-tls
+  rules:
+    - host: heritageflix-churches.demo.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: heritageflix-churches
+                port:
+                  number: 80
