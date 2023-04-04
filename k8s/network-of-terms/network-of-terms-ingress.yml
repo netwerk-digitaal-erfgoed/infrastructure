@@ -16,7 +16,7 @@ spec:
     - host: termennetwerk-api.netwerkdigitaalerfgoed.nl
       http:
         paths:
-          - path: /(reconcile|preview)(?:/|$)(.*)
+          - path: /(reconcile|preview|extend)(?:/|$)(.*)
             pathType: Prefix
             backend:
               service:
