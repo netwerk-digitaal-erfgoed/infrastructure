@@ -1,0 +1,24 @@
+# See https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/basic-configuration/
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sabio-frontend
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - sabio.netwerkdigitaalerfgoed.nl
+      secretName: sabio-tls
+  rules:
+    - host: sabio.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sabio-frontend
+                port:
+                  number: 80
