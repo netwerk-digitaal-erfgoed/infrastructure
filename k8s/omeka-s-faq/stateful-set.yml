@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: omeka-s-faq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: omeka-s-faq
+  serviceName: omeka-s-faq
+  template:
+    metadata:
+      labels:
+        app: omeka-s-faq
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-faq
+          env:
+            - name: PMF_DB_HOST
+              value: omeka-s-faq-mysql
+            - name: PMF_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: omeka-s-faq-mysql
+                  key: username
+            - name: PMF_DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: omeka-s-faq-mysql
+                  key: password
+            - name: PMF_DB_TYPE
+              value: mariadb
+            - name: PMF_DB_NAME
+              value: omeka_s_faq
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: omeka-s-faq-attachments
+              mountPath: /var/www/html/attachments
+            - name: omeka-s-faq-config
+              mountPath: /var/www/html/config
+            - name: omeka-s-faq-data
+              mountPath: /var/www/html/data
+            - name: omeka-s-faq-images
+              mountPath: /var/www/html/images
+      imagePullSecrets:
+        - name: ghcr
+  volumeClaimTemplates:
+    - metadata:
+        name: omeka-s-faq-attachments
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: do-block-storage
+    - metadata:
+        name: omeka-s-faq-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: do-block-storage
+    - metadata:
+        name: omeka-s-faq-images
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: do-block-storage
+    - metadata:
+        name: omeka-s-faq-config
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: do-block-storage

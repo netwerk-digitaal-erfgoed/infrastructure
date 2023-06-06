@@ -1,0 +1,24 @@
+# See https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/basic-configuration/
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: omeka-s-faq
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - omeka-s-faq.netwerkdigitaalerfgoed.nl
+      secretName: omeka-s-faq-tls
+  rules:
+    - host: omeka-s-faq.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: omeka-s-faq
+                port:
+                  number: 80
