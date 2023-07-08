@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/netwerk-digitaal-erfgoed/registry-api
+          image: ghcr.io/netwerk-digitaal-erfgoed/dataset-register
           env:
             - name: GRAPHDB_URL
               value: "http://graphdb"
