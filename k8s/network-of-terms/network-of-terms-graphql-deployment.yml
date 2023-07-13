@@ -21,6 +21,8 @@ spec:
                 secretKeyRef:
                   name: network-of-terms
                   key: gtaaCredentials
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://opentelemetry-collector:4318"
           ports:
             - containerPort: 3123
           readinessProbe:

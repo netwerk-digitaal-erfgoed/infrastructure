@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: registry-api
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: registry-api
@@ -11,6 +11,10 @@ spec:
     metadata:
       labels:
         app: registry-api
+# Enabling auto-instrumentation causes metrics to fail with the following error, so disable for now:
+# {"stack":"Error: PeriodicExportingMetricReader: metrics export failed (error Error: 13 INTERNAL: Received RST_STREAM with code 2 triggered by internal client error: Protocol error)\n    at doExport (/otel-auto-instrumentation/node_module)
+#      annotations:
+#        instrumentation.opentelemetry.io/inject-nodejs: "true" # Works, as it triggers all kinds of log messages
     spec:
       containers:
         - name: app
@@ -28,6 +32,10 @@ spec:
                 secretKeyRef:
                   name: graphdb
                   key: password
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT # This is being used by the sidecar. Should it be used by the app itself?
+              value: "http://opentelemetry-collector:4318"
+            - name: OTEL_LOG_LEVEL
+              value: "all"
           ports:
             - containerPort: 3000
       imagePullSecrets:

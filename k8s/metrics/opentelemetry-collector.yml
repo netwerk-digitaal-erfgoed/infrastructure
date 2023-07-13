@@ -1,0 +1,41 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: opentelemetry # Becomes service opentelemetry-collector
+spec:
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector:0.80.0
+  mode: deployment
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+    
+    processors:
+      batch:
+    
+    exporters:
+      prometheus:
+        endpoint: "0.0.0.0:9090"
+        resource_to_telemetry_conversion: 
+          enabled: true
+      logging:
+        loglevel: debug
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: []
+          exporters: [logging]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [logging, prometheus]
+      telemetry:
+        logs:
+          level: debug
+        metrics:
+          level: detailed
+
