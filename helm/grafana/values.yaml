@@ -1,6 +1,18 @@
 persistence:
   enabled: true
 
+ingress:
+  enabled: true
+  hosts:
+    - statistieken.netwerkdigitaalerfgoed.nl
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - statistieken.netwerkdigitaalerfgoed.nl
+      secretName: statistieken-tls
+
 datasources:
   datasources.yaml:
     apiVersion: 1
