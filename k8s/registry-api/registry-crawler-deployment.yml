@@ -30,6 +30,8 @@ spec:
                   key: password
             - name: CRAWLER_SCHEDULE
               value: '0 * * * *'
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT # This is being used by the sidecar. Should it be used by the app itself?
+              value: "http://opentelemetry-collector:4318"
           ports:
             - containerPort: 3000
       imagePullSecrets:
