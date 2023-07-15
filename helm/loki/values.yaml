@@ -1,0 +1,20 @@
+loki:
+  commonConfig:
+    replication_factor: 1
+  auth_enabled: false
+  storage:
+    bucketNames:
+      chunks: nde-loki-chunks
+      ruler: nde-loki-ruler
+      admin: nde-loki-admin
+    type: s3
+    s3:
+      endpoint: https://ams3.digitaloceanspaces.com
+      region: ams3
+      secretAccessKey:
+      accessKeyId:
+      s3ForcePathStyle: true
+      insecure: false
+
+singleBinary:
+  replicas: 1

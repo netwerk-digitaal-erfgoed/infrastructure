@@ -1,0 +1,3 @@
+config:
+  logLevel: info1
+  lokiAddress: http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push
