@@ -36,50 +36,27 @@ spec:
           ports:
             - containerPort: 80
           volumeMounts:
-            - name: omeka-s-faq-attachments
-              mountPath: /var/www/html/attachments
-            - name: omeka-s-faq-config
+            - name: omeka-s-faq
               mountPath: /var/www/html/config
-            - name: omeka-s-faq-data
+              subPath: config
+            - name: omeka-s-faq
+              mountPath: /var/www/html/attachments
+              subPath: attachments
+            - name: omeka-s-faq
               mountPath: /var/www/html/data
-            - name: omeka-s-faq-images
+              subPath: data
+            - name: omeka-s-faq
               mountPath: /var/www/html/images
+              subPath: images
       imagePullSecrets:
         - name: ghcr
   volumeClaimTemplates:
     - metadata:
-        name: omeka-s-faq-attachments
+        name: omeka-s-faq
       spec:
         accessModes:
           - ReadWriteOnce
         resources:
           requests:
             storage: 5Gi
-        storageClassName: do-block-storage
-    - metadata:
-        name: omeka-s-faq-data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 5Gi
-        storageClassName: do-block-storage
-    - metadata:
-        name: omeka-s-faq-images
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 5Gi
-        storageClassName: do-block-storage
-    - metadata:
-        name: omeka-s-faq-config
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
         storageClassName: do-block-storage
