@@ -32,6 +32,8 @@ spec:
                 secretKeyRef:
                   name: graphdb
                   key: password
+            - name: TRUST_PROXY
+              value: 'true'
             - name: OTEL_EXPORTER_OTLP_ENDPOINT # This is being used by the sidecar. Should it be used by the app itself?
               value: "http://opentelemetry-collector:4318"
             - name: OTEL_LOG_LEVEL

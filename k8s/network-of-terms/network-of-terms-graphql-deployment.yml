@@ -23,6 +23,8 @@ spec:
                   key: gtaaCredentials
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: "http://opentelemetry-collector:4318"
+            - name: TRUST_PROXY
+              value: 'true'
           ports:
             - containerPort: 3123
           readinessProbe:
