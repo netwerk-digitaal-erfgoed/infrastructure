@@ -15,7 +15,7 @@ spec:
     spec:
       initContainers:
         - name: indexer
-          image: atomgraph/fuseki:4.6.1
+          image: ghcr.io/netwerk-digitaal-erfgoed/fuseki:4.9.0
           command: ["sh", "-c", '$JAVA_HOME/bin/java -cp $FUSEKI_JAR jena.textindexer --desc=config.ttl']
           ports:
             - containerPort: 3030
@@ -29,7 +29,7 @@ spec:
               subPath: config
       containers:
         - name: app
-          image: atomgraph/fuseki:4.6.1
+          image: ghcr.io/netwerk-digitaal-erfgoed/fuseki:4.9.0
           args: ["--config=config.ttl"]
           env:
             - name: JAVA_OPTIONS
