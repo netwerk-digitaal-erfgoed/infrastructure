@@ -31,6 +31,9 @@ spec:
         - name: app
           image: atomgraph/fuseki:4.6.1
           args: ["--config=config.ttl"]
+          env:
+            - name: JAVA_OPTIONS
+              value: "-Xmx8g -Xms8g"
           ports:
             - containerPort: 3030
           volumeMounts:
