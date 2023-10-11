@@ -29,7 +29,7 @@ spec:
             - containerPort: 3123
           readinessProbe:
             httpGet:
-              path: /
+              path: /graphiql
               port: 3123
       imagePullSecrets:
         - name: ghcr
