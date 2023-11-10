@@ -27,7 +27,7 @@ spec:
                 -Dgraphdb.workbench.cors.enable=true
                 -Dgraphdb.engine.parallel-import=false
             - name: GDB_HEAP_SIZE
-              value: 1g
+              value: 3g
           volumeMounts:
             - mountPath: "/opt/graphdb/home"
               name: data
