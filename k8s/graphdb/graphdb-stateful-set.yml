@@ -20,7 +20,7 @@ spec:
             requests:
               memory: 1.5Gi
             limits:
-              memory: 3Gi
+              memory: 6Gi
           env:
             - name: GDB_JAVA_OPTS
               value: |
