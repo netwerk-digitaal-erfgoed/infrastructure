@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: sabio-frontend
+  name: sabio
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
 spec:
@@ -20,5 +20,15 @@ spec:
             backend:
               service:
                 name: sabio-frontend
+                port:
+                  number: 80
+    - host: sabio.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: sabio-backend
                 port:
                   number: 80
