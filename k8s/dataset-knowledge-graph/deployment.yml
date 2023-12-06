@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dataset-knowledge-graph
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dataset-knowledge-graph
+  template:
+    metadata:
+      labels:
+        app: dataset-knowledge-graph
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph
+          env:
+            - name: GRAPHDB_URL
+              value: "http://graphdb"
+            - name: GRAPHDB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: graphdb
+                  key: username
+            - name: GRAPHDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: graphdb
+                  key: password
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: ghcr
