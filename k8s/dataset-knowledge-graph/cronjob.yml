@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dataset-knowledge-graph
+spec:
+  schedule: "15 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: app
+              image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph
+              imagePullPolicy: Always
+              env:
+                - name: GRAPHDB_URL
+                  value: "http://graphdb"
+                - name: GRAPHDB_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: graphdb
+                      key: username
+                - name: GRAPHDB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: graphdb
+                      key: password
+          restartPolicy: OnFailure
+          imagePullSecrets:
+            - name: ghcr
