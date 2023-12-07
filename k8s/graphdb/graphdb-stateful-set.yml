@@ -43,5 +43,5 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 8Gi
+            storage: 8Gi # Changed to 20Gi.
         storageClassName: do-block-storage
