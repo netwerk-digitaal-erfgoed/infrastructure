@@ -20,14 +20,14 @@ spec:
             requests:
               memory: 1.5Gi
             limits:
-              memory: 8Gi
+              memory: 12Gi
           env:
             - name: GDB_JAVA_OPTS
               value: |
                 -Dgraphdb.workbench.cors.enable=true
                 -Dgraphdb.engine.parallel-import=false
             - name: GDB_HEAP_SIZE
-              value: 6g
+              value: 8g
           volumeMounts:
             - mountPath: "/opt/graphdb/home"
               name: data
