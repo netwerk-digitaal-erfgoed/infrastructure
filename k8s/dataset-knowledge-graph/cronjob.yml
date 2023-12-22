@@ -14,13 +14,25 @@ spec:
               imagePullPolicy: Always
               env:
                 - name: GRAPHDB_URL
-                  value: "http://dataset-knowledge-graph-graphdb"
+                  value: "http://triplestore.netwerkdigitaalerfgoed.nl"
                 - name: GRAPHDB_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: graphdb
+                      key: username
+                - name: GRAPHDB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: graphdb
+                      key: password
+                - name: GRAPHDB_IMPORT_URL
+                  value: "http://dataset-knowledge-graph-graphdb"
+                - name: GRAPHDB_IMPORT_USERNAME
                   valueFrom:
                     secretKeyRef:
                       name: dataset-knowledge-graph-graphdb
                       key: username
-                - name: GRAPHDB_PASSWORD
+                - name: GRAPHDB_IMPORT_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: dataset-knowledge-graph-graphdb
