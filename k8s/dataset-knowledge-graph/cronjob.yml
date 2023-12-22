@@ -14,7 +14,7 @@ spec:
               imagePullPolicy: Always
               env:
                 - name: GRAPHDB_URL
-                  value: "http://triplestore.netwerkdigitaalerfgoed.nl"
+                  value: "http://graphdb"
                 - name: GRAPHDB_USERNAME
                   valueFrom:
                     secretKeyRef:
