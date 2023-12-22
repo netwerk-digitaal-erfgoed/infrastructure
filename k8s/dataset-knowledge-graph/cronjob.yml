@@ -25,14 +25,14 @@ spec:
                     secretKeyRef:
                       name: graphdb
                       key: password
-                - name: GRAPHDB_IMPORT_URL
+                - name: GRAPHDB_IMPORTS_URL
                   value: "http://dataset-knowledge-graph-graphdb"
-                - name: GRAPHDB_IMPORT_USERNAME
+                - name: GRAPHDB_IMPORTS_USERNAME
                   valueFrom:
                     secretKeyRef:
                       name: dataset-knowledge-graph-graphdb
                       key: username
-                - name: GRAPHDB_IMPORT_PASSWORD
+                - name: GRAPHDB_IMPORTS_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: dataset-knowledge-graph-graphdb
