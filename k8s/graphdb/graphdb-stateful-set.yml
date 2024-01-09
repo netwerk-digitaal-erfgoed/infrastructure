@@ -33,6 +33,12 @@ spec:
               name: data
           ports:
             - containerPort: 7200
+          livenessProbe:
+            httpGet:
+              path: /repositories/registry/health
+              port: 7200
+            initialDelaySeconds: 60
+            periodSeconds: 5
       imagePullSecrets:
         - name: ghcr
   volumeClaimTemplates:
