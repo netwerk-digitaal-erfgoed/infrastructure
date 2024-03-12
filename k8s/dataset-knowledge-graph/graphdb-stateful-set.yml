@@ -20,12 +20,13 @@ spec:
             requests:
               memory: 1.5Gi
             limits:
-              memory: 12Gi
+              memory: 13Gi
           env:
             - name: GDB_JAVA_OPTS
               value: |
                 -Dgraphdb.workbench.cors.enable=true
                 -Dgraphdb.engine.parallel-import=false
+                -Dhealth.max.query.time.seconds=60
             - name: GDB_HEAP_SIZE
               value: 9g
           volumeMounts:
@@ -35,10 +36,11 @@ spec:
             - containerPort: 7200
           livenessProbe:
             httpGet:
-              path: /repositories/dataset-knowledge-graph-imports/health
+              path: /repositories/dataset-knowledge-graph-imports/health?passive
               port: 7200
-            initialDelaySeconds: 60
+            initialDelaySeconds: 200
             periodSeconds: 5
+            timeoutSeconds: 60
       imagePullSecrets:
         - name: ghcr
   volumeClaimTemplates:
