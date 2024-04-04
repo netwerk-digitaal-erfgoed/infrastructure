@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: heritageflix-modemuze-materials
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - heritageflix-modemuze-materialen.demo.netwerkdigitaalerfgoed.nl
+      secretName: heritageflix-modemuze-materials-tls
+  rules:
+    - host: heritageflix-modemuze-materialen.demo.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: heritageflix-modemuze-materials
+                port:
+                  number: 80

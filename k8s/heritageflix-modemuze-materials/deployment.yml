@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heritageflix-modemuze-materials
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: heritageflix-modemuze-materials
+  template:
+    metadata:
+      labels:
+        app: heritageflix-modemuze-materials
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/netwerk-digitaal-erfgoed/heritageflix-modemuze-materials
+          ports:
+            - containerPort: 3000
+      imagePullSecrets:
+        - name: ghcr

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heritageflix-zuiderzeemuseum-locations
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: heritageflix-zuiderzeemuseum-locations
+  template:
+    metadata:
+      labels:
+        app: heritageflix-zuiderzeemuseum-locations
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/netwerk-digitaal-erfgoed/heritageflix-zuiderzeemuseum-locations
+          ports:
+            - containerPort: 3000
+      imagePullSecrets:
+        - name: ghcr
