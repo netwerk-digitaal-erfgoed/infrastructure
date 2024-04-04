@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: heritageflix-zuiderzeemuseum-locations
+  name: heritageflix-modemuze-periodes
 spec:
   ports:
     - port: 80
       targetPort: 3000
   selector:
-    app: heritageflix-zuiderzeemuseum-locations
+    app: heritageflix-modemuze-periodes

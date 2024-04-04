@@ -1,23 +1,23 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: heritageflix-zuiderzeemuseum-locations
+  name: heritageflix-modemuze-periodes
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - heritageflix-zuiderzeemuseum-locaties.demo.netwerkdigitaalerfgoed.nl
-      secretName: heritageflix-zuiderzeemuseum-locations-tls
+        - heritageflix-modemuze-periodes.demo.netwerkdigitaalerfgoed.nl
+      secretName: heritageflix-modemuze-periodes-tls
   rules:
-    - host: heritageflix-zuiderzeemuseum-locaties.demo.netwerkdigitaalerfgoed.nl
+    - host: heritageflix-modemuze-periodes.demo.netwerkdigitaalerfgoed.nl
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: heritageflix-zuiderzeemuseum-locations
+                name: heritageflix-modemuze-periodes
                 port:
                   number: 80

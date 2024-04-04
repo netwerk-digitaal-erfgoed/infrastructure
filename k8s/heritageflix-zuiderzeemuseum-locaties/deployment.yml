@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: heritageflix-modemuze-materials
+  name: heritageflix-zuiderzeemuseum-locaties
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: heritageflix-modemuze-materials
+      app: heritageflix-zuiderzeemuseum-locaties
   template:
     metadata:
       labels:
-        app: heritageflix-modemuze-materials
+        app: heritageflix-zuiderzeemuseum-locaties
     spec:
       containers:
         - name: app
-          image: ghcr.io/netwerk-digitaal-erfgoed/heritageflix-modemuze-materials
+          image: ghcr.io/netwerk-digitaal-erfgoed/heritageflix-zuiderzeemuseum-locaties
           ports:
             - containerPort: 3000
       imagePullSecrets:
