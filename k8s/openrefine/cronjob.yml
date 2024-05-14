@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: clear-openrefine-projects
+spec:
+  schedule: "0 4 * * 6"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: app
+              image: alpine:latest
+              imagePullPolicy: Always
+              command: ["bin/sh", "-c"]
+              env:
+                - name: ENDPOINT
+                  value: "https://openrefine.netwerkdigitaalerfgoed.nl"
+              args:
+                - |
+                  apk add --no-cache curl jq
+                  
+                  csrf=$(curl -s "$ENDPOINT/command/core/get-csrf-token" | jq -r '.token')
+                  projects=$(curl -s "$ENDPOINT/command/core/get-all-project-metadata" | jq '.projects | keys[] | tonumber')
+                  
+                  for project in $projects; do
+                    curl -s --data project="$project" --data csrf_token=$csrf "$ENDPOINT/command/core/delete-project"
+                  done
+          restartPolicy: OnFailure
