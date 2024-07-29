@@ -40,3 +40,6 @@ spec:
           restartPolicy: OnFailure
           imagePullSecrets:
             - name: ghcr
+        metadata:
+          labels:
+            app: dataset-knowledge-graph
