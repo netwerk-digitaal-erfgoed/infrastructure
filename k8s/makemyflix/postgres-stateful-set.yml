@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: makemyflix-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: makemyflix-postgres
+  serviceName: makemyflix-postgres
+  template:
+    metadata:
+      labels:
+        app: makemyflix-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16.3-alpine
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: makemyflix-postgres
+                  key: password
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: makemyflix-postgres-data
+              subPath: postgres
+  volumeClaimTemplates:
+    - metadata:
+        name: makemyflix-postgres-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: do-block-storage

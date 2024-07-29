@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: makemyflix
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - makemyflix.netwerkdigitaalerfgoed.nl
+      secretName: makemyflix-tls
+  rules:
+    - host: makemyflix.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /admin
+            pathType: Prefix
+            backend:
+              service:
+                name: makemyflix-strapi
+                port:
+                  number: 80
+    - host: makemyflix.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: makemyflix-nuxt
+                port:
+                  number: 80
