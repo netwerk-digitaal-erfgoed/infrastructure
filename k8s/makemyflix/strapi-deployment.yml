@@ -18,6 +18,11 @@ spec:
           ports:
             - containerPort: 1001
           env:
+            - name: APP_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: makemyflix-strapi
+                  key: keys
             - name: DATABASE_HOST
               value: makemyflix-postgres
             - name: DATABASE_USERNAME
