@@ -5,6 +5,6 @@ metadata:
 spec:
   ports:
     - port: 80
-      targetPort: 1001
+      targetPort: 1337
   selector:
     app: makemyflix-strapi
