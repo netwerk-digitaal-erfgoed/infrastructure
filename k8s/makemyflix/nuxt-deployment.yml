@@ -16,7 +16,7 @@ spec:
         - name: app
           image: ghcr.io/netwerk-digitaal-erfgoed/makemyflix-nuxt
           ports:
-            - containerPort: 1000
+            - containerPort: 3000
           env:
             - name: NUXT_APP_BACKEND_URL
               value: "https://makemyflix.netwerkdigitaalerfgoed.nl/admin"
