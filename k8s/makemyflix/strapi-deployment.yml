@@ -23,6 +23,21 @@ spec:
                 secretKeyRef:
                   name: makemyflix-strapi
                   key: keys
+            - name: API_TOKEN_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: makemyflix-strapi
+                  key: api-token-salt
+            - name: ADMIN_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: makemyflix-strapi
+                  key: admin-jwt-secret
+            - name: TRANSFER_TOKEN_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: makemyflix-strapi
+                  key: transfer-token-salt
             - name: DATABASE_HOST
               value: makemyflix-postgres
             - name: DATABASE_USERNAME
