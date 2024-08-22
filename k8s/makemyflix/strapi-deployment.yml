@@ -33,6 +33,11 @@ spec:
                 secretKeyRef:
                   name: makemyflix-strapi
                   key: admin-jwt-secret
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: makemyflix-strapi
+                  key: jwt-secret
             - name: TRANSFER_TOKEN_SALT
               valueFrom:
                 secretKeyRef:
