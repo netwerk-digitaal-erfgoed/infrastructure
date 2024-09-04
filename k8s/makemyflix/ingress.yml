@@ -4,6 +4,8 @@ metadata:
   name: makemyflix
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   tls:
@@ -14,8 +16,8 @@ spec:
     - host: makemyflix.netwerkdigitaalerfgoed.nl
       http:
         paths:
-          - path: /admin
-            pathType: Prefix
+          - path: /strapi/?(.*)$
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: makemyflix-strapi
