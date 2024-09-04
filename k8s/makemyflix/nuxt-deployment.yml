@@ -19,6 +19,6 @@ spec:
             - containerPort: 3000
           env:
             - name: NUXT_APP_BACKEND_URL
-              value: "https://makemyflix.netwerkdigitaalerfgoed.nl/admin"
+              value: "https://makemyflix.netwerkdigitaalerfgoed.nl/strapi"
       imagePullSecrets:
         - name: ghcr
