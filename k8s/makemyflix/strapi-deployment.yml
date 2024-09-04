@@ -18,6 +18,8 @@ spec:
           ports:
             - containerPort: 1337
           env:
+            - name: URL
+              value: 'https://makemyflix.netwerkdigitaalerfgoed.nl/strapi'
             - name: APP_KEYS
               valueFrom:
                 secretKeyRef:
