@@ -16,20 +16,17 @@ spec:
     - host: makemyflix.netwerkdigitaalerfgoed.nl
       http:
         paths:
-          - path: /strapi/?(.*)$
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: makemyflix-strapi
-                port:
-                  number: 80
-    - host: makemyflix.netwerkdigitaalerfgoed.nl
-      http:
-        paths:
-          - path: /
+          - path: /(.*)
             pathType: Prefix
             backend:
               service:
                 name: makemyflix-nuxt
+                port:
+                  number: 80
+          - path: /strapi/?(.*)$
+            pathType: Prefix
+            backend:
+              service:
+                name: makemyflix-strapi
                 port:
                   number: 80
