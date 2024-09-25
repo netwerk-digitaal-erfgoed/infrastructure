@@ -58,8 +58,12 @@ spec:
                   secretKeyRef:
                     name: makemyflix-postgres
                     key: password
-            - name: S3_PUBLIC_URL
+            - name: S3_ENDPOINT
               value: "https://nde-makemyflix-strapi.ams3.digitaloceanspaces.com"
+            - name: S3_PUBLIC_URL
+              value: "https://nde-makemyflix-strapi.ams3.cdn.digitaloceanspaces.com"
+            - name: S3_REGION
+              value: ams3
             - name: S3_BUCKET
               value: nde-makemyflix-strapi
             - name: S3_KEY
