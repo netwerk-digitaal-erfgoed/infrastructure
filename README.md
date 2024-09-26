@@ -10,6 +10,8 @@ and [How To Set Up an Nginx Ingress on DigitalOcean Kubernetes Using Helm](https
 We apply this configuration to a
 [DigitalOcean managed Kubernetes cluster](https://www.digitalocean.com/products/kubernetes/).
 
+For running software in the NDE infrastructure, it must meet the [NDE Software Requirements](doc/software-requirements.md).
+
 ## Included
 
 While each application should take care of deploying itself, this repository contains the generic configuration for
