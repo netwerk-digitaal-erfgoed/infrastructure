@@ -23,7 +23,7 @@ See [CLARIAH #2](https://github.com/CLARIAH/clariah-plus/blob/main/requirements/
 
 This defaults to the repository’s issue tracker on GitHub.
 
-See [CLARIAH #7](https://github.com/CLARIAH/clariah-plus/blob/main/requirements/software-requirements.md#7-the-software-should-have-a-public-support-channel)
+See [CLARIAH #7](https://github.com/CLARIAH/clariah-plus/blob/main/requirements/software-requirements.md#7-the-software-should-have-a-public-support-channel).
 
 ### 4. The software *MUST* be packaged as a container.
 
