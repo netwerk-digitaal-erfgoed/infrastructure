@@ -35,7 +35,8 @@ See [CLARIAH #15](https://github.com/CLARIAH/clariah-plus/blob/main/requirements
 
 Examples of configuration parameters are credentials, API tokens and database connection information.
 These parameters *MUST NOT* be part of the application’s source code.
-Instead, the application must read environment variables
+Instead, the application *MUST* read configuration from environment variables,
+the values for which can be provided by the infrastructure.
 
 See [CLARIAH #5](https://github.com/CLARIAH/clariah-plus/blob/main/requirements/software-requirements.md#5-the-software-must-separate-code-from-configuration).
 
