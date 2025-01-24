@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-reconciliation
+          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-reconciliation:a61573b
           env:
             - name: GTAA_CREDENTIALS
               valueFrom:
