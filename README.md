@@ -104,3 +104,4 @@ Hostnames:
 - ldwizard.netwerkdigitaalerfgoed.nl
 - termennetwerk.netwerkdigitaalerfgoed.nl
 - termennetwerk-api.netwerkdigitaalerfgoed.nl
+
