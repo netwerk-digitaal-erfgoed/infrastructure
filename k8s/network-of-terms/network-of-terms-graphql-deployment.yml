@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-graphql:a61573b
+          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-graphql:latest
           env:
             - name: GTAA_CREDENTIALS
               valueFrom:

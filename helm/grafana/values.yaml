@@ -4,13 +4,13 @@ persistence:
 ingress:
   enabled: true
   hosts:
-    - statistieken.netwerkdigitaalerfgoed.nl
+    - statistieken.nde.ms4.surf.nl
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
-  ingressClassName: nginx
+  ingressClassName: nginx-nde
   tls:
     - hosts:
-        - statistieken.netwerkdigitaalerfgoed.nl
+        - statistieken.nde.ms4.surf.nl
       secretName: statistieken-tls
 
 datasources:

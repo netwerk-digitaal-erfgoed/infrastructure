@@ -52,4 +52,4 @@ spec:
         resources:
           requests:
             storage: 200Gi
-        storageClassName: do-block-storage
+        storageClassName: hdd

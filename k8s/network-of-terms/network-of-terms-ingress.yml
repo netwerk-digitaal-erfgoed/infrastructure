@@ -4,20 +4,20 @@ kind: Ingress
 metadata:
   name: network-of-terms-api
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt
+    cert-manager.io/issuer: letsencrypt-nde
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
-  ingressClassName: nginx
+  ingressClassName: nginx-nde
   tls:
     - hosts:
-        - termennetwerk-api.netwerkdigitaalerfgoed.nl
+        - termennetwerk-api.nde.ms4.surf.nl
       secretName: termennetwerk-api-tls
   rules:
-    - host: termennetwerk-api.netwerkdigitaalerfgoed.nl
+    - host: termennetwerk-api.nde.ms4.surf.nl
       http:
         paths:
           - path: /(reconcile|preview|extend)(?:/|$)(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: network-of-terms-reconciliation

@@ -3,16 +3,16 @@ kind: Ingress
 metadata:
   name: graphdb
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt
+    cert-manager.io/issuer: letsencrypt-nde
 spec:
-  ingressClassName: nginx
+  ingressClassName: nginx-nde
   tls:
     - hosts:
-        - triplestore.netwerkdigitaalerfgoed.nl
+        - triplestore.nde.ms4.surf.nl
       secretName: graphdb-tls
   rules:
     # GraphDB doesn't support running under a path (/graphdb) so must run on a (sub)domain.
-    - host: triplestore.netwerkdigitaalerfgoed.nl
+    - host: triplestore.nde.ms4.surf.nl
       http:
         paths:
           - path: /
