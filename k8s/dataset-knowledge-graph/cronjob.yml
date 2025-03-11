@@ -26,16 +26,16 @@ spec:
                       name: graphdb
                       key: password
                 - name: GRAPHDB_IMPORTS_URL
-                  value: "http://dataset-knowledge-graph-graphdb"
+                  value: "http://graphdb"
                 - name: GRAPHDB_IMPORTS_USERNAME
                   valueFrom:
                     secretKeyRef:
-                      name: dataset-knowledge-graph-graphdb
+                      name: graphdb
                       key: username
                 - name: GRAPHDB_IMPORTS_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: dataset-knowledge-graph-graphdb
+                      name: graphdb
                       key: password
           restartPolicy: OnFailure
           imagePullSecrets:
