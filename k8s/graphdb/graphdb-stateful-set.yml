@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: dataset-knowledge-graph-graphdb
+  name: graphdb
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dataset-knowledge-graph-graphdb
-  serviceName: dataset-knowledge-graph-graphdb
+      app: graphdb
+  serviceName: graphdb
   template:
     metadata:
       labels:
-        app: dataset-knowledge-graph-graphdb
+        app: graphdb
     spec:
       containers:
         - name: database
