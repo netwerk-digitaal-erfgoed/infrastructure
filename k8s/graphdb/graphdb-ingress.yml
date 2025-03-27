@@ -8,11 +8,11 @@ spec:
   ingressClassName: nginx-nde
   tls:
     - hosts:
-        - triplestore.nde-dev.ms4.surf.nl
+        - triplestore.nde-dev.ms4.surfsara.nl
       secretName: graphdb-tls
   rules:
     # GraphDB doesn't support running under a path (/graphdb) so must run on a (sub)domain.
-    - host: triplestore.nde-dev.ms4.surf.nl
+    - host: triplestore.nde-dev.ms4.surfsara.nl
       http:
         paths:
           - path: /

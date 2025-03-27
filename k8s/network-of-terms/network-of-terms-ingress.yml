@@ -10,10 +10,10 @@ spec:
   ingressClassName: nginx-nde
   tls:
     - hosts:
-        - termennetwerk-api.nde-dev.ms4.surf.nl
+        - termennetwerk-api.nde-dev.ms4.surfsara.nl
       secretName: termennetwerk-api-tls
   rules:
-    - host: termennetwerk-api.nde-dev.ms4.surf.nl
+    - host: termennetwerk-api.nde-dev.ms4.surfsara.nl
       http:
         paths:
           - path: /(reconcile|preview|extend)(?:/|$)(.*)
