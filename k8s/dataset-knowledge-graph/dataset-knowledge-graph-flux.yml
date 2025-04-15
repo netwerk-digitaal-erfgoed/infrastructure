@@ -1,0 +1,45 @@
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: dataset-knowledge-graph
+  namespace: nde
+spec:
+  image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph
+  interval: 5h
+  secretRef:
+    name: ghcr
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: dataset-knowledge-graph-policy
+  namespace: nde
+spec:
+  imageRepositoryRef:
+    name: dataset-knowledge-graph
+  policy:
+    semver:
+      range: ">=1.0.0"
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageUpdateAutomation
+metadata:
+  name: dataset-knowledge-graph-update
+  namespace: nde
+spec:
+  suspend: false
+  interval: 30m
+  sourceRef:
+    kind: GitRepository
+    name: nde
+  git:
+    commit:
+      author:
+        email: fluxcdbot@users.noreply.github.com
+        name: fluxcdbot
+      messageTemplate: '{{range .Changed.Changes}}{{print .OldValue}} -> {{println .NewValue}}{{end}}'
+    push:
+      branch: surf
+  update:
+    path: ./k8s/network-of-terms

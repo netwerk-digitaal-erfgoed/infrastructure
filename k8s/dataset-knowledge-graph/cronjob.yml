@@ -10,7 +10,7 @@ spec:
         spec:
           containers:
             - name: app
-              image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph
+              image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph # {"$imagepolicy": "nde:dataset-knowledge-graph-policy"}
               imagePullPolicy: Always
               env:
                 - name: GRAPHDB_URL
