@@ -93,5 +93,5 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/netwerk-digitaal-erfgoed/example:latest  # {"$imagepolicy": "nde:example-policy:tag"}
+          image: ghcr.io/netwerk-digitaal-erfgoed/example:latest  # {"$imagepolicy": "nde:example-policy"}
 ```
