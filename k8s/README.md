@@ -74,8 +74,7 @@ spec:
 Now all that remains is to set a marker at the image:tag so flux knows what to update.  
 This works on every location where there is an image, like a deployment, cronjob or stateful set.  
 
-The format is `# {"$imagepolicy": "<policy-namespace>:<policy-name>:tag"}`, where the policy namespace should be nde, and the policy name depends on your own configuration.  
-The "tag" part in this indicates that only the tag should be updated.
+The format is `# {"$imagepolicy": "<policy-namespace>:<policy-name>"}`, where the policy namespace should be nde, and the policy name depends on your own configuration.  
 
 ```
 apiVersion: apps/v1
