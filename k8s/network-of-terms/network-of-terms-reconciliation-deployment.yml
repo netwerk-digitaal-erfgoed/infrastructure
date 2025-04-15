@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: 4.1.7 # {"$imagepolicy": "nde:network-of-terms-reconciliation-policy:tag"}
+          image: 4.1.7 # {"$imagepolicy": "nde:network-of-terms-reconciliation-policy"}
           env:
             - name: GTAA_CREDENTIALS
               valueFrom:
