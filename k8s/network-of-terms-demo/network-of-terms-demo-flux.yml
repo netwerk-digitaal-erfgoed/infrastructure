@@ -32,7 +32,7 @@ metadata:
   namespace: nde
 spec:
   suspend: false
-  interval: 30m
+  interval: 1m
   sourceRef:
     kind: GitRepository
     name: nde
