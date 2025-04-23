@@ -10,7 +10,7 @@ spec:
   tls:
     - hosts:
         - demo.nde-dev.ms4.surfsara.nl
-      secretName: termennetwerk-tls
+      secretName: termennetwerk-tls-demo
   rules:
     - host: demo.nde-dev.ms4.surfsara.nl
       http:
