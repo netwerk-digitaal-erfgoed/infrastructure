@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qlever
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qlever
+  serviceName: qlever
+  template:
+    metadata:
+      labels:
+        app: qlever
+    spec:
+      containers:
+        - name: server
+          image: ghcr.io/zazukoians/qlever-server
+#          resources:
+#            requests:
+#              memory: 1.5Gi
+#            limits:
+#              memory: 8Gi
+          env:
+            - name: QLEVER_SERVER_HOST_NAME
+              value: "127.0.0.1"
+            - name: QLEVER_SERVER_PORT
+              value: "7001"
+            - name: QLEVER_INDEX_INPUT_FILES # Required
+              value: ""
+            - name: QLEVER_INDEX_SETTINGS_JSON
+              value: "bla"
+#              value: '{ "ascii-prefixes-only": false, "num-triples-per-batch": 100000 }'
+#            - name: QLEVER_INDEX_TEXT_INDEX
+#              value: from_text_records_and_literals
+            - name: SHOW_LOGS
+              value: "true"
+#          command: ["cat", "/data/Qleverfile"]
+          volumeMounts:
+            - mountPath: "/data"
+              name: server-data
+          ports:
+            - containerPort: 7001
+#          securityContext:
+#            runAsUser: 65534
+#          livenessProbe:
+#            httpGet:
+#              path: /repositories/registry/health?passive
+#              port: 7200
+#            initialDelaySeconds: 100
+#            periodSeconds: 5
+#            timeoutSeconds: 60
+        - name: ui
+          image: ghcr.io/zazukoians/qlever-ui
+          volumeMounts:
+            - mountPath: "/app/db"
+              name: ui-data
+          env:
+            - name: SHOW_LOGS
+              value: "true"
+          ports:
+            - containerPort: 7002
+          securityContext:
+            runAsUser: 65534
+
+      initContainers:
+        - name: init
+          image: docker.io/library/busybox
+          imagePullPolicy: Always
+          command: ["sh", "-c", "chown -R 65534:0 /data/server && chown -R 65534:0 /data/ui"]
+          volumeMounts:
+            - name: server-data
+              mountPath: /data/server
+            - name: ui-data
+              mountPath: /data/ui
+      imagePullSecrets:
+        - name: ghcr
+  volumeClaimTemplates:
+    - metadata:
+        name: server-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 200Gi # Changed to 200Gi.
+        storageClassName: do-block-storage
+    - metadata:
+        name: ui-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi # Changed to 200Gi.
+        storageClassName: do-block-storage
