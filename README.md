@@ -1,5 +1,7 @@
 # NDE Infrastructure
 
+⚠️ This is the branch for the SURF pilot. 
+
 This repository contains generic infrastructure configuration for running NDE applications in a Kubernetes cluster.
 
 This configuration follows the [CLARIAH Infrastructure Requirements](https://github.com/CLARIAH/clariah-plus/blob/main/requirements/infrastructure-requirements.md).
@@ -102,3 +104,4 @@ Hostnames:
 - ldwizard.netwerkdigitaalerfgoed.nl
 - termennetwerk.netwerkdigitaalerfgoed.nl
 - termennetwerk-api.netwerkdigitaalerfgoed.nl
+

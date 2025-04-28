@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: StatefulSet # https://www.digitalocean.com/docs/kubernetes/resources/clusterlint-errors/#dobs-pod-owner
+kind: StatefulSet
 metadata:
   name: graphdb
 spec:
@@ -20,7 +20,7 @@ spec:
             requests:
               memory: 1.5Gi
             limits:
-              memory: 8Gi
+              memory: 13Gi
           env:
             - name: GDB_JAVA_OPTS
               value: |
@@ -28,7 +28,7 @@ spec:
                 -Dgraphdb.engine.parallel-import=false
                 -Dhealth.max.query.time.seconds=60
             - name: GDB_HEAP_SIZE
-              value: 6g
+              value: 9g
           volumeMounts:
             - mountPath: "/opt/graphdb/home"
               name: data
@@ -36,9 +36,9 @@ spec:
             - containerPort: 7200
           livenessProbe:
             httpGet:
-              path: /repositories/registry/health?passive
+              path: /repositories/dataset-knowledge-graph-imports/health?passive
               port: 7200
-            initialDelaySeconds: 100
+            initialDelaySeconds: 200
             periodSeconds: 5
             timeoutSeconds: 60
       imagePullSecrets:
@@ -51,5 +51,5 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 8Gi # Changed to 200Gi.
-        storageClassName: do-block-storage
+            storage: 200Gi
+        storageClassName: hdd

@@ -1,0 +1,45 @@
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: network-of-terms-reconciliation
+  namespace: nde
+spec:
+  image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-reconciliation
+  interval: 5h
+  secretRef:
+    name: ghcr
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: network-of-terms-reconciliation-policy
+  namespace: nde
+spec:
+  imageRepositoryRef:
+    name: network-of-terms-reconciliation
+  policy:
+    semver:
+      range: ">=1.0.0"
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageUpdateAutomation
+metadata:
+  name: network-of-terms-reconciliation-update
+  namespace: nde
+spec:
+  suspend: false
+  interval: 30m
+  sourceRef:
+    kind: GitRepository
+    name: nde
+  git:
+    commit:
+      author:
+        email: fluxcdbot@users.noreply.github.com
+        name: fluxcdbot
+      messageTemplate: '{{range .Changed.Changes}}{{print .OldValue}} -> {{println .NewValue}}{{end}}'
+    push:
+      branch: surf
+  update:
+    path: ./k8s/network-of-terms
