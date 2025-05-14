@@ -21,7 +21,7 @@ spec:
           serviceAccountName: statefulset-manager
           initContainers:
             - name: harvester
-              image: ghcr.io/netwerk-digitaal-erfgoed/geonames-harvester
+              image: ghcr.io/netwerk-digitaal-erfgoed/geonames-rdf
               imagePullPolicy: Always
               volumeMounts:
                 - name: data
