@@ -23,7 +23,6 @@ spec:
             - name: harvester
               image: ghcr.io/netwerk-digitaal-erfgoed/geonames-harvester
               imagePullPolicy: Always
-              command: ["/bin/sh", "-c", "./geonames-download.sh && ./map.sh"]
               volumeMounts:
                 - name: data
                   mountPath: /app/data
