@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-graphql:5.4.4 # {"$imagepolicy": "nde:network-of-terms-graphql-policy"}
+          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-graphql:5.4.5 # {"$imagepolicy": "nde:network-of-terms-graphql-policy"}
           env:
             - name: GTAA_CREDENTIALS
               valueFrom:
