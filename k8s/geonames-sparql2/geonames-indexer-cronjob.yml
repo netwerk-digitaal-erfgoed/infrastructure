@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: geonames-sparql-indexer
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                          - geonames-sparql2
+                  topologyKey: kubernetes.io/hostname
+          serviceAccountName: statefulset-manager
+          initContainers:
+
+            # Build Fuseki data and fulltext index.
+            - name: prepare-fuseki
+              image: stain/jena-fuseki:5.1.0
+              securityContext:
+                runAsUser: 0 # to access the data volume at /data
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+                  subPath: staging # Only mount the staging dir to /data, so we can use the same Fuseki config for the text indexer.
+                - name: fuseki-config
+                  mountPath: /fuseki-config
+              env:
+                # Does raising memory increase indexing speed?
+                - name: JVM_ARGS
+                  value: "-Xmx3600M"
+                  # with default mem (1200M):
+#                   Time = 1,568.982 seconds : Triples = 133,759,999 : Rate = 85,253 /s when writing directly to PVC
+              command:
+                - sh
+                - -c
+                - |
+                  rm -rf /data/*
+                  curl -sS -O https://geonames.ams3.digitaloceanspaces.com/geonames.zip
+                  unzip geonames.zip
+                  ./tdbloader2 --loc=/data/tdb geonames.ttl
+                  java -cp $FUSEKI_HOME/fuseki-server.jar jena.textindexer --desc=/fuseki-config/config.ttl
+                  echo "Creating Lucene index..."
+                  exec java -cp $FUSEKI_HOME/fuseki-server.jar jena.textindexer --desc=/fuseki-config/config.ttl
+
+          # Restart Fuseki to reload harvested data.
+          containers:
+            - name: restart-server
+              image: bitnami/kubectl:1.25.3
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+              command:
+                - sh
+                - -c
+                - |
+                  kubectl scale statefulset/geonames-sparql2 --replicas=0
+                  kubectl rollout status statefulset/geonames-sparql2 --watch
+                  rm -rf /data/production/*
+                  mv /data/staging/* /data/production
+                  kubectl scale statefulset/geonames-sparql2 --replicas=1
+          restartPolicy: OnFailure
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: data-geonames-sparql2-0
+            - name: fuseki-config
+              configMap:
+                name: geonames-fuseki-config
+          securityContext: # To access the data volume.
+            fsGroup: 100
