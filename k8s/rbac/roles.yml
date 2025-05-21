@@ -4,5 +4,6 @@ metadata:
   name: restart-statefulsets
 rules:
   - apiGroups: ["apps"]
-    resources: ["statefulsets"]
-    verbs: ["get", "patch"]
+    resources: ["statefulsets", "statefulsets/scale"]
+    verbs: ["get", "patch", "list", "watch"]
+
