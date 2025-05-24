@@ -24,8 +24,6 @@ spec:
             # Build Fuseki data and fulltext index.
             - name: prepare-fuseki
               image: stain/jena-fuseki:5.1.0
-              securityContext:
-                runAsUser: 0 # to access the data volume at /data
               volumeMounts:
                 - name: data
                   mountPath: /data
@@ -46,9 +44,9 @@ spec:
                   curl -sS -O https://geonames.ams3.digitaloceanspaces.com/geonames.zip
                   unzip geonames.zip
                   ./tdbloader2 --loc=/data/tdb geonames.ttl
-                  java -cp $FUSEKI_HOME/fuseki-server.jar jena.textindexer --desc=/fuseki-config/config.ttl
                   echo "Creating Lucene index..."
-                  exec java -cp $FUSEKI_HOME/fuseki-server.jar jena.textindexer --desc=/fuseki-config/config.ttl
+                  java $JVM_ARGS -cp $FUSEKI_HOME/fuseki-server.jar jena.textindexer --desc=/fuseki-config/config.ttl
+                  chmod -R g+w /data/*
 
           # Restart Fuseki to reload harvested data.
           containers:
