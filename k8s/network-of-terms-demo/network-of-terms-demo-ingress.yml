@@ -4,7 +4,7 @@ metadata:
   name: network-of-terms-demo
   annotations:
     cert-manager.io/issuer: marco-test-issuer
-    cert-manager.io/usages: server auth,digital signature
+    cert-manager.io/usages: server auth,digital signature,client auth
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx-nde
