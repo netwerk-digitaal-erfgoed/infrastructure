@@ -12,6 +12,9 @@ spec:
             - name: app
               image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph
               imagePullPolicy: Always
+              volumeMounts:
+                - mountPath: /app/imports
+                  name: imports
               env:
                 - name: QLEVER_ENV
                   value: native
@@ -30,6 +33,12 @@ spec:
           restartPolicy: OnFailure
           imagePullSecrets:
             - name: ghcr
+          volumes:
+            - name: imports
+              persistentVolumeClaim:
+                claimName: dataset-knowledge-graph-imports
+          securityContext:
+            fsGroup: 100
         metadata:
           labels:
             app: dataset-knowledge-graph
