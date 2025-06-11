@@ -13,30 +13,8 @@ spec:
               image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph
               imagePullPolicy: Always
               env:
-                - name: GRAPHDB_URL
-                  value: "http://graphdb"
-                - name: GRAPHDB_USERNAME
-                  valueFrom:
-                    secretKeyRef:
-                      name: graphdb
-                      key: username
-                - name: GRAPHDB_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: graphdb
-                      key: password
-                - name: GRAPHDB_IMPORTS_URL
-                  value: "http://dataset-knowledge-graph-graphdb"
-                - name: GRAPHDB_IMPORTS_USERNAME
-                  valueFrom:
-                    secretKeyRef:
-                      name: dataset-knowledge-graph-graphdb
-                      key: username
-                - name: GRAPHDB_IMPORTS_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: dataset-knowledge-graph-graphdb
-                      key: password
+                - name: QLEVER_ENV
+                  value: native
           restartPolicy: OnFailure
           imagePullSecrets:
             - name: ghcr
