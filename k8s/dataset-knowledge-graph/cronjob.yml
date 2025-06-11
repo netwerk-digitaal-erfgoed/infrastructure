@@ -15,6 +15,18 @@ spec:
               env:
                 - name: QLEVER_ENV
                   value: native
+                - name: GRAPHDB_URL
+                  value: "http://graphdb"
+                - name: GRAPHDB_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: graphdb
+                      key: username
+                - name: GRAPHDB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: graphdb
+                      key: password
           restartPolicy: OnFailure
           imagePullSecrets:
             - name: ghcr
