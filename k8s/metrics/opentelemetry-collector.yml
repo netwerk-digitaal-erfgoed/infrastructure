@@ -1,41 +1,75 @@
-apiVersion: opentelemetry.io/v1alpha1
+apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: opentelemetry # Becomes service opentelemetry-collector
 spec:
-  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector:0.80.0
   mode: deployment
-  config: |
+  image: otel/opentelemetry-collector-contrib:0.126.0
+  config:
     receivers:
       otlp:
         protocols:
-          grpc:
-          http:
-    
+          grpc: {}
+          http: {}
+
     processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 75
+        spike_limit_percentage: 15
       batch:
-    
+        send_batch_size: 10000
+        timeout: 10s
+      k8sattributes:
+        extract:
+          metadata:
+            - k8s.namespace.name
+            - k8s.pod.name
+            - k8s.pod.start_time
+            - k8s.pod.uid
+            - k8s.deployment.name
+            - k8s.node.name
+
     exporters:
       prometheus:
         endpoint: "0.0.0.0:9090"
-        resource_to_telemetry_conversion: 
+        resource_to_telemetry_conversion:
           enabled: true
-      logging:
-        loglevel: debug
+      debug: {}
 
     service:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: []
-          exporters: [logging]
+          processors: [memory_limiter, batch]
+          exporters: [debug]
         metrics:
           receivers: [otlp]
-          processors: [batch]
-          exporters: [logging, prometheus]
-      telemetry:
-        logs:
-          level: debug
-        metrics:
-          level: detailed
+          processors: [k8sattributes, memory_limiter, batch]
+          exporters: [debug, prometheus]
 
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: otel-collector
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: otel-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: otel-collector
+subjects:
+  - kind: ServiceAccount
+    name: opentelemetry-collector
+ #   namespace: default  # ⚠️ Adjust this if you're not using the 'default' namespace
