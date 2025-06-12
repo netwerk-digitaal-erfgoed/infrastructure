@@ -72,4 +72,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: opentelemetry-collector
- #   namespace: default  # ⚠️ Adjust this if you're not using the 'default' namespace
+    namespace: default
