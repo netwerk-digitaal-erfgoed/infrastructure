@@ -18,6 +18,8 @@ spec:
               env:
                 - name: QLEVER_ENV
                   value: native
+                - name: QLEVER_PORT
+                  value: "7100" # Should not be necessary but without this we get “Error: env/QLEVER_PORT must be number”.
                 - name: GRAPHDB_URL
                   value: "http://graphdb"
                 - name: GRAPHDB_USERNAME
