@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: annorepo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: annorepo
+  template:
+    metadata:
+      labels:
+        app: annorepo
+    spec:
+      containers:
+        # https://knaw-huc.github.io/annorepo/docs/install.html
+        - name: app
+          image: ghcr.io/knaw-huc/annorepo-server:v0.7.7
+          ports:
+            - containerPort: 8080
+          env:
+            - name: AR_EXTERNAL_BASE_URL
+              value: "https://annorepo.demo.netwerkdigitaalerfgoed.nl"
+            - name: AR_MONGODB_URL
+              value: "mongodb://annorepo-mongo:27017/"
+            - name: AR_DB_NAME
+              value: annorepo
+      imagePullSecrets:
+        - name: ghcr

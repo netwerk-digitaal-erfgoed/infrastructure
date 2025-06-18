@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: annorepo-mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: annorepo-mongo
+  serviceName: annorepo-mongo
+  template:
+    metadata:
+      labels:
+        app: annorepo-mongo
+    spec:
+      containers:
+        - name: annorepo-mongo
+          image: mongo:8.0.9
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - mountPath: "/data/db"
+              name: annorepo-mongo-data
+  volumeClaimTemplates:
+    - metadata:
+        name: annorepo-mongo-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 8Gi
+        storageClassName: do-block-storage
