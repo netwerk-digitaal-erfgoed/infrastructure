@@ -47,10 +47,15 @@ data:
         [
           text:field "name" ;
           text:predicate gn:name ;
+          text:boost 3.0 ;
         ]
         [
           text:field "alternateName" ;
           text:predicate gn:alternateName ;
+        ]    
+        [
+          text:field "countryCode" ;
+          text:predicate gn:countryCode ;
         ]    
       ) ;
     .
