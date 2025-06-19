@@ -32,6 +32,11 @@ spec:
                     secretKeyRef:
                       name: graphdb
                       key: password
+              resources:
+                requests:
+                  cpu: "2"
+                limits:
+                  cpu: "3"
           restartPolicy: OnFailure
           imagePullSecrets:
             - name: ghcr
