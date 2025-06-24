@@ -6,7 +6,7 @@ spec:
   selectAllByDefault: true
   replicaCount: 1
   inlineScrapeConfig: |
-    - job_name: "prometheus"
+    - job_name: "opentelemetry-collector"
       static_configs:
       - targets: ["opentelemetry-collector-headless:9090"]
   remoteWrite:
