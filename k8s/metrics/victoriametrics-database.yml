@@ -3,7 +3,7 @@ kind: VMSingle
 metadata:
   name: victoriametrics-single-persisted
 spec:
-  retentionPeriod: "1"
+  retentionPeriod: "12"
   removePvcAfterDelete: true
   storage:
     accessModes:
@@ -11,3 +11,5 @@ spec:
     resources:
       requests:
         storage: 16Gi
+  extraArgs:
+    opentelemetry.usePrometheusNaming: "true"
