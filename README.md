@@ -64,6 +64,18 @@ Finally, apply the configuration from this repository by cloning it and then run
 kubectl apply -R -f k8s
 ```
 
+### Telemetry
+
+Our applications push [OpenTelemetry](https://opentelemetry.io) metrics to an
+OpenTelemetry collector, which is deployed through the [OpenTelemetry Kubernetes Operator](https://opentelemetry.io/docs/platforms/kubernetes/operator/).
+
+A [VictoriaMetrics](https://victoriametrics.com) agent scrapes
+the OpenTelemetry collector for metrics and stores them in a VictoriaMetrics database.
+
+Logs are collected through [Loki](https://grafana.com/oss/loki/).
+
+Both metrics and logs are available in our [Grafana dashboard](https://statistieken.netwerkdigitaalerfgoed.nl) (behind login).
+
 ### Backups
 
 We back up cluster data using [Velero](https://velero.io).
