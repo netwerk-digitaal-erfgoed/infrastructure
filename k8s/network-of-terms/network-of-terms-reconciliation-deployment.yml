@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-reconciliation:4.1.15 # {"$imagepolicy": "nde:network-of-terms-reconciliation-policy"}
+          image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-reconciliation:4.1.16 # {"$imagepolicy": "nde:network-of-terms-reconciliation-policy"}
           env:
             - name: GTAA_CREDENTIALS
               valueFrom:
