@@ -7,7 +7,6 @@ metadata:
     cert-manager.io/issuer: letsencrypt-nde
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
-  ingressClassName: nginx-nde
   tls:
     - hosts:
         - termennetwerk-api.nde-dev.ms4.surfsara.nl

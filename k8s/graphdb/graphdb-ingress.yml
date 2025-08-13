@@ -5,7 +5,6 @@ metadata:
   annotations:
     cert-manager.io/issuer: letsencrypt-nde
 spec:
-  ingressClassName: nginx-nde
   tls:
     - hosts:
         - triplestore.nde-dev.ms4.surfsara.nl
