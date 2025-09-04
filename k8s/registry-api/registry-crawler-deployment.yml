@@ -16,18 +16,13 @@ spec:
         - name: app
           image: ghcr.io/netwerk-digitaal-erfgoed/dataset-register
           env:
-            - name: GRAPHDB_URL
-              value: "http://graphdb"
-            - name: GRAPHDB_USERNAME
+            - name: SPARQL_URL
+              value: "http://dataset-register-qlever"
+            - name: SPARQL_ACCESS_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: graphdb
-                  key: username
-            - name: GRAPHDB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: graphdb
-                  key: password
+                  name: dataset-register-qlever
+                  key: access-token
             - name: CRAWLER_SCHEDULE
               value: '0 * * * *'
             - name: OTEL_EXPORTER_OTLP_ENDPOINT # This is being used by the sidecar. Should it be used by the app itself?
