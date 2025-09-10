@@ -36,7 +36,7 @@ spec:
             - containerPort: 7200
           livenessProbe:
             httpGet:
-              path: /repositories/registry/health?passive
+              path: /repositories/registry-backup/health?passive
               port: 7200
             initialDelaySeconds: 100
             periodSeconds: 5
