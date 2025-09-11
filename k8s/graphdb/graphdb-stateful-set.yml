@@ -12,6 +12,8 @@ spec:
     metadata:
       labels:
         app: graphdb
+      annotations:
+        backup.velero.io/backup-volumes: data
     spec:
       containers:
         - name: database
