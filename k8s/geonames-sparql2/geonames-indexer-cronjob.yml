@@ -51,7 +51,7 @@ spec:
           # Restart Fuseki to reload harvested data.
           containers:
             - name: restart-server
-              image: bitnamisecure/kubectl:sha256-19163f0c3febd59f1c401170e198189ddfdea470b611bb5f25a2b043b99518ae
+              image: bitnamisecure/kubectl:latest
               volumeMounts:
                 - name: data
                   mountPath: /data
