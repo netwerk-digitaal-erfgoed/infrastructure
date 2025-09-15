@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: ghcr.io/netwerk-digitaal-erfgoed/dataset-register
+          image: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-api
           env:
             - name: SPARQL_URL
               value: "http://dataset-register-qlever"
