@@ -15,7 +15,7 @@ data:
       INPUT_FILES     = statements.nq
       CAT_INPUT_FILES = cat ${INPUT_FILES}
       SETTINGS_JSON   = { "ascii-prefixes-only": true, "num-triples-per-batch": 100000 }
-      TEXT_INDEX      = from_text_records_and_literals    
+      TEXT_INDEX      = none    
       
       [server]
       PORT               = 7001
