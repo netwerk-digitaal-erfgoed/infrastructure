@@ -9,7 +9,7 @@ spec:
     - host: demo.netwerkdigitaalerfgoed.nl
       http:
         paths:
-          - path: /geonames
+          - path: /geonames2
             pathType: Prefix
             backend:
               service:

@@ -16,7 +16,7 @@ spec:
                       - key: app
                         operator: In
                         values:
-                          - geonames-sparql2
+                          - geonames-sparql
                   topologyKey: kubernetes.io/hostname
           serviceAccountName: statefulset-manager
           initContainers:
@@ -59,16 +59,16 @@ spec:
                 - sh
                 - -c
                 - |
-                  kubectl scale statefulset/geonames-sparql2 --replicas=0
-                  kubectl rollout status statefulset/geonames-sparql2 --watch
+                  kubectl scale statefulset/geonames-sparql --replicas=0
+                  kubectl rollout status statefulset/geonames-sparql --watch
                   rm -rf /data/production/*
                   mv /data/staging/* /data/production
-                  kubectl scale statefulset/geonames-sparql2 --replicas=1
+                  kubectl scale statefulset/geonames-sparql --replicas=1
           restartPolicy: OnFailure
           volumes:
             - name: data
               persistentVolumeClaim:
-                claimName: data-geonames-sparql2-0
+                claimName: data-geonames-sparql-0
             - name: fuseki-config
               configMap:
                 name: geonames-fuseki-config
