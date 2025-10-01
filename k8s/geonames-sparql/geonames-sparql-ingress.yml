@@ -22,15 +22,16 @@ kind: Ingress
 metadata:
   name: geonames-sparql-redirect
   annotations:
-    nginx.ingress.kubernetes.io/permanent-redirect: https://demo.netwerkdigitaalerfgoed.nl/geonames
+    nginx.ingress.kubernetes.io/permanent-redirect: https://demo.netwerkdigitaalerfgoed.nl/geonames/$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   rules:
     - host: demo.netwerkdigitaalerfgoed.nl
       http:
         paths:
-          - path: /geonames2
-            pathType: Prefix
+          - path: /geonames2(/|$)(.*)
+            pathType: ImplementationSpecific
             backend: # unused, but each rule must have a backend
               service:
                 name: geonames-sparql
