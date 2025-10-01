@@ -9,10 +9,31 @@ spec:
     - host: demo.netwerkdigitaalerfgoed.nl
       http:
         paths:
-          - path: /geonames2
+          - path: /geonames
             pathType: Prefix
             backend:
               service:
                 name: geonames-sparql
                 port:
                   number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: geonames-sparql-redirect
+  annotations:
+    nginx.ingress.kubernetes.io/permanent-redirect: https://demo.netwerkdigitaalerfgoed.nl/geonames
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: demo.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /geonames2
+            pathType: Prefix
+            backend: # unused, but each rule must have a backend
+              service:
+                name: geonames-sparql
+                port:
+                  number: 80
+---
