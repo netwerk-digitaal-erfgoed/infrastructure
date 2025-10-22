@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: registry-browser
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: datasetregister.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /datasets
+            pathType: Prefix
+            backend:
+              service:
+                name: registry-browser
+                port:
+                  number: 80
+          - path: /_app
+            pathType: Prefix
+            backend:
+              service:
+                name: registry-browser
+                port:
+                  number: 80
+          - path: /en
+            pathType: Prefix
+            backend:
+              service:
+                name: registry-browser
+                port:
+                  number: 80
+
+

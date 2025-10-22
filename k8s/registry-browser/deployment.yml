@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry-browser
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: registry-browser
+  template:
+    metadata:
+      labels:
+        app: registry-browser
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-browser
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: ghcr
