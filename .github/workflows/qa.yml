@@ -20,4 +20,4 @@ jobs:
 
       - name: Dry run apply to validate manifests
         run: |
-          kubectl apply -R -f $GITHUB_WORKSPACE/k8s --dry-run=server
+          kubectl apply -R -f $GITHUB_WORKSPACE/k8s-do --dry-run=server
