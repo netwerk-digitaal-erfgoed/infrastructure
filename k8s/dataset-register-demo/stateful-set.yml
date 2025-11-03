@@ -29,7 +29,7 @@ spec:
           ports:
             - containerPort: 80
       imagePullSecrets:
-        - name: ghcr
+        - name: github-creds
       securityContext:
         fsGroup: 82 # www-data
   volumeClaimTemplates:
