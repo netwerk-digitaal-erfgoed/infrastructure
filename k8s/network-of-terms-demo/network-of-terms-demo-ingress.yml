@@ -2,19 +2,22 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: datasets
+  name: network-of-terms-demo
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    cert-manager.io/issuer: harica-nde
 spec:
-  ingressClassName: nginx
+  tls:
+    - hosts:
+        - termennetwerk.nde.ms4.surfsara.nl
+      secretName: termennetwerk-tls
   rules:
-    - host: demo.netwerkdigitaalerfgoed.nl
+    - host: termennetwerk.nde.ms4.surfsara.nl
       http:
         paths:
-          - path: /datasets(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /
+            pathType: Prefix
             backend:
               service:
-                name: datasets
+                name: network-of-terms-demo
                 port:
                   number: 80
