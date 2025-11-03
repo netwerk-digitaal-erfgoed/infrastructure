@@ -11,21 +11,6 @@ spec:
     name: github-creds
 ---
 apiVersion: image.toolkit.fluxcd.io/v1beta2
-kind: ImagePolicy
-metadata:
-  name: network-of-terms-demo-policy
-  namespace: nde
-spec:
-  imageRepositoryRef:
-    name: network-of-terms-demo
-  filterTags:
-    pattern: '^[a-f0-9]+-(?P<ts>[0-9]+)'
-    extract: '$ts'
-  policy:
-    numerical:
-      order: asc
----
-apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageUpdateAutomation
 metadata:
   name: network-of-terms-demo-update
