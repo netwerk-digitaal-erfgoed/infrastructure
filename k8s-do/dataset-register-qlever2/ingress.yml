@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dataset-register-qlever2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: datasetregister.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /sparql2
+            pathType: Prefix
+            backend:
+              service:
+                name: dataset-register-qlever2
+                port:
+                  number: 80
+

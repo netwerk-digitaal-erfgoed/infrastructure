@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dataset-register-qlever2
+spec:
+  ports:
+    - port: 80
+      targetPort: 7001
+  selector:
+    app: dataset-register-qlever2

@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dataset-register-demo
+  annotations:
+    cert-manager.io/cluster-issuer: harica-nde
+spec:
+  tls:
+    - hosts:
+        - datasetregister.nde.ms4.surfsara.nl
+      secretName: dataset-register-demo
+  rules:
+    - host: datasetregister.nde.ms4.surfsara.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dataset-register-demo
+                port:
+                  number: 80

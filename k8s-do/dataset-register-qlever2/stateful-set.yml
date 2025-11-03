@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dataset-register-qlever2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dataset-register-qlever2
+  serviceName: dataset-register-qlever2
+  template:
+    metadata:
+      labels:
+        app: dataset-register-qlever2
+    spec:
+      containers:
+        - name: app
+          image: adfreiburg/qlever:commit-3f7a4cc
+          env:
+            - name: ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: dataset-register-qlever
+                  key: access-token
+          ports:
+            - containerPort: 7001
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /data/Qleverfile
+              subPath: Qleverfile
+          command:
+            - sh
+            - -c
+            - |
+              cd /data
+              qlever get-data
+              qlever index --overwrite-existing
+              qlever start --persist-updates --access-token "$ACCESS_TOKEN"  
+              qlever log
+
+      volumes:
+        - name: config
+          configMap:
+            name: dataset-register-qlever-config2
+
+      securityContext: # To access the data volume.
+        fsGroup: 100
+
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: do-block-storage

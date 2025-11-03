@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dataset-register-qlever-config2
+data:
+  Qleverfile: |
+      [data]
+      NAME              = dataset-register
+      GET_DATA_CMD      = curl -sS -O https://dataset-register.ams3.digitaloceanspaces.com/statements.nq
+      TEXT_DESCRIPTION  = All literals, search with FILTER CONTAINS(?var, "...")
+      DESCRIPTION       = NDE Dataset Register
+      FORMAT            = nq
+      
+      [index]
+      INPUT_FILES     = statements.nq
+      CAT_INPUT_FILES = cat ${INPUT_FILES}
+      SETTINGS_JSON   = { "ascii-prefixes-only": true, "num-triples-per-batch": 100000 }
+      TEXT_INDEX      = none    
+      
+      [server]
+      PORT               = 7001
+      MEMORY_FOR_QUERIES = 5G
+      CACHE_MAX_SIZE     = 2G
+      TIMEOUT            = 30s
+      
+      [runtime]
+      SYSTEM = native
+      
+      [ui]
+      UI_CONFIG = dataset-register
