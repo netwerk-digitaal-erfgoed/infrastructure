@@ -1,0 +1,46 @@
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: registry-demo-php
+  namespace: nde
+spec:
+  image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php
+  interval: 1m
+  secretRef:
+    name: github-creds
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: registry-demo-nginx
+  namespace: nde
+spec:
+  image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-nginx
+  interval: 1m
+  secretRef:
+    name: github-creds
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: registry-demo-php
+  namespace: nde
+spec:
+  imageRepositoryRef:
+    name: registry-demo-php
+  policy:
+    numerical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: registry-demo-nginx
+  namespace: nde
+spec:
+  imageRepositoryRef:
+    name: registry-demo-nginx
+  policy:
+    numerical:
+      order: asc

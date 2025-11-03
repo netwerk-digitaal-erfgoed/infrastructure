@@ -15,14 +15,14 @@ spec:
     spec:
       containers:
         - name: php
-          image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php-fpm
+          image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php-fpm # {"$imagepolicy": "nde:registry-demo-php"}
           volumeMounts:
             - mountPath: "/datasetdescriptions"
               name: data
           ports:
             - containerPort: 9000
         - name: nginx
-          image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-nginx
+          image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-nginx # {"$imagepolicy": "nde:registry-demo-nginx"}
           volumeMounts:
             - mountPath: "/datasetdescriptions"
               name: data
