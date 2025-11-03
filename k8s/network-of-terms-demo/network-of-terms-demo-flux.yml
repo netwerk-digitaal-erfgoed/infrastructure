@@ -40,4 +40,4 @@ spec:
         name: fluxcdbot
       messageTemplate: '{{range .Changed.Changes}}{{print .OldValue}} -> {{println .NewValue}}{{end}}'
   update:
-    path: ./k8s/network-of-terms
+    path: ./k8s
