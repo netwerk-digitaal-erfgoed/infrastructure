@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openrefine
+  annotations:
+    cert-manager.io/issuer: harica-nde
+spec:
+  tls:
+    - hosts:
+        - openrefine.nde.ms4.surfsara.nl
+      secretName: openrefine-tls
+  rules:
+    - host: openrefine.nde.ms4.surfsara.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: openrefine
+                port:
+                  number: 80
