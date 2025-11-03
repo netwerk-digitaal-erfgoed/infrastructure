@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: dataset-register-demo
   annotations:
-    cert-manager.io/cluster-issuer: harica-nde
+    cert-manager.io/issuer: harica-nde
 spec:
   tls:
     - hosts:
