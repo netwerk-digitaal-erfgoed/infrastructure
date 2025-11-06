@@ -5,7 +5,7 @@ metadata:
   name: registry-demo-php
   namespace: nde
 spec:
-  image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php
+  image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php-fpm
   interval: 1m
   secretRef:
     name: github-creds
