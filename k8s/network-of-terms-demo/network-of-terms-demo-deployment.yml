@@ -18,4 +18,4 @@ spec:
           ports:
             - containerPort: 80
       imagePullSecrets:
-        - name: github-creds
+        - name: ghcr
