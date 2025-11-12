@@ -8,7 +8,7 @@ spec:
   image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php-fpm
   interval: 1m
   secretRef:
-    name: github-creds
+    name: ghcr
 ---
 apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageRepository
@@ -19,7 +19,7 @@ spec:
   image: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-nginx
   interval: 1m
   secretRef:
-    name: github-creds
+    name: ghcr
 ---
 apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImagePolicy

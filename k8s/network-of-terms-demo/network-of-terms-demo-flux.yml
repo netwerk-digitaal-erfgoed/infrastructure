@@ -8,7 +8,7 @@ spec:
   image: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-demo
   interval: 1m
   secretRef:
-    name: github-creds
+    name: ghcr
 ---
 apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImagePolicy
