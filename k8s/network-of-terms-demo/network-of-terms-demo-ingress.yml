@@ -5,6 +5,7 @@ metadata:
   name: network-of-terms-demo
   annotations:
     cert-manager.io/issuer: harica-nde
+    cert-manager.io/usages: server auth,digital signature,client auth
 spec:
   tls:
     - hosts:
