@@ -2,8 +2,6 @@
 
 ⚠️ This is the branch for the SURF pilot.  
 
-Testing signing commits.
-
 This repository contains generic infrastructure configuration for running NDE applications in a Kubernetes cluster.
 
 This configuration follows the [CLARIAH Infrastructure Requirements](https://github.com/CLARIAH/clariah-plus/blob/main/requirements/infrastructure-requirements.md).
