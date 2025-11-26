@@ -9,8 +9,8 @@ metadata:
 spec:
   tls:
     - hosts:
-        - termennetwerk.nde.ms4.surfsara.nl
-      secretName: termennetwerk-tls
+        - termennetwerk.test.netwerkdigitaalerfgoed.nl
+      secretName: termennetwerk-test-tls
   rules:
     - host: termennetwerk.test.netwerkdigitaalerfgoed.nl
       http:
