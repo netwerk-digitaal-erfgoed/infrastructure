@@ -19,7 +19,8 @@ spec:
   imageRepositoryRef:
     name: network-of-terms-demo
   filterTags:
-    pattern: '^[0-9]{14}.*'
+    pattern: '^(?P<timestamp>[0-9]{14}).*'
+    extract: '$timestamp'
   policy:
     numerical:
       order: asc
