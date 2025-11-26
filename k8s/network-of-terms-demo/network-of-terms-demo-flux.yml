@@ -18,6 +18,8 @@ metadata:
 spec:
   imageRepositoryRef:
     name: network-of-terms-demo
+  filterTags:
+    pattern: '^[0-9]{14}.*'
   policy:
     numerical:
       order: asc
