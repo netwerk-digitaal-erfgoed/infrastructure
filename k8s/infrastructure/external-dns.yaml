@@ -1,0 +1,50 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: external-dns-nde
+spec:
+  interval: 10m
+  url: https://kubernetes-sigs.github.io/external-dns/
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-dns-nde
+spec:
+  serviceAccountName: nde
+  suspend: false
+  interval: 5m
+  releaseName: external-dns-nde
+  targetNamespace: nde
+  storageNamespace: nde
+  install:
+    createNamespace: false
+  chart:
+    spec:
+      chart: external-dns
+      version: "~1.15.0"
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns-nde
+      interval: 30m
+  values:
+    sources:
+      - ingress
+    policy: "sync"
+    registry: txt
+    txtOwnerId: "nde-k8s"
+    txtPrefix: "external-dns-"
+    txtSuffix: ""
+    domainFilters: [nde.nl, netwerkdigitaalerfgoed.nl]
+    provider:
+      name: transip
+    extraArgs:
+      - --transip-account=nde
+      - --transip-keyfile=/transip/transip-api-key
+    extraVolumes:
+      - name: transip-api-key
+        secret:
+          secretName: transip-api-key
+      - name: transip-api-key
+        mountPath: /transip
+        readOnly: true
