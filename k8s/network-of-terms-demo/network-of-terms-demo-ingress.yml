@@ -12,7 +12,7 @@ spec:
         - termennetwerk.nde.ms4.surfsara.nl
       secretName: termennetwerk-tls
   rules:
-    - host: termennetwerk.nde.ms4.surfsara.nl
+    - host: termennetwerk.test.netwerkdigitaalerfgoed.nl
       http:
         paths:
           - path: /
