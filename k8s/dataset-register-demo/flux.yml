@@ -29,6 +29,9 @@ metadata:
 spec:
   imageRepositoryRef:
     name: registry-demo-php
+  filterTags:
+    pattern: '^(?P<timestamp>[0-9]{14}).*'
+    extract: '$timestamp'
   policy:
     numerical:
       order: asc
