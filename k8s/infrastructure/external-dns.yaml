@@ -19,6 +19,9 @@ spec:
   storageNamespace: nde
   install:
     createNamespace: false
+    crds: Skip
+  upgrade:
+    crds: Skip
   chart:
     spec:
       chart: external-dns
