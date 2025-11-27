@@ -6,10 +6,31 @@ on:
       - master
 
 jobs:
-  build:
+  helm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+
+      - name: Install kubeconform
+        run: |
+          curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Lint Helm chart
+        run: helm lint helm/nde-app
+
+      - name: Validate HelmReleases
+        run: |
+          for hr in k8s/*/helmrelease.yaml; do
+            echo "=== Validating $hr ==="
+            name=$(yq '.metadata.name' "$hr")
+            yq '.spec.values' "$hr" | helm template "$name" helm/nde-app -f - | kubeconform -strict -summary
+          done
+
+  k8s-do:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
 
       - uses: digitalocean/action-doctl@v2
         with:
