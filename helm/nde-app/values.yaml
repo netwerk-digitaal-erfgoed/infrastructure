@@ -1,0 +1,89 @@
+# Workload type and replicas
+workload:
+  type: deployment  # or "statefulset"
+  replicas: 1
+
+# Container(s) - supports multi-container pods
+containers:
+  - name: app
+    image:
+      repository: ""  # Required
+      tag: latest
+    port: 80
+    env: []
+    volumeMounts: []
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    livenessProbe:
+      httpGet:
+        path: /
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readinessProbe:
+      httpGet:
+        path: /
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+    # Flux image automation (generates ImageRepository + ImagePolicy)
+    flux:
+      enabled: false
+      interval: 1m
+      policy:
+        type: numerical  # or "semver"
+        range: ""  # For semver, e.g. '>=1.0.0 <2.0.0'
+
+# Image pull secrets (ghcr.io images auto-add ghcr secret)
+imagePullSecrets: []
+
+# Pod security context
+securityContext: {}
+  # fsGroup: 82
+
+# Service
+service:
+  port: 80
+  targetPort: ""  # Defaults to first container's port
+
+# Ingress - shared annotations for first ingress
+ingress:
+  annotations:
+    cert-manager.io/issuer: harica-nde
+    cert-manager.io/usages: server auth,digital signature,client auth
+
+# Ingresses - first one gets TLS auto-configured and shared annotations
+ingresses: []
+  # - hosts:
+  #     - app.example.com
+  #   # Optional overrides:
+  #   # name: custom-name        # Defaults to release name for first, required for others
+  #   # annotations: {}          # Merged with ingress.annotations for first ingress
+  #   # paths:                   # Defaults to [{path: /, pathType: Prefix}]
+  #   #   - path: /api
+  #   #     pathType: Prefix
+  #   # tls:
+  #   #   secretName: custom-tls # Defaults to {name}-tls
+
+# Persistence (StatefulSet only)
+persistence:
+  enabled: false
+  storageClass: hdd
+  size: 1Gi
+  name: data
+  mountPath: /data
+
+# CronJobs
+cronjobs: []
+  # - name: my-job           # Required, used in CronJob name
+  #   schedule: "0 4 * * 6"
+  #   image: alpine:latest
+  #   imagePullPolicy: ""    # Optional
+  #   command: []
+  #   args: []
+  #   env: []
+  #   restartPolicy: OnFailure  # Optional, defaults to OnFailure

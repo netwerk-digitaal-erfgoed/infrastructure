@@ -1,0 +1,20 @@
+{{- range .Values.containers }}
+{{- if .flux.enabled }}
+{{- $fluxName := include "nde-app.fluxName" (list .flux.name (include "nde-app.fullname" $) .name) }}
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: {{ $fluxName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "nde-app.labels" $ | nindent 4 }}
+spec:
+  image: {{ .image.repository }}
+  interval: {{ .flux.interval | default "1m" }}
+  {{- if or .flux.secretRef (hasPrefix "ghcr.io" .image.repository) }}
+  secretRef:
+    name: {{ .flux.secretRef | default "ghcr" }}
+  {{- end }}
+{{- end }}
+{{- end }}

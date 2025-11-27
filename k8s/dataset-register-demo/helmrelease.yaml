@@ -1,0 +1,61 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dataset-register-demo
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: charts/nde-app
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      type: statefulset
+
+    containers:
+      - name: nginx
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-nginx
+          tag: # {"$imagepolicy": "nde:dataset-register-demo-nginx:tag"}
+        port: 80
+        volumeMounts:
+          - mountPath: /datasetdescriptions
+            name: data
+        flux:
+          enabled: true
+
+      - name: php
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php-fpm
+          tag: # {"$imagepolicy": "nde:dataset-register-demo-php:tag"}
+        port: 9000
+        volumeMounts:
+          - mountPath: /datasetdescriptions
+            name: data
+        flux:
+          enabled: true
+
+    securityContext:
+      fsGroup: 82  # www-data
+
+    ingresses:
+      - hosts:
+          - datasetregister.test.netwerkdigitaalerfgoed.nl
+
+      - name: redirect
+        className: nginx
+        hosts:
+          - demo.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/permanent-redirect: https://datasetregister.netwerkdigitaalerfgoed.nl
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            rewrite ^(/register)$ $1/ redirect;
+        paths:
+          - path: /register(/|$)(.*)
+            pathType: ImplementationSpecific
+
+    persistence:
+      enabled: true
+      mountPath: /datasetdescriptions

@@ -1,0 +1,49 @@
+{{- range $index, $ingress := .Values.ingresses }}
+{{- $isFirst := eq $index 0 }}
+{{- $name := $ingress.name | default (include "nde-app.fullname" $) }}
+{{- if not $isFirst }}
+{{- $name = printf "%s-%s" (include "nde-app.fullname" $) $ingress.name }}
+{{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "nde-app.labels" $ | nindent 4 }}
+  annotations:
+    {{- if $isFirst }}
+    {{- with $.Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- end }}
+    {{- with $ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if $ingress.hosts }}
+  {{- if or $isFirst $ingress.tls }}
+  tls:
+    - secretName: {{ (($ingress.tls).secretName) | default (printf "%s-tls" $name) }}
+      hosts:
+        {{- range $ingress.hosts }}
+        - {{ . }}
+        {{- end }}
+  {{- end }}
+  {{- end }}
+  rules:
+    {{- range $ingress.hosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          {{- range $ingress.paths | default (list (dict "path" "/" "pathType" "Prefix")) }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "nde-app.fullname" $ }}
+                port:
+                  number: {{ $.Values.service.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
