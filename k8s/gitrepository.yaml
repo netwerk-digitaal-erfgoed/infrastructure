@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: nde
+  namespace: nde
+spec:
+  interval: 1m
+  url: https://github.com/netwerk-digitaal-erfgoed/infrastructure
+  ref:
+    branch: master
