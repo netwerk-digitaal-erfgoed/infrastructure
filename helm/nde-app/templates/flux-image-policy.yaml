@@ -1,0 +1,29 @@
+{{- range .Values.containers }}
+{{- if .flux.enabled }}
+{{- $fluxName := include "nde-app.fluxName" (list .flux.name (include "nde-app.fullname" $) .name) }}
+{{- $policyType := ((.flux.policy).type) | default "numerical" }}
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: {{ $fluxName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "nde-app.labels" $ | nindent 4 }}
+spec:
+  imageRepositoryRef:
+    name: {{ $fluxName }}
+  {{- if eq $policyType "numerical" }}
+  filterTags:
+    pattern: {{ ((.flux.policy).pattern) | default "^(?P<timestamp>[0-9]{14}).*" | squote }}
+    extract: {{ ((.flux.policy).extract) | default "$timestamp" | squote }}
+  policy:
+    numerical:
+      order: {{ ((.flux.policy).order) | default "asc" }}
+  {{- else if eq $policyType "semver" }}
+  policy:
+    semver:
+      range: {{ (.flux.policy).range | squote }}
+  {{- end }}
+{{- end }}
+{{- end }}

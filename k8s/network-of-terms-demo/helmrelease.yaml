@@ -1,0 +1,29 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: network-of-terms-demo
+  namespace: nde
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: charts/nde-app
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      replicas: 2
+
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-demo
+          tag: latest # {"$imagepolicy": "nde:network-of-terms-demo:tag"}
+        port: 80
+        flux:
+          enabled: true
+
+    ingresses:
+      - hosts:
+          - termennetwerk.test.netwerkdigitaalerfgoed.nl

@@ -1,0 +1,38 @@
+{{- range .Values.cronjobs }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "nde-app.fullname" $ }}-{{ required "cronjobs[].name is required" .name }}
+  labels:
+    {{- include "nde-app.labels" $ | nindent 4 }}
+spec:
+  schedule: {{ required "cronjobs[].schedule is required" .schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          {{- if hasPrefix "ghcr.io" .image }}
+          imagePullSecrets:
+            - name: ghcr
+          {{- end }}
+          containers:
+            - name: {{ .name }}
+              image: {{ required "cronjobs[].image is required" .image }}
+              {{- with .imagePullPolicy }}
+              imagePullPolicy: {{ . }}
+              {{- end }}
+              {{- with .command }}
+              command:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with .args }}
+              args:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with .env }}
+              env:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+          restartPolicy: {{ .restartPolicy | default "OnFailure" }}
+{{- end }}
