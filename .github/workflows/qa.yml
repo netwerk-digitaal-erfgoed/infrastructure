@@ -24,7 +24,10 @@ jobs:
           for hr in k8s/*/helmrelease.yaml; do
             echo "=== Validating $hr ==="
             name=$(yq '.metadata.name' "$hr")
-            yq '.spec.values' "$hr" | helm template "$name" helm/nde-app -f - | kubeconform -strict -summary
+            yq '.spec.values' "$hr" | helm template "$name" helm/nde-app -f - | \
+              kubeconform -strict -summary \
+                -schema-location default \
+                -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
           done
 
   k8s-do:

@@ -33,7 +33,7 @@ spec:
 
     ingresses:
       - hosts:
-          - openrefine.nde.ms4.surfsara.nl
+          - openrefine.test.netwerkdigitaalerfgoed.nl
 
     cronjobs:
       - name: clear-projects
