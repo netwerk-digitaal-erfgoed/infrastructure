@@ -2,4 +2,4 @@ apiVersion: v2
 name: nde-app
 description: Generic Helm chart for NDE applications
 type: application
-version: 0.1.0
+version: 0.0.0
