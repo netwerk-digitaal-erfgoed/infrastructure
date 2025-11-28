@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: adfreiburg/qlever:commit-3f7a4cc
+          image: adfreiburg/qlever:commit-688efa2
           env:
             - name: ACCESS_TOKEN
               valueFrom:
