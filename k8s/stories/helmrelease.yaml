@@ -15,16 +15,14 @@ spec:
   values:
     workload:
       replicas: 2
-
     containers:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/stories
-          tag: latest # {"$imagepolicy": "nde:stories:tag"}
+          tag: 20251201155721-86cc193 # {"$imagepolicy": "nde:stories:tag"}
         port: 80
         flux:
           enabled: true
-
     ingresses:
       - hosts:
           - datastories.demo.netwerkdigitaalerfgoed.nl

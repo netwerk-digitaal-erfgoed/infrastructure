@@ -14,34 +14,30 @@ spec:
   values:
     workload:
       type: statefulset
-
     containers:
       - name: nginx
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-nginx
-          tag: latest # {"$imagepolicy": "nde:dataset-register-demo-nginx:tag"}
+          tag: 20251201141941-9b46c70 # {"$imagepolicy": "nde:dataset-register-demo-nginx:tag"}
         port: 80
         volumeMounts:
           - mountPath: /datasetdescriptions
             name: data
         flux:
           enabled: true
-
       - name: php
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php-fpm
-          tag: latest # {"$imagepolicy": "nde:dataset-register-demo-php:tag"}
+          tag: 20251201141941-9b46c70 # {"$imagepolicy": "nde:dataset-register-demo-php:tag"}
         port: 9000
         volumeMounts:
           - mountPath: /datasetdescriptions
             name: data
         flux:
           enabled: true
-
     ingresses:
       - hosts:
           - datasetregister.netwerkdigitaalerfgoed.nl
-
       - name: redirect
         className: nginx
         hosts:
@@ -53,7 +49,6 @@ spec:
         paths:
           - path: /register(/|$)(.*)
             pathType: ImplementationSpecific
-
     persistence:
       enabled: true
       mountPath: /datasetdescriptions

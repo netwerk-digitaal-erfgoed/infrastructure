@@ -16,7 +16,7 @@ spec:
       - name: app
         image:
           repository: easypi/openrefine
-          tag: 3.9.3 # {"$imagepolicy": "nde:openrefine:tag"}
+          tag: 3.9.5 # {"$imagepolicy": "nde:openrefine:tag"}
         env:
           - name: REFINE_EXTRA_OPTS
             value: refine.display.new.version.notice=false
@@ -31,11 +31,9 @@ spec:
           policy:
             type: semver
             range: '>=3.9.3 <4.0.0'
-
     ingresses:
       - hosts:
           - openrefine.netwerkdigitaalerfgoed.nl
-
     cronjobs:
       - name: clear-projects
         schedule: "0 4 * * 6"
