@@ -19,7 +19,7 @@ spec:
       - name: nginx
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-nginx
-          tag: # {"$imagepolicy": "nde:dataset-register-demo-nginx:tag"}
+          tag: latest # {"$imagepolicy": "nde:dataset-register-demo-nginx:tag"}
         port: 80
         volumeMounts:
           - mountPath: /datasetdescriptions
@@ -30,7 +30,7 @@ spec:
       - name: php
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php-fpm
-          tag: # {"$imagepolicy": "nde:dataset-register-demo-php:tag"}
+          tag: latest # {"$imagepolicy": "nde:dataset-register-demo-php:tag"}
         port: 9000
         volumeMounts:
           - mountPath: /datasetdescriptions
