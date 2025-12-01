@@ -1,0 +1,27 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: heritageflix-paintings
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/heritageflix-paintings
+          tag: latest # {"$imagepolicy": "nde:heritageflix-paintings:tag"}
+        port: 3000
+        flux:
+          enabled: true
+
+    ingresses:
+      - hosts:
+          - heritageflix-paintings.demo.netwerkdigitaalerfgoed.nl

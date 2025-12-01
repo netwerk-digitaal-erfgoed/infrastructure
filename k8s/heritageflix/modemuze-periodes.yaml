@@ -1,0 +1,27 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: heritageflix-modemuze-periodes
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/heritageflix-modemuze-periodes
+          tag: latest # {"$imagepolicy": "nde:heritageflix-modemuze-periodes:tag"}
+        port: 3000
+        flux:
+          enabled: true
+
+    ingresses:
+      - hosts:
+          - heritageflix-modemuze-periodes.demo.netwerkdigitaalerfgoed.nl
