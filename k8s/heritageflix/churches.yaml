@@ -17,11 +17,10 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/heritageflix-churches
-          tag: latest # {"$imagepolicy": "nde:heritageflix-churches:tag"}
+          tag: 20251201214715-aaf14d3 # {"$imagepolicy": "nde:heritageflix-churches:tag"}
         port: 3000
         flux:
           enabled: true
-
     ingresses:
       - hosts:
           - heritageflix-churches.demo.netwerkdigitaalerfgoed.nl
