@@ -1,0 +1,41 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: annorepo-mongo
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      type: statefulset
+
+    containers:
+      - name: annorepo-mongo
+        image:
+          repository: mongo
+          tag: "8.0.9"
+        flux:
+          policy:
+            type: semver
+        port: 27017
+        volumeMounts:
+          - mountPath: /data/db
+            name: data
+
+
+    service:
+      port: 27017
+
+    persistence:
+      enabled: true
+      name: data
+      mountPath: /data/db
+      size: 8Gi
+      storageClass: hdd

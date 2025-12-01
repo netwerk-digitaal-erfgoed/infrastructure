@@ -1,0 +1,34 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: annorepo
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/knaw-huc/annorepo-server
+          tag: latest # {"$imagepolicy": "nde:annorepo:tag"}
+        port: 8080
+        flux:
+          enabled: true
+        env:
+          - name: AR_EXTERNAL_BASE_URL
+            value: "https://annorepo.demo.netwerkdigitaalerfgoed.nl"
+          - name: AR_MONGODB_URL
+            value: "mongodb://annorepo-mongo:27017/"
+          - name: AR_DB_NAME
+            value: annorepo
+
+    ingresses:
+      - hosts:
+          - annorepo.demo.netwerkdigitaalerfgoed.nl
