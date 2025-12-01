@@ -17,11 +17,10 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/heritageflix-paintings
-          tag: latest # {"$imagepolicy": "nde:heritageflix-paintings:tag"}
+          tag: 20251201215321-442e9d0 # {"$imagepolicy": "nde:heritageflix-paintings:tag"}
         port: 3000
         flux:
           enabled: true
-
     ingresses:
       - hosts:
           - heritageflix-paintings.demo.netwerkdigitaalerfgoed.nl
