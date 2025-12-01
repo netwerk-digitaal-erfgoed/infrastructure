@@ -17,11 +17,10 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/heritageflix-modemuze-materialen
-          tag: latest # {"$imagepolicy": "nde:heritageflix-modemuze-materialen:tag"}
+          tag: 20251201222028-a298c51 # {"$imagepolicy": "nde:heritageflix-modemuze-materialen:tag"}
         port: 3000
         flux:
           enabled: true
-
     ingresses:
       - hosts:
           - heritageflix-modemuze-materialen.demo.netwerkdigitaalerfgoed.nl
