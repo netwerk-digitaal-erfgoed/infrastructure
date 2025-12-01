@@ -3,6 +3,7 @@ kind: HelmRelease
 metadata:
   name: openrefine
 spec:
+  serviceAccountName: nde
   interval: 30m
   chart:
     spec:

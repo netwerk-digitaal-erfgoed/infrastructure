@@ -3,6 +3,7 @@ kind: HelmRelease
 metadata:
   name: dataset-register-demo
 spec:
+  serviceAccountName: nde
   interval: 30m
   chart:
     spec:

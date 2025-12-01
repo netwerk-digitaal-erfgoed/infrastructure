@@ -4,6 +4,7 @@ metadata:
   name: network-of-terms-demo
   namespace: nde
 spec:
+  serviceAccountName: nde
   interval: 30m
   chart:
     spec:
