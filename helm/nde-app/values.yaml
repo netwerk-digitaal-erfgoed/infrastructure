@@ -77,6 +77,13 @@ persistence:
   name: data
   mountPath: /data
 
+# PersistentVolumeClaims
+pvcs: []
+  # - name: data            # Required, used in PVC name (fullname-name)
+  #   size: 1Gi             # Required
+  #   accessMode: ReadWriteOnce  # Optional, defaults to ReadWriteOnce
+  #   storageClass: hdd      # Optional, defaults to hdd
+
 # CronJobs
 cronjobs: []
   # - name: my-job           # Required, used in CronJob name

@@ -1,7 +1,18 @@
 ## Encrypting the secret
 
-Flux is configured with sops-age: 
-https://fluxcd.io/flux/guides/mozilla-sops/#encrypting-secrets-using-age 
+Flux is configured with [sops-age](https://fluxcd.io/flux/guides/mozilla-sops/#encrypting-secrets-using-age).
+
+### How it works
+
+This uses asymmetric encryption (like SSH or GPG):
+
+- **encryption** (done locally): uses only the **public key** — anyone can encrypt
+- **decryption** (done by Flux in the cluster): uses the **private key** — only the cluster can decrypt.
+
+The public key (`age1qnj...`) is safe to share and is embedded in the commands below. 
+The private key is stored as a secret in the cluster (`sops-age` in the `flux-system` namespace) and never leaves there.
+
+### Encrypt a secret
 
 Create a new secrets manifest, save it as a YAML file:
 

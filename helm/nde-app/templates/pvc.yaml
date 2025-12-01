@@ -1,0 +1,16 @@
+{{- range .Values.pvcs }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "nde-app.fullname" $ }}-{{ required "pvcs[].name is required" .name }}
+  labels:
+    {{- include "nde-app.labels" $ | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .accessMode | default "ReadWriteOnce" }}
+  storageClassName: {{ .storageClass | default "hdd" }}
+  resources:
+    requests:
+      storage: {{ required "pvcs[].size is required" .size }}
+{{- end }}

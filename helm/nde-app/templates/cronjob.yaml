@@ -11,10 +11,18 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          labels:
+            {{- include "nde-app.selectorLabels" $ | nindent 12 }}
+            app: {{ include "nde-app.fullname" $ }}-{{ .name }}
         spec:
           {{- if hasPrefix "ghcr.io" .image }}
           imagePullSecrets:
             - name: ghcr
+          {{- end }}
+          {{- with .securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           containers:
             - name: {{ .name }}
@@ -34,5 +42,17 @@ spec:
               env:
                 {{- toYaml . | nindent 16 }}
               {{- end }}
+              {{- with .volumeMounts }}
+              volumeMounts:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with .resources }}
+              resources:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+          {{- with .volumes }}
+          volumes:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           restartPolicy: {{ .restartPolicy | default "OnFailure" }}
 {{- end }}
