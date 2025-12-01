@@ -40,7 +40,7 @@ spec:
 
     ingresses:
       - hosts:
-          - datasetregister.test.netwerkdigitaalerfgoed.nl
+          - datasetregister.netwerkdigitaalerfgoed.nl
 
       - name: redirect
         className: nginx
