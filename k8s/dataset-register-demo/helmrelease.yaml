@@ -38,9 +38,6 @@ spec:
         flux:
           enabled: true
 
-    securityContext:
-      fsGroup: 82  # www-data
-
     ingresses:
       - hosts:
           - datasetregister.test.netwerkdigitaalerfgoed.nl
