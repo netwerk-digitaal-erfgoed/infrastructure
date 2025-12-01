@@ -27,4 +27,4 @@ spec:
 
     ingresses:
       - hosts:
-          - termennetwerk.test.netwerkdigitaalerfgoed.nl
+          - termennetwerk.netwerkdigitaalerfgoed.nl
