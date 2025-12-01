@@ -1,0 +1,38 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: demo
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      replicas: 2
+
+    containers:
+      - name: demo
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/demo-frontend
+          tag: latest # {"$imagepolicy": "nde:demo:tag"}
+        port: 5501
+        flux:
+          enabled: true
+
+    ingresses:
+      - hosts:
+          - demo.netwerkdigitaalerfgoed.nl
+      - name: network-of-terms-redirect
+        hosts:
+          - demo.netwerkdigitaalerfgoed.nl
+        paths:
+          - path: /termennetwerk
+            pathType: Prefix
+        annotations:
+          nginx.ingress.kubernetes.io/permanent-redirect: https://termennetwerk.netwerkdigitaalerfgoed.nl
