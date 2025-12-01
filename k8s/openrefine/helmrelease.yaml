@@ -34,7 +34,7 @@ spec:
 
     ingresses:
       - hosts:
-          - openrefine.test.netwerkdigitaalerfgoed.nl
+          - openrefine.netwerkdigitaalerfgoed.nl
 
     cronjobs:
       - name: clear-projects
