@@ -22,6 +22,9 @@ spec:
                 secretKeyRef:
                   name: dataset-register-qlever
                   key: access-token
+          resources:
+            requests:
+              memory: 8Gi
           ports:
             - containerPort: 7001
           volumeMounts:
