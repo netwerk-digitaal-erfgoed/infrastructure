@@ -100,16 +100,15 @@ Supported probe type: `httpGet`.
 
 ### Ingress
 
-| Value | Description | Default |
-|-------|-------------|---------|
-| `ingress.annotations` | Shared annotations for first ingress | cert-manager config |
-| `ingresses` | List of ingress definitions | `[]` |
-| `ingresses[].hosts` | List of hostnames | Required |
-| `ingresses[].name` | Ingress name | Release name (first), required (others) |
-| `ingresses[].className` | Ingress class | Not set |
-| `ingresses[].annotations` | Additional annotations | `{}` |
-| `ingresses[].paths` | Path definitions | `[{path: /, pathType: Prefix}]` |
-| `ingresses[].tls.secretName` | TLS secret name | `{name}-tls` |
+| Value | Description                                                          | Default |
+|-------|----------------------------------------------------------------------|---------|
+| `ingress.annotations` | Shared annotations for first ingress                                 | cert-manager config |
+| `ingresses` | List of ingress definitions; the first ingress automatically get TLS | `[]` |
+| `ingresses[].hosts` | List of hostnames                                                    | Required |
+| `ingresses[].name` | Ingress name                                                         | Release name (first), required (others) |
+| `ingresses[].annotations` | Additional annotations                                               | `{}` |
+| `ingresses[].paths` | Path definitions                                                     | `[{path: /, pathType: Prefix}]` |
+| `ingresses[].tls.secretName` | TLS secret name                                                      | `{name}-tls` |
 
 ### Persistence (StatefulSet only)
 
