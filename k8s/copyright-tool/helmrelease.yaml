@@ -25,8 +25,8 @@ spec:
           enabled: true
     ingresses:
       - hosts:
-          - regeljerechten.netwerkdigitaalerfgoed.nl
-          - rjr.netwerkdigitaalerfgoed.nl
+          - regeljerechten.nl
+          - www.regeljerechten.nl
         tls:
         annotations:
           nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
