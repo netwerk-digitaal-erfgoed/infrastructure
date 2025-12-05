@@ -34,11 +34,11 @@ spec:
           - name: JVM_ARGS
             value: "-Xmx8g"
         volumeMounts:
-          - name: fuseki
-            mountPath: /fuseki
-#          - name: config
-#            mountPath: /fuseki/config.ttl
-#            subPath: config.ttl
+#          - name: fuseki
+#            mountPath: /fuseki
+          - name: config
+            mountPath: /fuseki/config.ttl
+            subPath: config.ttl
 #          - name: data
 #            mountPath: /data
 #            subPath: production
