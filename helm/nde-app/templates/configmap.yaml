@@ -1,0 +1,11 @@
+{{- range .Values.configMaps }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nde-app.fullname" $ }}-{{ .name }}
+  labels:
+    {{- include "nde-app.labels" $ | nindent 4 }}
+data:
+  {{- toYaml .data | nindent 2 }}
+{{- end }}

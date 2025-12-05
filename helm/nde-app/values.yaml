@@ -69,7 +69,13 @@ ingresses: []
   #   # tls:
   #   #   secretName: custom-tls # Defaults to {name}-tls
 
-# Persistence (StatefulSet only)
+# Pod volumes (for ConfigMaps, Secrets, etc.)
+volumes: []
+  # - name: config
+  #   configMap:
+  #     name: my-config
+
+# Persistence (StatefulSet only) - single volume
 persistence:
   enabled: false
   storageClass: hdd
@@ -77,12 +83,25 @@ persistence:
   name: data
   mountPath: /data
 
+# Multiple persistence volumes (StatefulSet only)
+persistenceVolumes: []
+  # - name: data
+  #   size: 50Gi
+  #   storageClass: hdd  # optional, defaults to hdd
+
 # PersistentVolumeClaims
 pvcs: []
   # - name: data            # Required, used in PVC name (fullname-name)
   #   size: 1Gi             # Required
   #   accessMode: ReadWriteOnce  # Optional, defaults to ReadWriteOnce
   #   storageClass: hdd      # Optional, defaults to hdd
+
+# ConfigMaps
+configMaps: []
+  # - name: config
+  #   data:
+  #     config.yaml: |
+  #       key: value
 
 # CronJobs
 cronjobs: []
