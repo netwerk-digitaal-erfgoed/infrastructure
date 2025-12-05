@@ -33,9 +33,9 @@ spec:
         env:
           - name: JVM_ARGS
             value: "-Xmx8g"
-#        volumeMounts:
-#          - name: fuseki
-#            mountPath: /fuseki
+        volumeMounts:
+          - name: fuseki
+            mountPath: /fuseki
 #          - name: config
 #            mountPath: /fuseki/config.ttl
 #            subPath: config.ttl
