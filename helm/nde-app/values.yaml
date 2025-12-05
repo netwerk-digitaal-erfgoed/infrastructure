@@ -83,8 +83,8 @@ persistence:
   name: data
   mountPath: /data
 
-# Multiple persistence volumes (StatefulSet only)
-persistenceVolumes: []
+# Multiple persistent volumes (StatefulSet only)
+persistentVolumes: []
   # - name: data
   #   size: 50Gi
   #   storageClass: hdd  # optional, defaults to hdd

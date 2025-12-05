@@ -57,7 +57,7 @@ spec:
         configMap:
           name: geonames-sparql-fuseki-config
 
-    persistenceVolumes:
+    persistentVolumes:
       - name: data
         size: 50Gi
       - name: fuseki

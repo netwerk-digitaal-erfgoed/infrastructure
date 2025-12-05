@@ -106,8 +106,13 @@ spec:
             {{- end }}
           {{- end }}
         {{- end }}
-  {{- if and (eq .Values.workload.type "statefulset") .Values.persistence.enabled }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- if and (eq .Values.workload.type "statefulset") (or .Values.persistence.enabled .Values.persistentVolumes) }}
   volumeClaimTemplates:
+    {{- if .Values.persistence.enabled }}
     - metadata:
         name: {{ .Values.persistence.name }}
       spec:
@@ -117,4 +122,16 @@ spec:
           requests:
             storage: {{ .Values.persistence.size }}
         storageClassName: {{ .Values.persistence.storageClass }}
+    {{- end }}
+    {{- range .Values.persistentVolumes }}
+    - metadata:
+        name: {{ .name }}
+      spec:
+        accessModes:
+          - {{ .accessMode | default "ReadWriteOnce" }}
+        resources:
+          requests:
+            storage: {{ .size }}
+        storageClassName: {{ .storageClass | default "hdd" }}
+    {{- end }}
   {{- end }}
