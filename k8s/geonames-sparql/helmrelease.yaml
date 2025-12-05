@@ -77,11 +77,16 @@ spec:
         hosts:
           - demo.netwerkdigitaalerfgoed.nl
         paths:
-          - path: /geonames2(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /geonames
+            pathType: Prefix
         annotations:
-          nginx.ingress.kubernetes.io/permanent-redirect: https://demo.netwerkdigitaalerfgoed.nl/geonames/$2
-          nginx.ingress.kubernetes.io/use-regex: "true"
+          nginx.ingress.kubernetes.io/server-snippet: |
+            location ~* ^/geonames2(/|$)(.*) {
+              return 301 https://demo.netwerkdigitaalerfgoed.nl/geonames/$2;
+            }
+            location ~* ^/geonames(/|$)(.*) {
+              return 301 https://geonames.netwerkdigitaalerfgoed.nl/$2;
+            }
 
     configMaps:
       - name: fuseki-config
