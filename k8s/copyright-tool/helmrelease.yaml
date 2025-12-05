@@ -27,6 +27,5 @@ spec:
       - hosts:
           - regeljerechten.nl
           - www.regeljerechten.nl
-        tls:
         annotations:
           nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
