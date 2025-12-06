@@ -93,7 +93,6 @@ spec:
       - name: fuseki-config
         data:
           config.ttl: |
-            # Test ConfigMap change
             @prefix :       <#> .
             @prefix fuseki: <http://jena.apache.org/fuseki#> .
             @prefix gn:     <https://www.geonames.org/ontology#> .
