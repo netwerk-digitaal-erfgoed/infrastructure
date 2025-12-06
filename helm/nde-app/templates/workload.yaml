@@ -16,10 +16,9 @@ spec:
   template:
     metadata:
       annotations:
-        this: that3
       {{- if .Values.configMaps }}
-        # Annotate with a checksum so Kubernetes restarts pods when the ConfigMap changes.
-        checksum/config2: {{ toYaml .Values.configMaps | sha256sum }}
+        # https://v3.helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+        checksum/config: {{ toYaml .Values.configMaps | sha256sum }}
       {{- end }}
       labels:
         {{- include "nde-app.selectorLabels" . | nindent 8 }}
