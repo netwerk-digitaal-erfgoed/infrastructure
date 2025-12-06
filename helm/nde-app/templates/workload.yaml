@@ -15,8 +15,11 @@ spec:
   {{- end }}
   template:
     metadata:
+      annotations:
+        this: that
       {{- if .Values.configMaps }}
       annotations:
+        # Annotate with a checksum so Kubernetes restarts pods when the ConfigMap changes.
         checksum/config: {{ toYaml .Values.configMaps | sha256sum }}
       {{- end }}
       labels:
