@@ -24,8 +24,9 @@ spec:
         port: 3306
         flux:
           enabled: true
-          policy: semver
-          range: "~10.11"
+          policy:
+            type: semver
+            range: "~10.11"
         env:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
