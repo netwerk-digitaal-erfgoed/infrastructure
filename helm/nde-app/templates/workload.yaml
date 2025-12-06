@@ -15,6 +15,10 @@ spec:
   {{- end }}
   template:
     metadata:
+      {{- if .Values.configMaps }}
+      annotations:
+        checksum/config: {{ toYaml .Values.configMaps | sha256sum }}
+      {{- end }}
       labels:
         {{- include "nde-app.selectorLabels" . | nindent 8 }}
         app: {{ include "nde-app.fullname" . }}
