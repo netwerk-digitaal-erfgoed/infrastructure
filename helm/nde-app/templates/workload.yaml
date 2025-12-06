@@ -15,10 +15,11 @@ spec:
   {{- end }}
   template:
     metadata:
-      {{- if .Values.configMaps }}
       annotations:
+        this: that
+      {{- if .Values.configMaps }}
         # Annotate with a checksum so Kubernetes restarts pods when the ConfigMap changes.
-        checksum/config: {{ toYaml .Values.configMaps | sha256sum }}
+        checksum/config2: {{ toYaml .Values.configMaps | sha256sum }}
       {{- end }}
       labels:
         {{- include "nde-app.selectorLabels" . | nindent 8 }}
