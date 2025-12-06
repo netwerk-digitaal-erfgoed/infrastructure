@@ -1,0 +1,61 @@
+# Use pre-signed URLs for private S3 access:
+#   s3cmd signurl s3://YOUR-BUCKET/omeka-s-faq.sql.gz +3600
+#   s3cmd signurl s3://YOUR-BUCKET/omeka-s-faq-files.tar.gz +3600
+# Then replace the URLs below with the pre-signed URLs.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: omeka-s-faq-mysql-import
+  namespace: nde
+spec:
+  template:
+    spec:
+      containers:
+        - name: import
+          image: mariadb:10.11.3
+          env:
+            - name: MYSQL_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: omeka-s-faq-mysql
+                  key: root-password
+          command:
+            - sh
+            - -c
+            - |
+              echo "Downloading database dump..."
+              curl -sS -o /tmp/dump.sql.gz "https://ams3.digitaloceanspaces.com/infra-migration/omeka-s.sql.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251206%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251206T213359Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=ef43abbbacd32f623127075829f4145c1202ac14f7ecb0b5428d93ca8fd942b2"
+              echo "Importing database..."
+              gunzip -c /tmp/dump.sql.gz | mysql -h omeka-s-faq-mysql -u root omeka_s_faq
+              echo "Import complete."
+      restartPolicy: OnFailure
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: omeka-s-faq-files-import
+  namespace: nde
+spec:
+  template:
+    spec:
+      containers:
+        - name: import
+          image: alpine:latest
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache curl tar
+              echo "Downloading files archive..."
+              curl -sS -o /tmp/files.tar.gz "https://ams3.digitaloceanspaces.com/infra-migration/omeka-s-faq-files.tar.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251206%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251206T213432Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=e84a5d55db191bc41d5acf7f4091bf90e0ca78b27c314ab7760ddccb979bbc12"
+              echo "Extracting files..."
+              tar -xzf /tmp/files.tar.gz -C /data
+              echo "Import complete."
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: omeka-s-faq-omeka-s-faq-0
+      restartPolicy: OnFailure

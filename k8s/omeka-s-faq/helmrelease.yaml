@@ -1,0 +1,64 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: omeka-s-faq
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      type: statefulset
+
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-faq
+          tag: latest
+        port: 80
+        flux:
+          enabled: true
+        env:
+          - name: PMF_DB_HOST
+            value: omeka-s-faq-mysql
+          - name: PMF_DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: omeka-s-faq-mysql
+                key: username
+          - name: PMF_DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: omeka-s-faq-mysql
+                key: password
+          - name: PMF_DB_TYPE
+            value: mariadb
+          - name: PMF_DB_NAME
+            value: omeka_s_faq
+        volumeMounts:
+          - name: omeka-s-faq
+            mountPath: /var/www/html/config
+            subPath: config
+          - name: omeka-s-faq
+            mountPath: /var/www/html/attachments
+            subPath: attachments
+          - name: omeka-s-faq
+            mountPath: /var/www/html/data
+            subPath: data
+          - name: omeka-s-faq
+            mountPath: /var/www/html/images
+            subPath: images
+
+    persistentVolumes:
+      - name: omeka-s-faq
+        size: 5Gi
+
+    ingresses:
+      - hosts:
+          - omeka-s-faq.netwerkdigitaalerfgoed.nl
