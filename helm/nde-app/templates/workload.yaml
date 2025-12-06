@@ -15,8 +15,6 @@ spec:
   {{- end }}
   template:
     metadata:
-      annotations:
-        this: that
       {{- if .Values.configMaps }}
       annotations:
         # Annotate with a checksum so Kubernetes restarts pods when the ConfigMap changes.
