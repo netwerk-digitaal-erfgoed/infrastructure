@@ -24,7 +24,7 @@ spec:
             - -c
             - |
               echo "Downloading database dump..."
-              curl -sS -o /tmp/dump.sql.gz "https://ams3.digitaloceanspaces.com/infra-migration/omeka-s.sql.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251206%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251206T213359Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=ef43abbbacd32f623127075829f4145c1202ac14f7ecb0b5428d93ca8fd942b2"
+              curl -sS -o /tmp/dump.sql.gz "https://ams3.digitaloceanspaces.com/infra-migration/omeka-s-faq.sql.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251206%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251206T220415Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=799a9e74dfb6a2d86912f01de82bef350061b72283b26bd935422f084eb8eab4"
               echo "Importing database..."
               gunzip -c /tmp/dump.sql.gz | mysql -h omeka-s-faq-mysql -u root omeka_s_faq
               echo "Import complete."
