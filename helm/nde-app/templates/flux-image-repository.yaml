@@ -1,5 +1,5 @@
 {{- range .Values.containers }}
-{{- if .flux.enabled }}
+{{- if and .flux .flux.enabled }}
 {{- $fluxName := include "nde-app.fluxName" (list .flux.name (include "nde-app.fullname" $) .name) }}
 ---
 apiVersion: image.toolkit.fluxcd.io/v1beta2
