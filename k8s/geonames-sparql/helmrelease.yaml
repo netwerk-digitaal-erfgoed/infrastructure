@@ -17,7 +17,7 @@ spec:
       type: statefulset
 
     containers:
-      - name: app
+      - name: app-test2
         image:
           repository: stain/jena-fuseki
           tag: "5.1.0" # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
