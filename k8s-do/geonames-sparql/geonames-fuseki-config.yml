@@ -14,7 +14,7 @@ data:
        fuseki:services (:geonames) .
     
     :geonames a fuseki:Service ;
-              fuseki:name "geonames" ;
+              fuseki:name "" ;
               fuseki:label "GeoNames" ;
               fuseki:serviceQuery "sparql" ;
               fuseki:serviceReadGraphStore "get" ;
