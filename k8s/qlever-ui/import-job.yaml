@@ -1,0 +1,32 @@
+# Update the pre-signed URL before applying.
+# Generate with: s3cmd signurl s3://infra-migration/qlever-ui-db.tar.gz +3600
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qlever-ui-db-import
+  namespace: nde
+spec:
+  template:
+    spec:
+      containers:
+        - name: import
+          image: alpine:latest
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              apk add --no-cache curl tar
+              echo "Downloading archive..."
+              curl -sS -o /tmp/db.tar.gz "https://ams3.digitaloceanspaces.com/infra-migration/qlever-ui-db.tar.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251207%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251207T213547Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=d559811540c035c1eb977a211bd9164108b372b5c176e10de040d70c78ca81fd"
+              echo "Extracting files..."
+              tar -xzf /tmp/db.tar.gz -C /data
+              echo "Import complete."
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: db-qlever-ui-0
+      restartPolicy: OnFailure
