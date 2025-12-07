@@ -1,3 +1,4 @@
+{{- if .Values.containers }}
 {{- $kind := eq .Values.workload.type "statefulset" | ternary "StatefulSet" "Deployment" }}
 apiVersion: apps/v1
 kind: {{ $kind }}
@@ -140,3 +141,4 @@ spec:
         storageClassName: {{ .storageClass | default "hdd" }}
     {{- end }}
   {{- end }}
+{{- end }}
