@@ -31,7 +31,7 @@ follow your regular Git workflow:
 2. make changes to any of the Kubernetes manifests, which you can find in the `k8s/` directory;
 3. push your changes pack to GitHub.
 
-A [GitHub action](.github/workflows/deploy.yml) then automatically applies the changes to our Kubernetes cluster.
+[Flux](https://fluxcd.io) automatically applies the changes to our Kubernetes cluster.
 
 ## Set up a DigitalOcean cluster from scratch
 
@@ -114,6 +114,3 @@ Hostnames:
 - ldwizard.netwerkdigitaalerfgoed.nl
 - termennetwerk.netwerkdigitaalerfgoed.nl
 - termennetwerk-api.netwerkdigitaalerfgoed.nl
-
-
-test write access

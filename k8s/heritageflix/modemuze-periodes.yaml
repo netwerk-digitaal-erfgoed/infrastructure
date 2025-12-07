@@ -19,8 +19,6 @@ spec:
           repository: ghcr.io/netwerk-digitaal-erfgoed/heritageflix-modemuze-periodes
           tag: 20251201222028-a298c51 # {"$imagepolicy": "nde:heritageflix-modemuze-periodes:tag"}
         port: 3000
-        flux:
-          enabled: true
     ingresses:
       - hosts:
           - heritageflix-modemuze-periodes.demo.netwerkdigitaalerfgoed.nl

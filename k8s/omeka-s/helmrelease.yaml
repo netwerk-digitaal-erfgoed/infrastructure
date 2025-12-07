@@ -22,8 +22,6 @@ spec:
           repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-nginx
           tag: latest
         port: 80
-        flux:
-          enabled: true
         env:
           - name: RESTART_TRIGGER
             value: "1"
@@ -34,8 +32,6 @@ spec:
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-php
           tag: latest
-        flux:
-          enabled: true
         port: 9000
         env:
           - name: DATABASE_USER

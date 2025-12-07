@@ -1,7 +1,8 @@
 {{- range .Values.containers }}
-{{- if and .flux .flux.enabled }}
-{{- $fluxName := include "nde-app.fluxName" (list .flux.name (include "nde-app.fullname" $) .name) }}
-{{- $policyType := ((.flux.policy).type) | default "numerical" }}
+{{- $fluxEnabled := not (and .flux (eq .flux.enabled false)) }}
+{{- if $fluxEnabled }}
+{{- $fluxName := include "nde-app.fluxName" (list ((.flux).name) (include "nde-app.fullname" $) .name) }}
+{{- $policyType := (((.flux).policy).type) | default "numerical" }}
 ---
 apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImagePolicy
@@ -15,15 +16,15 @@ spec:
     name: {{ $fluxName }}
   {{- if eq $policyType "numerical" }}
   filterTags:
-    pattern: {{ ((.flux.policy).pattern) | default "^(?P<timestamp>[0-9]{14}).*" | squote }}
-    extract: {{ ((.flux.policy).extract) | default "$timestamp" | squote }}
+    pattern: {{ (((.flux).policy).pattern) | default "^(?P<timestamp>[0-9]{14}).*" | squote }}
+    extract: {{ (((.flux).policy).extract) | default "$timestamp" | squote }}
   policy:
     numerical:
-      order: {{ ((.flux.policy).order) | default "asc" }}
+      order: {{ (((.flux).policy).order) | default "asc" }}
   {{- else if eq $policyType "semver" }}
   policy:
     semver:
-      range: {{ (.flux.policy).range | squote }}
+      range: {{ (((.flux).policy).range) | squote }}
   {{- end }}
 {{- end }}
 {{- end }}

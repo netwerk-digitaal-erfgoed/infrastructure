@@ -23,7 +23,6 @@ spec:
           repository: stain/jena-fuseki
           tag: "5.1.0" # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
         flux:
-          enabled: true
           policy:
             type: semver
             range: ">=5.1.0"

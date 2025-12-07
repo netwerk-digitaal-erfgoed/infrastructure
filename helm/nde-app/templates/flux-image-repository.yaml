@@ -1,6 +1,7 @@
 {{- range .Values.containers }}
-{{- if and .flux .flux.enabled }}
-{{- $fluxName := include "nde-app.fluxName" (list .flux.name (include "nde-app.fullname" $) .name) }}
+{{- $fluxEnabled := not (and .flux (eq .flux.enabled false)) }}
+{{- if $fluxEnabled }}
+{{- $fluxName := include "nde-app.fluxName" (list ((.flux).name) (include "nde-app.fullname" $) .name) }}
 ---
 apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageRepository
@@ -12,10 +13,10 @@ metadata:
 spec:
   image: {{ .image.repository }}
   {{- $defaultInterval := (hasPrefix "ghcr.io/netwerk-digitaal-erfgoed" .image.repository) | ternary "1m" "24h" }}
-  interval: {{ .flux.interval | default $defaultInterval }}
-  {{- if or .flux.secretRef (hasPrefix "ghcr.io" .image.repository) }}
+  interval: {{ ((.flux).interval) | default $defaultInterval }}
+  {{- if or ((.flux).secretRef) (hasPrefix "ghcr.io" .image.repository) }}
   secretRef:
-    name: {{ .flux.secretRef | default "ghcr" }}
+    name: {{ ((.flux).secretRef) | default "ghcr" }}
   {{- end }}
 {{- end }}
 {{- end }}

@@ -19,8 +19,6 @@ spec:
           repository: ghcr.io/netwerk-digitaal-erfgoed/heritageflix-churches
           tag: 20251201222028-a298c51 # {"$imagepolicy": "nde:heritageflix-churches:tag"}
         port: 3000
-        flux:
-          enabled: true
     ingresses:
       - hosts:
           - heritageflix-churches.demo.netwerkdigitaalerfgoed.nl

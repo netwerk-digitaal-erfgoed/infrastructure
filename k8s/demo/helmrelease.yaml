@@ -22,8 +22,6 @@ spec:
           repository: ghcr.io/netwerk-digitaal-erfgoed/demo-frontend
           tag: latest # {"$imagepolicy": "nde:demo:tag"}
         port: 5501
-        flux:
-          enabled: true
 
     ingresses:
       - hosts:

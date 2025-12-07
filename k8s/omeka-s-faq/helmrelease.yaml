@@ -22,8 +22,6 @@ spec:
           repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-faq
           tag: latest
         port: 80
-        flux:
-          enabled: true
         env:
           - name: PMF_DB_HOST
             value: omeka-s-faq-mysql

@@ -26,8 +26,6 @@ spec:
         readinessProbe:
           httpGet: {}
         flux:
-          enabled: true
-          interval: 24h
           policy:
             type: semver
             range: '>=3.9.3 <4.0.0'
