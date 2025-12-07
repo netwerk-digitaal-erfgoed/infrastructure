@@ -25,6 +25,8 @@ spec:
           enabled: false
         port: 7001
         env:
+          - name: RESTART_TRIGGER
+            value: "1"
           - name: ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
