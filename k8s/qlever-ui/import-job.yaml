@@ -3,7 +3,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: qlever-ui-db-import
+  name: qlever-ui-db-import2
   namespace: nde
 spec:
   template:
@@ -19,9 +19,12 @@ spec:
               apk add --no-cache curl tar
               echo "Downloading archive..."
               curl -sS -o /tmp/db.tar.gz "https://ams3.digitaloceanspaces.com/infra-migration/qlever-ui-db.tar.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251207%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251207T213547Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=d559811540c035c1eb977a211bd9164108b372b5c176e10de040d70c78ca81fd"
+              echo "Cleaning up incorrectly nested directory..."
+              rm -rf /data/db
               echo "Extracting files..."
-              tar -xzf /tmp/db.tar.gz -C /data
+              tar -xzf /tmp/db.tar.gz -C /data --strip-components=1
               echo "Import complete."
+              ls -la /data
           volumeMounts:
             - name: data
               mountPath: /data
