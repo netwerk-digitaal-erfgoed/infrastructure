@@ -35,7 +35,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: omeka-s-files-import
+  name: omeka-s-files-import2
   namespace: nde
 spec:
   template:
