@@ -34,9 +34,9 @@ spec:
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-php
           tag: latest
-        port: 9000
         flux:
           enabled: true
+        port: 9000
         env:
           - name: DATABASE_USER
             valueFrom:
@@ -62,6 +62,13 @@ spec:
     persistentVolumes:
       - name: files
         size: 20Gi
+
+    service:
+      ports:
+        - name: http
+          port: 80
+        - name: php-fpm
+          port: 9000
 
     ingresses:
       - hosts:

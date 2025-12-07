@@ -1,3 +1,4 @@
+{{- if .Values.containers }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,7 +7,16 @@ metadata:
     {{- include "nde-app.labels" . | nindent 4 }}
 spec:
   ports:
+    {{- if .Values.service.ports }}
+    {{- range .Values.service.ports }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort | default .port }}
+    {{- end }}
+    {{- else }}
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort | default (index .Values.containers 0).port }}
+    {{- end }}
   selector:
     {{- include "nde-app.selectorLabels" . | nindent 4 }}
+{{- end }}
