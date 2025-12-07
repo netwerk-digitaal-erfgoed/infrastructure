@@ -11,7 +11,8 @@ metadata:
     {{- include "nde-app.labels" $ | nindent 4 }}
 spec:
   image: {{ .image.repository }}
-  interval: {{ .flux.interval | default "1m" }}
+  {{- $defaultInterval := (hasPrefix "ghcr.io/netwerk-digitaal-erfgoed" .image.repository) | ternary "1m" "24h" }}
+  interval: {{ .flux.interval | default $defaultInterval }}
   {{- if or .flux.secretRef (hasPrefix "ghcr.io" .image.repository) }}
   secretRef:
     name: {{ .flux.secretRef | default "ghcr" }}
