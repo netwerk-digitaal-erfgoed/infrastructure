@@ -25,6 +25,8 @@ spec:
           enabled: false
         port: 7000
         env:
+          - name: RESTART_TRIGGER
+            value: "1"
           - name: QLEVERUI_CSRF_TRUSTED_ORIGINS
             value: "https://qlever.netwerkdigitaalerfgoed.nl"
         volumeMounts:
