@@ -5,7 +5,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: omeka-mysql-import
+  name: omeka-mysql-import-2
   namespace: nde
 spec:
   template:
@@ -20,9 +20,11 @@ spec:
                   name: omeka-mysql
                   key: root-password
           command:
-            - sh
+            - bash
             - -c
             - |
+              set -e
+              apt-get update && apt-get install -y curl
               echo "Downloading database dump..."
               curl -sS -o /tmp/dump.sql.gz "https://ams3.digitaloceanspaces.com/infra-migration/omeka-s.sql.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251207%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251207T184311Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=71cdc79808c2a36de674c8b8ba7f02b987de8e4f145f4f00d15c2edf5931407b"
               echo "Importing database..."
