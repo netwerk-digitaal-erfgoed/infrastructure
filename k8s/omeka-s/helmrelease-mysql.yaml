@@ -22,6 +22,11 @@ spec:
           repository: mariadb
           tag: "10.6.2"
         port: 3306
+        flux:
+          enabled: true
+          policy:
+            type: semver
+            range: "~10.6"
         env:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
