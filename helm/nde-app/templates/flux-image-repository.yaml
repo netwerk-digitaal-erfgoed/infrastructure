@@ -1,5 +1,5 @@
 {{- range .Values.containers }}
-{{- $fluxEnabled := not (and .flux (eq .flux.enabled false)) }}
+{{- $fluxEnabled := ne ((.flux).enabled) false }}
 {{- if $fluxEnabled }}
 {{- $fluxName := include "nde-app.fluxName" (list ((.flux).name) (include "nde-app.fullname" $) .name) }}
 ---
