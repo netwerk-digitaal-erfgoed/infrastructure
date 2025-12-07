@@ -35,7 +35,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: omeka-s-files-import3
+  name: omeka-s-files-import4
   namespace: nde
 spec:
   template:
@@ -51,7 +51,7 @@ spec:
             - |
               apk add --no-cache curl tar
               echo "Downloading files archive..."
-              curl -sS -o /tmp/files.tar.gz "https://ams3.digitaloceanspaces.com/infra-migration/omeka-s-files.tar.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251207%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251207T210616Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=e6d0b30a14d221ee1ee5c2c8176f92a3a9cca352b19d8c456538a962065c0d71"
+              curl -sS -o /tmp/files.tar.gz "https://ams3.digitaloceanspaces.com/infra-migration/omeka-s-files.tar.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251207%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251207T212436Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=0ac29427895162e4678e1a8a54a33ab5a869566033f5df3499a02f01f5ad4f19"
               echo "Extracting files..."
               tar -xzf /tmp/files.tar.gz -C /data
               chown -R 82:82 /data
