@@ -1,0 +1,67 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: omeka-s
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      type: statefulset
+
+    containers:
+      - name: nginx
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-nginx
+          tag: latest
+        port: 80
+        flux:
+          enabled: true
+        volumeMounts:
+          - name: files
+            mountPath: /var/www/html/files/
+      - name: php
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-php
+          tag: latest
+        port: 9000
+        flux:
+          enabled: true
+        env:
+          - name: DATABASE_USER
+            valueFrom:
+              secretKeyRef:
+                name: omeka-mysql
+                key: username
+          - name: DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: omeka-mysql
+                key: password
+          - name: DATABASE_NAME
+            value: omeka
+          - name: DATABASE_HOST
+            value: omeka-mysql
+        volumeMounts:
+          - name: files
+            mountPath: /var/www/html/files/
+
+    securityContext:
+      fsGroup: 82
+
+    persistentVolumes:
+      - name: files
+        size: 20Gi
+
+    ingresses:
+      - hosts:
+          - omeka.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-body-size: "500m"
