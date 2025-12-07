@@ -1,0 +1,26 @@
+# Use pre-signed URLs for private S3 access:
+#   s3cmd signurl s3://infra-migration/annorepo-mongo.gz +3600
+# Then replace the URL below with the pre-signed URL.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: annorepo-mongo-import
+  namespace: nde
+spec:
+  template:
+    spec:
+      containers:
+        - name: import
+          image: mongo:8.0.9
+          command:
+            - bash
+            - -c
+            - |
+              set -e
+              apt-get update && apt-get install -y curl
+              echo "Downloading database dump..."
+              curl -sS -o /tmp/dump.gz "https://ams3.digitaloceanspaces.com/infra-migration/annorepo-mongo.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251207%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251207T183510Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=b9e0a1d48888f27a86122ceb0d368fdabbaa2e91ba0a50e8fe6ffb0d2602cea6"
+              echo "Importing database..."
+              mongorestore --archive=/tmp/dump.gz --gzip --host=annorepo-mongo --db=annorepo
+              echo "Import complete."
+      restartPolicy: OnFailure

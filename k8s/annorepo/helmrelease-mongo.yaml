@@ -22,13 +22,14 @@ spec:
           repository: mongo
           tag: "8.0.9"
         flux:
+          enabled: true
           policy:
             type: semver
+            range: "~8.0"
         port: 27017
         volumeMounts:
           - mountPath: /data/db
             name: data
-
 
     service:
       port: 27017
