@@ -21,8 +21,6 @@ spec:
           repository: ghcr.io/netwerk-digitaal-erfgoed/copyright-tool
           tag: 20251201155656-40e0e93 # {"$imagepolicy": "nde:copyright-tool:tag"}
         port: 80
-        flux:
-          enabled: true
     ingresses:
       - hosts:
           - regeljerechten.nl
