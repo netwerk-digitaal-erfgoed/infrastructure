@@ -24,6 +24,9 @@ spec:
         port: 80
         flux:
           enabled: true
+        env:
+          - name: RESTART_TRIGGER
+            value: "1"
         volumeMounts:
           - name: files
             mountPath: /var/www/html/files/
