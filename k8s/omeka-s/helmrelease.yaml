@@ -31,7 +31,7 @@ spec:
             mountPath: /var/www/html/files/
       - name: php
         image:
-          repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-php
+          repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-php-fpm
           tag: latest
         port: 9000
         env:
