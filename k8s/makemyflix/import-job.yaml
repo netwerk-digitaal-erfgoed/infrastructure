@@ -1,0 +1,32 @@
+# Use pre-signed URLs for private S3 access:
+#   s3cmd signurl s3://infra-migration/makemyflix-postgres.sql.gz +3600
+# Then replace the URL below with the pre-signed URL.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: makemyflix-postgres-import
+  namespace: nde
+spec:
+  template:
+    spec:
+      containers:
+        - name: import
+          image: postgres:16.3-alpine
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: makemyflix-postgres
+                  key: password
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              apk add --no-cache curl
+              echo "Downloading database dump..."
+              curl -sS -o /tmp/dump.sql.gz "https://ams3.digitaloceanspaces.com/infra-migration/makemyflix-postgres.sql.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251208%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251208T184903Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=15d380c707d74151b802f4a1019effdb4d4488bbeeeaf0cb5b35c522ca46f9f1"
+              echo "Importing database..."
+              gunzip -c /tmp/dump.sql.gz | psql -h makemyflix-postgres -U postgres -d postgres
+              echo "Import complete."
+      restartPolicy: OnFailure
