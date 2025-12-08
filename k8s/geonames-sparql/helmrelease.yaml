@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: helm/nde-app
-#      reconcileStrategy: Revision
+      reconcileStrategy: Revision
       sourceRef:
         kind: GitRepository
         name: nde
