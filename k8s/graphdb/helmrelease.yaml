@@ -16,12 +16,11 @@ spec:
   values:
     workload:
       type: statefulset
-
     containers:
       - name: app
         image:
           repository: ontotext/graphdb
-          tag: "10.7.3" # {"$imagepolicy": "nde:graphdb:tag"}
+          tag: "10.8.11" # {"$imagepolicy": "nde:graphdb:tag"}
         flux:
           policy:
             type: semver
@@ -50,11 +49,9 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /opt/graphdb/home
-
     persistentVolumes:
       - name: data
         size: 50Gi
-
     ingresses:
       - hosts:
           - triplestore.netwerkdigitaalerfgoed.nl
