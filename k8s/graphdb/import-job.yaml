@@ -1,0 +1,33 @@
+# Use pre-signed URLs for private S3 access:
+#   s3cmd signurl s3://infra-migration/graphdb-data.tar.gz +3600
+# Then replace the URL below with the pre-signed URL.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: graphdb-import
+  namespace: nde
+spec:
+  template:
+    spec:
+      containers:
+        - name: import
+          image: alpine:latest
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              apk add --no-cache curl tar
+              echo "Downloading GraphDB data archive..."
+              curl -sS -o /tmp/graphdb-data.tar.gz "https://ams3.digitaloceanspaces.com/infra-migration/graphdb-data.tar.gz?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251208%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251208T193901Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=1b4efe8899fab913076b0164fceb9853960c33168617c8cac64ecfb8216fe731"
+              echo "Extracting data..."
+              tar -xzf /tmp/graphdb-data.tar.gz -C /data --strip-components=1
+              echo "Import complete. Restart the graphdb pod to pick up the data."
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data-graphdb-0
+      restartPolicy: OnFailure
