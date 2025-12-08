@@ -1,0 +1,97 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: makemyflix-strapi
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/makemyflix-strapi
+          tag: latest # {"$imagepolicy": "nde:makemyflix-strapi:tag"}
+        flux:
+          policy:
+            type: semver
+            range: ">=0.0.0"
+        port: 1337
+        env:
+          - name: URL
+            value: "https://makemyflix.netwerkdigitaalerfgoed.nl/strapi"
+          - name: APP_KEYS
+            valueFrom:
+              secretKeyRef:
+                name: makemyflix-strapi
+                key: keys
+          - name: API_TOKEN_SALT
+            valueFrom:
+              secretKeyRef:
+                name: makemyflix-strapi
+                key: api-token-salt
+          - name: ADMIN_JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: makemyflix-strapi
+                key: admin-jwt-secret
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: makemyflix-strapi
+                key: jwt-secret
+          - name: TRANSFER_TOKEN_SALT
+            valueFrom:
+              secretKeyRef:
+                name: makemyflix-strapi
+                key: transfer-token-salt
+          - name: DATABASE_HOST
+            value: makemyflix-postgres
+          - name: DATABASE_USERNAME
+            value: postgres
+          - name: DATABASE_NAME
+            value: postgres
+          - name: DATABASE_PORT
+            value: "5432"
+          - name: DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: makemyflix-postgres
+                key: password
+          - name: S3_ENDPOINT
+            value: "https://nde-makemyflix-strapi.ams3.digitaloceanspaces.com"
+          - name: S3_PUBLIC_URL
+            value: "https://nde-makemyflix-strapi.ams3.cdn.digitaloceanspaces.com"
+          - name: S3_REGION
+            value: ams3
+          - name: S3_BUCKET
+            value: nde-makemyflix-strapi
+          - name: S3_KEY
+            valueFrom:
+              secretKeyRef:
+                name: makemyflix-strapi-s3
+                key: key
+          - name: S3_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: makemyflix-strapi-s3
+                key: secret
+
+    ingresses:
+      - hosts:
+          - makemyflix.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/rewrite-target: /$1
+          nginx.ingress.kubernetes.io/use-regex: "true"
+        paths:
+          - path: /strapi/?(.*)$
+            pathType: Prefix
+        tls:
+          enabled: false
