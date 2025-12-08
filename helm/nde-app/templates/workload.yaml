@@ -53,63 +53,21 @@ spec:
           ports:
             - containerPort: {{ . }}
           {{- end }}
-          {{- with .env }}
-          env:
-            {{- toYaml . | nindent 12 }}
+          {{- /* Pass through all standard container fields dynamically */ -}}
+          {{- $passthrough := omit . "name" "image" "port" "flux" "livenessProbe" "readinessProbe" }}
+          {{- with $passthrough }}
+          {{- toYaml . | nindent 10 }}
           {{- end }}
-          {{- with .volumeMounts }}
-          volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .resources }}
-          resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+          {{- /* Handle probes with httpGet defaults */ -}}
           {{- with .livenessProbe }}
+          {{- $defaults := dict "httpGet" (dict "path" "/" "port" $containerPort) }}
           livenessProbe:
-            {{- if hasKey . "httpGet" }}
-            httpGet:
-              path: {{ .httpGet.path | default "/" }}
-              port: {{ .httpGet.port | default $containerPort }}
-            {{- end }}
-            {{- with .initialDelaySeconds }}
-            initialDelaySeconds: {{ . }}
-            {{- end }}
-            {{- with .periodSeconds }}
-            periodSeconds: {{ . }}
-            {{- end }}
-            {{- with .timeoutSeconds }}
-            timeoutSeconds: {{ . }}
-            {{- end }}
-            {{- with .successThreshold }}
-            successThreshold: {{ . }}
-            {{- end }}
-            {{- with .failureThreshold }}
-            failureThreshold: {{ . }}
-            {{- end }}
+            {{- toYaml (mergeOverwrite $defaults .) | nindent 12 }}
           {{- end }}
           {{- with .readinessProbe }}
+          {{- $defaults := dict "httpGet" (dict "path" "/" "port" $containerPort) }}
           readinessProbe:
-            {{- if hasKey . "httpGet" }}
-            httpGet:
-              path: {{ .httpGet.path | default "/" }}
-              port: {{ .httpGet.port | default $containerPort }}
-            {{- end }}
-            {{- with .initialDelaySeconds }}
-            initialDelaySeconds: {{ . }}
-            {{- end }}
-            {{- with .periodSeconds }}
-            periodSeconds: {{ . }}
-            {{- end }}
-            {{- with .timeoutSeconds }}
-            timeoutSeconds: {{ . }}
-            {{- end }}
-            {{- with .successThreshold }}
-            successThreshold: {{ . }}
-            {{- end }}
-            {{- with .failureThreshold }}
-            failureThreshold: {{ . }}
-            {{- end }}
+            {{- toYaml (mergeOverwrite $defaults .) | nindent 12 }}
           {{- end }}
         {{- end }}
       {{- with .Values.volumes }}
