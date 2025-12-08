@@ -1,101 +1,101 @@
-#apiVersion: helm.toolkit.fluxcd.io/v2
-#kind: HelmRelease
-#metadata:
-#  name: dataset-register-qlever
-#spec:
-#  serviceAccountName: nde
-#  interval: 30m
-#  chart:
-#    spec:
-#      chart: helm/nde-app
-#      reconcileStrategy: Revision
-#      sourceRef:
-#        kind: GitRepository
-#        name: nde
-#  values:
-#    workload:
-#      type: statefulset
-#
-#    containers:
-#      - name: app
-#        image:
-#          repository: adfreiburg/qlever
-#          tag: commit-688efa2
-#        flux:
-#          enabled: false
-#        port: 7001
-#        env:
-#          - name: ACCESS_TOKEN
-#            valueFrom:
-#              secretKeyRef:
-#                name: dataset-register-qlever
-#                key: access-token
-#        resources:
-#          requests:
-#            memory: 8Gi
-#        volumeMounts:
-#          - name: data
-#            mountPath: /data
-#          - name: config
-#            mountPath: /data/Qleverfile
-#            subPath: Qleverfile
-#        command:
-#          - sh
-#          - -c
-#          - |
-#            cd /data
-#            qlever index --overwrite-existing
-#            qlever start --persist-updates --access-token "$ACCESS_TOKEN"
-#            qlever log
-#
-#    securityContext:
-#      fsGroup: 100
-#
-#    volumes:
-#      - name: config
-#        configMap:
-#          name: dataset-register-qlever-qleverfile
-#
-#    persistentVolumes:
-#      - name: data
-#        size: 50Gi
-#
-#    service:
-#      port: 80
-#      targetPort: 7001
-#
-#    ingresses:
-#      - hosts:
-#          - datasetregister-test.netwerkdigitaalerfgoed.nl # TODO
-#        paths:
-#          - path: /sparql
-#            pathType: Prefix
-#
-#    configMaps:
-#      - name: qleverfile
-#        data:
-#          Qleverfile: |
-#            [data]
-#            NAME              = dataset-register
-#            GET_DATA_CMD      = curl -sS -O https://dataset-register.ams3.digitaloceanspaces.com/statements.nq
-#            TEXT_DESCRIPTION  = All literals, search with FILTER CONTAINS(?var, "...")
-#            DESCRIPTION       = NDE Dataset Register
-#            FORMAT            = nq
-#
-#            [index]
-#            INPUT_FILES     = statements.nq
-#            CAT_INPUT_FILES = cat ${INPUT_FILES}
-#            SETTINGS_JSON   = { "ascii-prefixes-only": true, "num-triples-per-batch": 100000 }
-#            TEXT_INDEX      = none
-#
-#            [server]
-#            PORT               = 7001
-#            MEMORY_FOR_QUERIES = 5G
-#            CACHE_MAX_SIZE     = 2G
-#            TIMEOUT            = 30s
-#
-#            [runtime]
-#            SYSTEM = native
-#
-#            [ui]
-#            UI_CONFIG = dataset-register
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dataset-register-qlever
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      type: statefulset
+
+    containers:
+      - name: app
+        image:
+          repository: adfreiburg/qlever
+          tag: commit-688efa2
+        flux:
+          enabled: false
+        port: 7001
+        env:
+          - name: ACCESS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataset-register-qlever
+                key: access-token
+        resources:
+          requests:
+            memory: 8Gi
+        volumeMounts:
+          - name: data
+            mountPath: /data
+          - name: config
+            mountPath: /data/Qleverfile
+            subPath: Qleverfile
+        command:
+          - sh
+          - -c
+          - |
+            cd /data
+            qlever index --overwrite-existing
+            qlever start --persist-updates --access-token "$ACCESS_TOKEN"
+            qlever log
+
+    securityContext:
+      fsGroup: 100
+
+    volumes:
+      - name: config
+        configMap:
+          name: dataset-register-qlever-qleverfile
+
+    persistentVolumes:
+      - name: data
+        size: 50Gi
+
+    service:
+      port: 80
+      targetPort: 7001
+
+    ingresses:
+      - hosts:
+          - datasetregister-test.netwerkdigitaalerfgoed.nl # TODO
+        paths:
+          - path: /sparql
+            pathType: Prefix
+
+    configMaps:
+      - name: qleverfile
+        data:
+          Qleverfile: |
+            [data]
+            NAME              = dataset-register
+            GET_DATA_CMD      = curl -sS -O https://dataset-register.ams3.digitaloceanspaces.com/statements.nq
+            TEXT_DESCRIPTION  = All literals, search with FILTER CONTAINS(?var, "...")
+            DESCRIPTION       = NDE Dataset Register
+            FORMAT            = nq
+
+            [index]
+            INPUT_FILES     = statements.nq
+            CAT_INPUT_FILES = cat ${INPUT_FILES}
+            SETTINGS_JSON   = { "ascii-prefixes-only": true, "num-triples-per-batch": 100000 }
+            TEXT_INDEX      = none
+
+            [server]
+            PORT               = 7001
+            MEMORY_FOR_QUERIES = 5G
+            CACHE_MAX_SIZE     = 2G
+            TIMEOUT            = 30s
+
+            [runtime]
+            SYSTEM = native
+
+            [ui]
+            UI_CONFIG = dataset-register
