@@ -48,7 +48,7 @@ spec:
         {{- range .Values.containers }}
         {{- $containerPort := .port }}
         - name: {{ .name }}
-          image: "{{ required "image.repository is required" .image.repository }}:{{ .image.tag }}"
+          image: "{{ required "image.repository is required" .image.repository }}:{{ required "image.tag is required" .image.tag }}"
           {{- with .port }}
           ports:
             - containerPort: {{ . }}

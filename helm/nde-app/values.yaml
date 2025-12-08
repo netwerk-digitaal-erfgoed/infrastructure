@@ -4,41 +4,31 @@ workload:
   replicas: 1
 
 # Container(s) - supports multi-container pods
-containers:
-  - name: app
-    image:
-      repository: ""  # Required
-      tag: latest
-    port: 80
-    env: []
-    volumeMounts: []
-    resources:
-      requests:
-        cpu: 100m
-        memory: 128Mi
-      limits:
-        cpu: 500m
-        memory: 512Mi
-    livenessProbe:
-      httpGet:
-        path: /
-      initialDelaySeconds: 30
-      periodSeconds: 10
-    readinessProbe:
-      httpGet:
-        path: /
-      initialDelaySeconds: 5
-      periodSeconds: 5
-
-    # Flux image automation (generates ImageRepository + ImagePolicy)
-    # Enabled by default. Set flux.enabled: false to disable.
-    # Interval defaults to 1m for ghcr.io/netwerk-digitaal-erfgoed images, 24h for external images.
-    flux:
-      enabled: true
-      # interval: 1m  # Override the default interval
-      policy:
-        type: numerical  # or "semver"
-        range: ""  # For semver, e.g. '~1.0' or '^1.0.0'
+containers: []
+# Example:
+#   - name: app
+#     image:
+#       repository: ghcr.io/org/image  # Required
+#       tag: latest
+#     port: 80
+#     env: []
+#     volumeMounts: []
+#     resources:
+#       requests:
+#         cpu: 100m
+#         memory: 128Mi
+#     livenessProbe:
+#       httpGet:
+#         path: /
+#     readinessProbe:
+#       httpGet:
+#         path: /
+#     # Flux image automation (generates ImageRepository + ImagePolicy)
+#     flux:
+#       enabled: true  # Default
+#       policy:
+#         type: numerical  # or "semver"
+#         range: ""  # For semver, e.g. '~1.0' or '^1.0.0'
 
 # Image pull secrets (ghcr.io images auto-add ghcr secret)
 imagePullSecrets: []
