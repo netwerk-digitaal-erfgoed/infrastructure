@@ -14,7 +14,12 @@ spec:
       author:
         email: fluxcdbot@users.noreply.github.com
         name: fluxcdbot
-      messageTemplate: '{{range .Changed.Changes}}{{print .OldValue}} -> {{println .NewValue}}{{end}}'
+      messageTemplate: |
+        Automated image update
+
+        {{ range $resource, $changes := .Changed.Objects -}}
+        {{ $resource.Name }}: {{ range $_, $change := $changes }}{{ $change.OldValue }} -> {{ $change.NewValue }}{{ end }}
+        {{ end }}
     push:
       branch: master
   update:
