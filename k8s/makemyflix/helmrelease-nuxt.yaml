@@ -1,0 +1,47 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: makemyflix-nuxt
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/makemyflix-nuxt
+          tag: latest # {"$imagepolicy": "nde:makemyflix-nuxt:tag"}
+        port: 3000
+        env:
+          - name: NUXT_PUBLIC_BACKEND_URL
+            value: "https://makemyflix.netwerkdigitaalerfgoed.nl/strapi/api"
+          - name: NUXT_APP_BACKEND_URL
+            value: "https://makemyflix.netwerkdigitaalerfgoed.nl/strapi/api"
+          - name: NUXT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: makemyflix-nuxt
+                key: token
+          - name: NUXT_APP_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: makemyflix-nuxt
+                key: token
+
+    ingresses:
+      - hosts:
+          - makemyflix.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/rewrite-target: /$1
+          nginx.ingress.kubernetes.io/use-regex: "true"
+        paths:
+          - path: /(.*)
+            pathType: Prefix
