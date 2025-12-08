@@ -23,7 +23,7 @@ spec:
         port: 3000
     ingresses:
       - hosts:
-          - datasetregister-test.netwerkdigitaalerfgoed.nl
+          - datasetregister.netwerkdigitaalerfgoed.nl
         paths:
           - path: /datasets
             pathType: Prefix

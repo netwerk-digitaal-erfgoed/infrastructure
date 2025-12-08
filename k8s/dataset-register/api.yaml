@@ -37,7 +37,7 @@ spec:
             value: "all"
     ingresses:
       - hosts:
-          - datasetregister-test.netwerkdigitaalerfgoed.nl
+          - datasetregister.netwerkdigitaalerfgoed.nl
         annotations:
           nginx.ingress.kubernetes.io/rewrite-target: /$2
           nginx.ingress.kubernetes.io/configuration-snippet: |
