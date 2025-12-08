@@ -68,7 +68,7 @@ spec:
 
     ingresses:
       - hosts:
-          - datasetregister.netwerkdigitaalerfgoed.nl
+          - datasetregister-test.netwerkdigitaalerfgoed.nl # TODO
         paths:
           - path: /sparql
             pathType: Prefix
