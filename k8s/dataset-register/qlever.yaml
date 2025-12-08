@@ -15,7 +15,6 @@ spec:
   values:
     workload:
       type: statefulset
-      replicas: 1
 
     containers:
       - name: app
@@ -45,7 +44,6 @@ spec:
           - -c
           - |
             cd /data
-            qlever get-data
             qlever index --overwrite-existing
             qlever start --persist-updates --access-token "$ACCESS_TOKEN"
             qlever log
