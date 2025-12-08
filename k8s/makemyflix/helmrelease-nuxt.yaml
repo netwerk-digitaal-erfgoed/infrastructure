@@ -18,7 +18,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/makemyflix-nuxt
-          tag: latest # {"$imagepolicy": "nde:makemyflix-nuxt:tag"}
+          tag: 20251208163943-ca2c962 # {"$imagepolicy": "nde:makemyflix-nuxt:tag"}
         port: 3000
         env:
           - name: NUXT_PUBLIC_BACKEND_URL
@@ -35,7 +35,6 @@ spec:
               secretKeyRef:
                 name: makemyflix-nuxt
                 key: token
-
     ingresses:
       - hosts:
           - makemyflix.netwerkdigitaalerfgoed.nl
