@@ -20,11 +20,11 @@ spec:
       - name: app
         image:
           repository: ontotext/graphdb
-          tag: "10.8.11" # {"$imagepolicy": "nde:graphdb:tag"}
+          tag: "11.2" # {"$imagepolicy": "nde:graphdb:tag"}
         flux:
           policy:
             type: semver
-            range: "~10"
+            range: "~11"
         port: 7200
         resources:
           requests:
