@@ -18,7 +18,7 @@ spec:
       type: statefulset
 
     containers:
-      - name: annorepo-mongo
+      - name: app
         image:
           repository: mongo
           tag: "8.0.9"
@@ -34,9 +34,6 @@ spec:
     service:
       port: 27017
 
-    persistence:
-      enabled: true
-      name: data
-      mountPath: /data/db
-      size: 8Gi
-      storageClass: hdd
+    persistentVolumes:
+      - name: data
+        size: 8Gi

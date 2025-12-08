@@ -67,26 +67,15 @@ volumes: []
   #   configMap:
   #     name: my-config
 
-# Persistence (StatefulSet only) - single volume
-persistence:
-  enabled: false
-  storageClass: hdd
-  size: 1Gi
-  name: data
-  mountPath: /data
-
-# Multiple persistent volumes (StatefulSet only)
+# Persistent volumes - unified storage for all workload types
+# For StatefulSets: creates volumeClaimTemplates
+# For Deployments/CronJobs: creates PVC + volume + volumeMount
 persistentVolumes: []
   # - name: data
   #   size: 50Gi
-  #   storageClass: hdd  # optional, defaults to hdd
-
-# PersistentVolumeClaims
-pvcs: []
-  # - name: data            # Required, used in PVC name (fullname-name)
-  #   size: 1Gi             # Required
-  #   accessMode: ReadWriteOnce  # Optional, defaults to ReadWriteOnce
-  #   storageClass: hdd      # Optional, defaults to hdd
+  #   mountPath: /data          # Optional - auto-wires volumeMount if provided
+  #   storageClass: hdd         # Optional, defaults to hdd
+  #   accessMode: ReadWriteOnce # Optional, defaults to ReadWriteOnce
 
 # ConfigMaps
 configMaps: []

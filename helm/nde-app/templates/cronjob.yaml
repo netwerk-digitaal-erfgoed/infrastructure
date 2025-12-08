@@ -1,9 +1,10 @@
+{{- $fullname := include "nde-app.fullname" . }}
 {{- range .Values.cronjobs }}
 ---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "nde-app.fullname" $ }}-{{ required "cronjobs[].name is required" .name }}
+  name: {{ $fullname }}-{{ required "cronjobs[].name is required" .name }}
   labels:
     {{- include "nde-app.labels" $ | nindent 4 }}
 spec:
@@ -14,7 +15,7 @@ spec:
         metadata:
           labels:
             {{- include "nde-app.selectorLabels" $ | nindent 12 }}
-            app: {{ include "nde-app.fullname" $ }}-{{ .name }}
+            app: {{ $fullname }}-{{ .name }}
         spec:
           {{- if hasPrefix "ghcr.io" .image }}
           imagePullSecrets:
@@ -42,17 +43,44 @@ spec:
               env:
                 {{- toYaml . | nindent 16 }}
               {{- end }}
-              {{- with .volumeMounts }}
+              {{- /* Auto-generate volumeMounts from persistentVolumes with mountPath */ -}}
+              {{- $autoMounts := list }}
+              {{- range $.Values.persistentVolumes }}
+                {{- if .mountPath }}
+                  {{- $autoMounts = append $autoMounts (dict "name" .name "mountPath" .mountPath) }}
+                {{- end }}
+              {{- end }}
+              {{- if or .volumeMounts $autoMounts }}
               volumeMounts:
+                {{- with .volumeMounts }}
                 {{- toYaml . | nindent 16 }}
+                {{- end }}
+                {{- range $autoMounts }}
+                - name: {{ .name }}
+                  mountPath: {{ .mountPath }}
+                {{- end }}
               {{- end }}
               {{- with .resources }}
               resources:
                 {{- toYaml . | nindent 16 }}
               {{- end }}
-          {{- with .volumes }}
+          {{- /* Auto-generate volumes from persistentVolumes with mountPath */ -}}
+          {{- $autoVolumes := list }}
+          {{- range $.Values.persistentVolumes }}
+            {{- if .mountPath }}
+              {{- $autoVolumes = append $autoVolumes (dict "name" .name "persistentVolumeClaim" (dict "claimName" (printf "%s-%s" $fullname .name))) }}
+            {{- end }}
+          {{- end }}
+          {{- if or .volumes $autoVolumes }}
           volumes:
+            {{- with .volumes }}
             {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- range $autoVolumes }}
+            - name: {{ .name }}
+              persistentVolumeClaim:
+                claimName: {{ .persistentVolumeClaim.claimName }}
+            {{- end }}
           {{- end }}
           restartPolicy: {{ .restartPolicy | default "OnFailure" }}
 {{- end }}
