@@ -58,24 +58,12 @@ spec:
         paths:
           - path: /
             pathType: Prefix
-      - name: redirect
-        hosts:
-          - graphdb.ddeboer.nl
-        annotations:
-          nginx.ingress.kubernetes.io/permanent-redirect: https://triplestore.netwerkdigitaalerfgoed.nl
-        tls:
-          enabled: true
-        paths:
-          - path: /
-            pathType: Prefix
       - name: registry-redirect
         hosts:
           - triplestore.netwerkdigitaalerfgoed.nl
         annotations:
           nginx.ingress.kubernetes.io/permanent-redirect: https://datasetregister.netwerkdigitaalerfgoed.nl/sparql
           nginx.ingress.kubernetes.io/permanent-redirect-code: "308"
-        tls:
-          enabled: false
         paths:
           - path: /repositories/registry
             pathType: Exact
