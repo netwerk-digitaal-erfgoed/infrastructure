@@ -18,7 +18,11 @@ spec:
       - name: app
         image:
           repository: ghcr.io/knaw-huc/annorepo-server
-          tag: latest # {"$imagepolicy": "nde:annorepo:tag"}
+          tag: "0.8.0" # {"$imagepolicy": "nde:annorepo:tag"}
+        flux:
+          policy:
+            type: semver
+            range: ">=0.8.0"
         port: 8080
         env:
           - name: AR_EXTERNAL_BASE_URL
