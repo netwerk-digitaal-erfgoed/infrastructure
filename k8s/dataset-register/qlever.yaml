@@ -60,10 +60,6 @@ spec:
       - name: data
         size: 50Gi
 
-    service:
-      port: 80
-      targetPort: 7001
-
     ingresses:
       - hosts:
           - datasetregister.netwerkdigitaalerfgoed.nl
