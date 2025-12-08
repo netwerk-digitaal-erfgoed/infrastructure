@@ -1,33 +1,33 @@
-# Use pre-signed URLs for private S3 access:
-#   s3cmd signurl s3://infra-migration/dataset-register.update-triples +3600
-# Then replace the URL below with the pre-signed URL.
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: dataset-register-qlever-import
-  namespace: nde
-spec:
-  template:
-    spec:
-      securityContext:
-        fsGroup: 100
-      containers:
-        - name: import
-          image: alpine:latest
-          command:
-            - sh
-            - -c
-            - |
-              set -e
-              apk add --no-cache curl
-              echo "Downloading update-triples file..."
-              curl -sS -o /data/dataset-register.update-triples "https://ams3.digitaloceanspaces.com/infra-migration/dataset-register.update-triples?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251207%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251207T205547Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=11ceaa7c890e0c34d6b583d36838116becab010555b68797a224e014684e8d49"
-              echo "Import complete."
-          volumeMounts:
-            - name: data
-              mountPath: /data
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: data-dataset-register-qlever-0
-      restartPolicy: OnFailure
+## Use pre-signed URLs for private S3 access:
+##   s3cmd signurl s3://infra-migration/dataset-register.update-triples +3600
+## Then replace the URL below with the pre-signed URL.
+#apiVersion: batch/v1
+#kind: Job
+#metadata:
+#  name: dataset-register-qlever-import
+#  namespace: nde
+#spec:
+#  template:
+#    spec:
+#      securityContext:
+#        fsGroup: 100
+#      containers:
+#        - name: import
+#          image: alpine:latest
+#          command:
+#            - sh
+#            - -c
+#            - |
+#              set -e
+#              apk add --no-cache curl
+#              echo "Downloading update-triples file..."
+#              curl -sS -o /data/dataset-register.update-triples "https://ams3.digitaloceanspaces.com/infra-migration/dataset-register.update-triples?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=7LILQRR5LBL43PESZRKU%2F20251207%2Fams3%2Fs3%2Faws4_request&X-Amz-Date=20251207T205547Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=11ceaa7c890e0c34d6b583d36838116becab010555b68797a224e014684e8d49"
+#              echo "Import complete."
+#          volumeMounts:
+#            - name: data
+#              mountPath: /data
+#      volumes:
+#        - name: data
+#          persistentVolumeClaim:
+#            claimName: data-dataset-register-qlever-0
+#      restartPolicy: OnFailure
