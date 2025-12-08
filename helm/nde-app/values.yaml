@@ -52,7 +52,7 @@ service:
   port: 80
   targetPort: ""  # Defaults to first container's port
 
-# Ingress - shared annotations for first ingress
+# Ingress - shared annotations for ingresses that have TLS enabled.
 ingress:
   annotations:
     cert-manager.io/issuer: harica-nde

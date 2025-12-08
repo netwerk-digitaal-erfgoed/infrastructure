@@ -12,7 +12,7 @@ metadata:
   labels:
     {{- include "nde-app.labels" $ | nindent 4 }}
   annotations:
-    {{- if $isFirst }}
+    {{- if or $isFirst (($ingress.tls).enabled) }}
     {{- with $.Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -22,7 +22,7 @@ metadata:
     {{- end }}
 spec:
   {{- if $ingress.hosts }}
-  {{- if or $isFirst $ingress.tls }}
+  {{- if or $isFirst (($ingress.tls).enabled) }}
   tls:
     - secretName: {{ (($ingress.tls).secretName) | default (printf "%s-tls" $name) }}
       hosts:
