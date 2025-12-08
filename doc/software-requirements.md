@@ -31,7 +31,14 @@ The software service MUST be packaged as an [OCI](https://opencontainers.org) co
 
 See [CLARIAH #15](https://github.com/CLARIAH/clariah-plus/blob/main/requirements/software-requirements.md#15-services-must-be-packaged-as-containers).
 
-### 5. The software *MUST* be configurable through environment variables.
+### 5. The container must be tagged with an incremental version number.
+
+The end of tech must either be a [semantic version increment](https://semver.org) or a simple timestamp-based increment
+(`git show -s --format=%cd-%h --date=format:%Y%m%d%H%M%S`).
+
+See [CLARIAH #4](https://github.com/CLARIAH/clariah-plus/blob/main/requirements/software-requirements.md#4-the-software-must-be-released-periodically-with-clear-version-numbers).
+
+### 6. The software *MUST* be configurable through environment variables.
 
 Examples of configuration parameters are credentials, API tokens and database connection information.
 These parameters *MUST NOT* be part of the application’s source code.
