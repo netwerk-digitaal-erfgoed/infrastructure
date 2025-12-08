@@ -50,6 +50,9 @@ spec:
             qlever start --persist-updates --access-token "$ACCESS_TOKEN"
             qlever log
 
+#    securityContext:
+#      fsGroup: 100
+
     volumes:
       - name: config
         configMap:
@@ -65,7 +68,7 @@ spec:
 
     ingresses:
       - hosts:
-          - datasetregister-migration.netwerkdigitaalerfgoed.nl # TODO
+          - datasetregister-test.netwerkdigitaalerfgoed.nl # TODO
         paths:
           - path: /sparql
             pathType: Prefix
