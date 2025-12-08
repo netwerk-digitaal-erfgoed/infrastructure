@@ -1,0 +1,33 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dataset-register-browser
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      replicas: 2
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-browser
+          tag: "0" # {"$imagepolicy": "nde:dataset-register-browser:tag"}
+        port: 3000
+    ingresses:
+      - hosts:
+          - datasetregister-test.netwerkdigitaalerfgoed.nl
+        paths:
+          - path: /datasets
+            pathType: Prefix
+          - path: /_app
+            pathType: Prefix
+          - path: /en
+            pathType: Prefix
