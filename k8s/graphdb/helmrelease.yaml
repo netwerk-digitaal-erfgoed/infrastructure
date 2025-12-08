@@ -1,0 +1,84 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: graphdb
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      type: statefulset
+
+    containers:
+      - name: app
+        image:
+          repository: ontotext/graphdb
+          tag: "10.7.3" # {"$imagepolicy": "nde:graphdb:tag"}
+        flux:
+          policy:
+            type: semver
+            range: "~10"
+        port: 7200
+        resources:
+          requests:
+            memory: 1.5Gi
+          limits:
+            memory: 8Gi
+        env:
+          - name: GDB_JAVA_OPTS
+            value: |
+              -Dgraphdb.workbench.cors.enable=true
+              -Dgraphdb.engine.parallel-import=false
+              -Dhealth.max.query.time.seconds=60
+          - name: GDB_HEAP_SIZE
+            value: 6g
+        livenessProbe:
+          httpGet:
+            path: /repositories/registry-backup/health?passive
+            port: 7200
+          initialDelaySeconds: 100
+          periodSeconds: 5
+          timeoutSeconds: 60
+        volumeMounts:
+          - name: data
+            mountPath: /opt/graphdb/home
+
+    persistentVolumes:
+      - name: data
+        size: 50Gi
+
+    ingresses:
+      - hosts:
+          - triplestore.netwerkdigitaalerfgoed.nl
+        paths:
+          - path: /
+            pathType: Prefix
+      - name: redirect
+        hosts:
+          - graphdb.ddeboer.nl
+        annotations:
+          nginx.ingress.kubernetes.io/permanent-redirect: https://triplestore.netwerkdigitaalerfgoed.nl
+        tls:
+          enabled: true
+        paths:
+          - path: /
+            pathType: Prefix
+      - name: registry-redirect
+        hosts:
+          - triplestore.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/permanent-redirect: https://datasetregister.netwerkdigitaalerfgoed.nl/sparql
+          nginx.ingress.kubernetes.io/permanent-redirect-code: "308"
+        tls:
+          enabled: false
+        paths:
+          - path: /repositories/registry
+            pathType: Exact
