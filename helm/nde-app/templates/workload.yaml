@@ -1,9 +1,11 @@
 {{- if .Values.containers }}
 {{- $kind := eq .Values.workload.type "statefulset" | ternary "StatefulSet" "Deployment" }}
+{{- $isStatefulSet := eq .Values.workload.type "statefulset" }}
+{{- $fullname := include "nde-app.fullname" . }}
 apiVersion: apps/v1
 kind: {{ $kind }}
 metadata:
-  name: {{ include "nde-app.fullname" . }}
+  name: {{ $fullname }}
   labels:
     {{- include "nde-app.labels" . | nindent 4 }}
 spec:
@@ -11,8 +13,8 @@ spec:
   selector:
     matchLabels:
       {{- include "nde-app.selectorLabels" . | nindent 6 }}
-  {{- if eq .Values.workload.type "statefulset" }}
-  serviceName: {{ include "nde-app.fullname" . }}
+  {{- if $isStatefulSet }}
+  serviceName: {{ $fullname }}
   {{- end }}
   template:
     metadata:
@@ -23,7 +25,7 @@ spec:
       {{- end }}
       labels:
         {{- include "nde-app.selectorLabels" . | nindent 8 }}
-        app: {{ include "nde-app.fullname" . }}
+        app: {{ $fullname }}
     spec:
       {{- $needsGhcr := false }}
       {{- range .Values.containers }}
@@ -74,19 +76,8 @@ spec:
       volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-  {{- if and (eq .Values.workload.type "statefulset") (or .Values.persistence.enabled .Values.persistentVolumes) }}
+  {{- if and $isStatefulSet .Values.persistentVolumes }}
   volumeClaimTemplates:
-    {{- if .Values.persistence.enabled }}
-    - metadata:
-        name: {{ .Values.persistence.name }}
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: {{ .Values.persistence.size }}
-        storageClassName: {{ .Values.persistence.storageClass }}
-    {{- end }}
     {{- range .Values.persistentVolumes }}
     - metadata:
         name: {{ .name }}

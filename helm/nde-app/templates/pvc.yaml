@@ -1,9 +1,11 @@
-{{- range .Values.pvcs }}
+{{- /* Generate PVCs for Deployments (not StatefulSets) from persistentVolumes */ -}}
+{{- if and (ne .Values.workload.type "statefulset") .Values.persistentVolumes }}
+{{- range .Values.persistentVolumes }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "nde-app.fullname" $ }}-{{ required "pvcs[].name is required" .name }}
+  name: {{ include "nde-app.fullname" $ }}-{{ required "persistentVolumes[].name is required" .name }}
   labels:
     {{- include "nde-app.labels" $ | nindent 4 }}
 spec:
@@ -12,5 +14,6 @@ spec:
   storageClassName: {{ .storageClass | default "hdd" }}
   resources:
     requests:
-      storage: {{ required "pvcs[].size is required" .size }}
+      storage: {{ required "persistentVolumes[].size is required" .size }}
+{{- end }}
 {{- end }}
