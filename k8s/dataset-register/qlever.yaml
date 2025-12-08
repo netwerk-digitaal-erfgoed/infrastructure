@@ -15,6 +15,7 @@ spec:
   values:
     workload:
       type: statefulset
+      replicas: 0
 
     containers:
       - name: app
@@ -67,7 +68,7 @@ spec:
 
     ingresses:
       - hosts:
-          - datasetregister-test.netwerkdigitaalerfgoed.nl # TODO
+          - datasetregister.netwerkdigitaalerfgoed.nl
         paths:
           - path: /sparql
             pathType: Prefix
