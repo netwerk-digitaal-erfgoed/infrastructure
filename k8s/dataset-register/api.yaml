@@ -1,0 +1,58 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dataset-register-api
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      replicas: 2
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-api
+          tag: "0" # {"$imagepolicy": "nde:dataset-register-api:tag"}
+        port: 3000
+        env:
+          - name: SPARQL_URL
+            value: "http://dataset-register-qlever"
+          - name: SPARQL_ACCESS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataset-register-qlever
+                key: access-token
+          - name: TRUST_PROXY
+            value: "true"
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://opentelemetry-collector:4318"
+          - name: OTEL_LOG_LEVEL
+            value: "all"
+    ingresses:
+      - hosts:
+          - datasetregister-test.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/rewrite-target: /$2
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            rewrite ^(/api)$ $1/ redirect;
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
+      - name: redirect
+        className: nginx
+        hosts:
+          - demo.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/permanent-redirect: https://datasetregister.netwerkdigitaalerfgoed.nl/api
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            rewrite ^(/register-api)$ $1/ redirect;
+        paths:
+          - path: /register-api(/|$)(.*)
+            pathType: ImplementationSpecific
