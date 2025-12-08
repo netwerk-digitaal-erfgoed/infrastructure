@@ -92,6 +92,6 @@ spec:
           nginx.ingress.kubernetes.io/use-regex: "true"
         paths:
           - path: /strapi/?(.*)$
-            pathType: Prefix
+            pathType: ImplementationSpecific
         tls:
           enabled: false

@@ -43,4 +43,4 @@ spec:
           nginx.ingress.kubernetes.io/use-regex: "true"
         paths:
           - path: /(.*)
-            pathType: Prefix
+            pathType: ImplementationSpecific
