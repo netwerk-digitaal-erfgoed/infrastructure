@@ -35,6 +35,8 @@ spec:
     ingresses:
       - hosts:
           - datasetregister.netwerkdigitaalerfgoed.nl
+        tls:
+          enabled: false
       - name: redirect
         className: nginx
         hosts:

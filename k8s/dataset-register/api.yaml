@@ -45,6 +45,8 @@ spec:
         paths:
           - path: /api(/|$)(.*)
             pathType: ImplementationSpecific
+        tls:
+          enabled: false
       - name: redirect
         className: nginx
         hosts:

@@ -66,6 +66,8 @@ spec:
         paths:
           - path: /sparql
             pathType: Prefix
+        tls:
+          enabled: false
 
     configMaps:
       - name: qleverfile
