@@ -11,7 +11,7 @@ spec:
   git:
     commit:
       author:
-        email: fluxcdbot@users.noreply.github.com
+        email: nde-bot@users.noreply.github.com
         name: fluxcdbot
       signingKey:
         secretRef:
