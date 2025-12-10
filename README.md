@@ -1,116 +1,87 @@
 # NDE Infrastructure
 
-This repository contains generic infrastructure configuration for running NDE applications in a Kubernetes cluster.
+This repository contains infrastructure configuration for running NDE applications in a Kubernetes cluster.
 
 This configuration follows the [CLARIAH Infrastructure Requirements](https://github.com/CLARIAH/clariah-plus/blob/main/requirements/infrastructure-requirements.md).
-It is based on existing documentation, in particular
-[How to Set Up an Nginx Ingress with Cert-Manager on DigitalOcean Kubernetes](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-with-cert-manager-on-digitalocean-kubernetes)
-and [How To Set Up an Nginx Ingress on DigitalOcean Kubernetes Using Helm](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-nginx-ingress-on-digitalocean-kubernetes-using-helm), with as few modifications as possible.
+Software running in this infrastructure must meet the [NDE Software Requirements](doc/software-requirements.md).
 
-We apply this configuration to a
-[DigitalOcean managed Kubernetes cluster](https://www.digitalocean.com/products/kubernetes/).
+## Features
 
-For running software in the NDE infrastructure, it must meet the [NDE Software Requirements](doc/software-requirements.md).
+* GitOps using [Flux](https://fluxcd.io) to automatically roll out infrastructure and application changes.
+* Declarative configuration using [Flux HelmRelease](https://fluxcd.io/flux/components/helm/helmreleases/).
+* DNS automation using [ExternalDns](https://kubernetes-sigs.github.io/external-dns/latest/).
+* A shared [Helm chart](helm/nde-app) for deploying applications consistently.
 
-## Included
-
-While each application should take care of deploying itself, this repository contains the generic configuration for
-making each application available on the web.
-
-This generic infrastructure includes:
-
-- ingress configuration for routing hostnames to applications
-- auto-provisioning and renewal of a Let’s Encrypt TLS certificate for each hostname.
-
-## Making changes
-
-We make changes to the infrastructure through declarative configuration files. So to change the infrastructure, just
-follow your regular Git workflow:
-
-1. clone this repository;
-2. make changes to any of the Kubernetes manifests, which you can find in the `k8s/` directory;
-3. push your changes pack to GitHub.
-
-[Flux](https://fluxcd.io) automatically applies the changes to our Kubernetes cluster.
-
-## Set up a DigitalOcean cluster from scratch
-
-Start by creating a Kubernetes cluster in the DigitalOcean web interface.
-
-Then set up requirements:
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.2/deploy/static/provider/do/deploy.yaml
-kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.1.0/cert-manager.yaml
-kubectl annotate -n ingress-nginx service ingress-nginx-controller service.beta.kubernetes.io/do-loadbalancer-hostname="kubernetes.netwerkdigitaalerfgoed.nl"
-```
-
-Create secrets so Kubernetes can pull from the GitHub container registry:
-
-```bash
-kubectl create secret docker-registry regcred --docker-server=docker.pkg.github.com --docker-username=YOUR_GITHUB_USERNAME --docker-password=ACCESS_TOKEN_FROM_GITHUB_WITH_READ_PACKAGES_PERMISSION --docker-email=YOUR_GITHUB_EMAIL
-kubectl create secret docker-registry ghcr --docker-server=ghcr.io --docker-username=YOUR_GITHUB_USERNAME --docker-password=ACCESS_TOKEN_FROM_GITHUB_WITH_READ_PACKAGES_PERMISSION --docker-email=YOUR_GITHUB_EMAIL
-```
-
-Apply the OpenTelemetry Operator:
-
-```bash
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
-```
-
-Finally, apply the configuration from this repository by cloning it and then running:
-
-```bash
-kubectl apply -R -f k8s
-```
-
-### Telemetry
-
-Our applications push [OpenTelemetry](https://opentelemetry.io) metrics to an
-OpenTelemetry collector, which is deployed through the [OpenTelemetry Kubernetes Operator](https://opentelemetry.io/docs/platforms/kubernetes/operator/).
-
-A [VictoriaMetrics](https://victoriametrics.com) agent scrapes
-the OpenTelemetry collector for metrics and stores them in a VictoriaMetrics database.
-
-Logs are collected through [Loki](https://grafana.com/oss/loki/).
-
-Both metrics and logs are available in our [Grafana dashboard](https://statistieken.netwerkdigitaalerfgoed.nl) (behind login).
-
-### Backups
-
-We back up cluster data using [Velero](https://velero.io).
-Our configuration is based on the [DigitalOcean tutorial](https://www.digitalocean.com/community/tutorials/how-to-back-up-and-restore-a-kubernetes-cluster-on-digitalocean-using-velero)
-but uses the [Velero Helm Chart](https://github.com/vmware-tanzu/helm-charts) for installation.
-
-To install Velero into the cluster, open the [helm/velero/values.yaml file](helm/velero/values.yaml) and:
-
-- change `bucket` to your DigitalOcean Space’s name;
-- enter your DigitalOcean access token for `DIGITALOCEAN_TOKEN`;
-- enter your S3 credentials under `secretContents` (do not commit these credentials to source control).
-
-Then run:
+## Repository structure
 
 ```
-helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
-helm install velero vmware-tanzu/velero --namespace velero --create-namespace -f helm/velero/values.yaml
+├─ helm/
+│  └─ nde-app/       # Helm chart for NDE applications
+├─ k8s/              # Application deployments (HelmReleases)
+│  ├─ rbac/          # Service account and roles
+│  ├─ secrets/       # Encrypted secrets
+│  └─ */             # Application HelmReleases
 ```
 
-We use [CSI Volume Snapshots](https://velero.io/blog/csi-integration/), which will we be listed
-at https://cloud.digitalocean.com/images/snapshots/volumes.
+## Deploying applications
 
-For more information, see [How To Back Up and Restore a Kubernetes Cluster on DigitalOcean Using Velero](https://www.digitalocean.com/community/tutorials/how-to-back-up-and-restore-a-kubernetes-cluster-on-digitalocean-using-velero)
-but note that we’re using Helm instead.
+Applications are deployed using [HelmReleases](https://fluxcd.io/flux/components/helm/helmreleases/) with the shared [nde-app Helm chart](helm/nde-app/README.md).
 
-### DNS
+### Example HelmRelease
 
-Configure an A record for each application hostname and for `kubernetes.netwerkdigitaalerfgoed.nl`
-pointing to your load balancer’s public IP address. Our current settings are (`kubectl get ingress`):
+```yaml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: my-app
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision # To pick up changes in the Helm chart without having to version that.
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/my-app
+          tag: latest # {"$imagepolicy": "nde:my-app:tag"}
+        port: 8080
 
-Load balancer public IP address: `178.128.138.52`.
+    ingresses:
+      - hosts:
+          - my-app.netwerkdigitaalerfgoed.nl
+```
 
-Hostnames:
+This creates:
 
-- demo.netwerkdigitaalerfgoed.nl
-- ldwizard.netwerkdigitaalerfgoed.nl
-- termennetwerk.netwerkdigitaalerfgoed.nl
-- termennetwerk-api.netwerkdigitaalerfgoed.nl
+- a Deployment running the `my-app` container on port 8080
+- a Service that maps port 80 to 8080
+- an HTTPS-enabled Ingress that routes traffic from `my-app.netwerkdigitaalerfgoed.nl` to the application
+- a DNS entry for `my-app.netwerkdigitaalerfgoed.nl`.
+
+### Image automation
+
+Flux automatically updates image tags when new versions are pushed. The `# {"$imagepolicy": ...}` comment enables this.
+
+- NDE images (`ghcr.io/netwerk-digitaal-erfgoed/*`): checked every **1 minute**
+- External images: checked every **24 hours**.
+
+See [helm/nde-app/README.md](helm/nde-app/README.md) for configuration options.
+
+## Secrets
+
+Secrets are encrypted using [SOPS with age](https://fluxcd.io/flux/guides/mozilla-sops/) and stored in `k8s/secrets/`.
+See [k8s/secrets/README.md](k8s/secrets/README.md) for encryption instructions.
+
+## Telemetry
+
+- **Metrics**: Applications push [OpenTelemetry](https://opentelemetry.io) metrics to a collector, scraped by [VictoriaMetrics](https://victoriametrics.com)
+- **Logs**: Collected through [Loki](https://grafana.com/oss/loki/)
+- **Dashboard**: [Grafana](https://statistieken.netwerkdigitaalerfgoed.nl) (behind login)
+
