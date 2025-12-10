@@ -44,6 +44,7 @@ spec:
           httpGet:
             path: /?query=ASK%20%7B%7D
             port: 7001
+            timeoutSeconds: 5
         volumeMounts:
           - name: data
             mountPath: /data
