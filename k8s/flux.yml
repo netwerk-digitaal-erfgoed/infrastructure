@@ -13,6 +13,9 @@ spec:
       author:
         email: fluxcdbot@users.noreply.github.com
         name: fluxcdbot
+      signingKey:
+        secretRef:
+          name: github-signing-key
       messageTemplate: |
         Automated image update
 
@@ -21,7 +24,5 @@ spec:
         {{ end }}
     push:
       branch: master
-    signingKey:
-      secretRef: github-signing-key
   update:
     path: ./k8s
