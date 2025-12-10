@@ -19,10 +19,6 @@ spec:
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/makemyflix-strapi
           tag: latest # {"$imagepolicy": "nde:makemyflix-strapi:tag"}
-        flux:
-          policy:
-            type: semver
-            range: ">=0.0.0"
         port: 1337
         env:
           - name: URL
