@@ -1,0 +1,33 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dataset-register-crawler
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-crawler
+          tag: 20251208141738-770f8cc # {"$imagepolicy": "nde:dataset-register-crawler:tag"}
+        port: 3000
+        env:
+          - name: SPARQL_URL
+            value: "http://dataset-register-qlever"
+          - name: SPARQL_ACCESS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataset-register-qlever
+                key: access-token
+          - name: CRAWLER_SCHEDULE
+            value: "0 * * * *"
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://opentelemetry-collector:4318"
