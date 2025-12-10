@@ -33,6 +33,17 @@ spec:
         resources:
           requests:
             memory: 8Gi
+        startupProbe:
+          httpGet:
+            path: /?query=ASK%20%7B%7D
+            port: 7001
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 30  # Allow up to 5 minutes for indexing
+        livenessProbe:
+          httpGet:
+            path: /?query=ASK%20%7B%7D
+            port: 7001
         volumeMounts:
           - name: data
             mountPath: /data
