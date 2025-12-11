@@ -32,7 +32,11 @@ spec:
                 key: access-token
         resources:
           requests:
-            memory: 8Gi
+            cpu: "2"
+            memory: 12Gi
+          limit:
+            cpu: "2"
+            memory: 12Gi
         startupProbe:
           httpGet:
             path: /?query=ASK%20%7B%7D
