@@ -31,10 +31,11 @@ spec:
                 name: dataset-register-qlever
                 key: access-token
         resources:
+          # requests = limits for Guaranteed QoS.
           requests:
             cpu: "2"
             memory: 12Gi
-          limit:
+          limits:
             cpu: "2"
             memory: 12Gi
         startupProbe:
