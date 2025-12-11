@@ -62,6 +62,7 @@ spec:
           - -c
           - |
             cd /data
+            qlever get-data
             qlever index --overwrite-existing
             qlever start --persist-updates --access-token "$ACCESS_TOKEN"
             qlever log
@@ -93,13 +94,13 @@ spec:
           Qleverfile: |
             [data]
             NAME              = dataset-register
-            GET_DATA_CMD      = curl -sS -O https://dataset-register.ams3.digitaloceanspaces.com/statements.nq
+            GET_DATA_CMD      = curl -sS -O https://dataset-register.ams3.digitaloceanspaces.com/cleaned-up-registrations.nq
             TEXT_DESCRIPTION  = All literals, search with FILTER CONTAINS(?var, "...")
             DESCRIPTION       = NDE Dataset Register
             FORMAT            = nq
 
             [index]
-            INPUT_FILES     = statements.nq
+            INPUT_FILES     = cleaned-up-registrations.nq
             CAT_INPUT_FILES = cat ${INPUT_FILES}
             SETTINGS_JSON   = { "ascii-prefixes-only": true, "num-triples-per-batch": 100000 }
             TEXT_INDEX      = none
