@@ -19,7 +19,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-browser
-          tag: 20251215154113-21e14f4 # {"$imagepolicy": "nde:dataset-register-browser:tag"}
+          tag: 20251215184232-240d2a2 # {"$imagepolicy": "nde:dataset-register-browser:tag"}
         port: 3000
     ingresses:
       - hosts:
