@@ -28,9 +28,9 @@ spec:
         port: 7200
         resources:
           requests:
-            memory: 1.5Gi
+            memory: 4Gi
           limits:
-            memory: 8Gi
+            memory: 10Gi
         env:
           - name: GDB_JAVA_OPTS
             value: |
@@ -38,7 +38,7 @@ spec:
               -Dgraphdb.engine.parallel-import=false
               -Dhealth.max.query.time.seconds=60
           - name: GDB_HEAP_SIZE
-            value: 6g
+            value: 8g
         livenessProbe:
           httpGet:
             path: /repositories/registry-backup/health?passive
