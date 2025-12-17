@@ -1,0 +1,35 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: matomo
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: matomo
+      version: ">=4.0.0 <5.0.0"
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: nde
+  values:
+    ingress:
+      enabled: true
+      hostname: matomo.netwerkdigitaalerfgoed.nl
+      tls: true
+      annotations:
+        cert-manager.io/issuer: harica-nde
+        cert-manager.io/usages: server auth,digital signature,client auth
+    persistence:
+      storageClass: hdd
+      size: 10Gi
+    mariadb:
+      auth:
+        existingSecret: matomo-mariadb
+        database: matomo
+      primary:
+        persistence:
+          storageClass: hdd
+          size: 8Gi
