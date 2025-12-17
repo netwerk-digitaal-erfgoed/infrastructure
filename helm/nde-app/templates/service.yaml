@@ -1,4 +1,4 @@
-{{- if .Values.containers }}
+{{- if or .Values.containers .Values.externalService.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -7,7 +7,10 @@ metadata:
     {{- include "nde-app.labels" . | nindent 4 }}
 spec:
   ports:
-    {{- if .Values.service.ports }}
+    {{- if .Values.externalService.enabled }}
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.externalService.port }}
+    {{- else if .Values.service.ports }}
     {{- range .Values.service.ports }}
     - name: {{ .name }}
       port: {{ .port }}
@@ -17,6 +20,22 @@ spec:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort | default (index .Values.containers 0).port }}
     {{- end }}
+  {{- if not .Values.externalService.enabled }}
   selector:
     {{- include "nde-app.selectorLabels" . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- if .Values.externalService.enabled }}
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: {{ include "nde-app.fullname" . }}
+  labels:
+    {{- include "nde-app.labels" . | nindent 4 }}
+subsets:
+  - addresses:
+      - ip: {{ .Values.externalService.ip }}
+    ports:
+      - port: {{ .Values.externalService.port }}
 {{- end }}
