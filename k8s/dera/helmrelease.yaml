@@ -16,7 +16,9 @@ spec:
     externalService:
       enabled: true
       ip: 84.22.101.57
-      port: 80
+      port: 443
     ingresses:
       - hosts:
           - dera.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
