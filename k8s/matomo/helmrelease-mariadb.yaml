@@ -1,0 +1,58 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: matomo-mariadb
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      type: statefulset
+
+    containers:
+      - name: mariadb
+        image:
+          repository: mariadb
+          tag: "11.6.2"
+        port: 3306
+        flux:
+          policy:
+            type: semver
+            range: "~11.6"
+        env:
+          - name: MARIADB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: matomo-mariadb
+                key: mariadb-root-password
+          - name: MARIADB_USER
+            valueFrom:
+              secretKeyRef:
+                name: matomo-mariadb
+                key: mariadb-user
+          - name: MARIADB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: matomo-mariadb
+                key: mariadb-password
+          - name: MARIADB_DATABASE
+            value: matomo
+        volumeMounts:
+          - name: data
+            mountPath: /var/lib/mysql
+
+    persistentVolumes:
+      - name: data
+        size: 8Gi
+
+    service:
+      port: 3306
+      targetPort: 3306
