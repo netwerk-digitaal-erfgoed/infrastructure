@@ -8,30 +8,102 @@ spec:
   interval: 30m
   chart:
     spec:
-      chart: matomo
-      version: ">=11.0.0 <12.0.0"
+      chart: helm/nde-app
+      reconcileStrategy: Revision
       sourceRef:
-        kind: HelmRepository
-        name: bitnami
-        namespace: nde
+        kind: GitRepository
+        name: nde
   values:
-    ingress:
-      enabled: true
-      hostname: matomo.netwerkdigitaalerfgoed.nl
-      tls: true
-      annotations:
-        cert-manager.io/issuer: harica-nde
-        cert-manager.io/usages: server auth,digital signature,client auth
-    persistence:
-      storageClass: hdd
-      size: 10Gi
-    mariadb:
-      auth:
-        existingSecret: matomo-mariadb
-        database: matomo
-      primary:
-        podAnnotations:
-          recreate-trigger: "1"
-        persistence:
-          storageClass: hdd
-          size: 8Gi
+    workload:
+      type: statefulset
+
+    containers:
+      - name: nginx
+        image:
+          repository: nginx
+          tag: "1.27-alpine"
+        port: 80
+        flux:
+          policy:
+            type: semver
+            range: "~1"
+        volumeMounts:
+          - name: data
+            mountPath: /var/www/html
+            readOnly: true
+          - name: nginx-config
+            mountPath: /etc/nginx/conf.d
+
+      - name: php-fpm
+        image:
+          repository: matomo
+          tag: "5-fpm-alpine"
+        port: 9000
+        flux:
+          policy:
+            type: semver
+            range: "~5"
+        env:
+          - name: MATOMO_DATABASE_HOST
+            value: matomo-mariadb
+          - name: MATOMO_DATABASE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: matomo-mariadb
+                key: mariadb-user
+          - name: MATOMO_DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: matomo-mariadb
+                key: mariadb-password
+          - name: MATOMO_DATABASE_DBNAME
+            value: matomo
+        volumeMounts:
+          - name: data
+            mountPath: /var/www/html
+
+    securityContext:
+      fsGroup: 82
+
+    persistentVolumes:
+      - name: data
+        size: 10Gi
+
+    volumes:
+      - name: nginx-config
+        configMap:
+          name: matomo-nginx
+
+    configMaps:
+      - name: nginx
+        data:
+          default.conf: |
+            server {
+                listen 80;
+                server_name _;
+                root /var/www/html;
+                index index.php;
+
+                client_max_body_size 50m;
+
+                location / {
+                    try_files $uri $uri/ /index.php?$query_string;
+                }
+
+                location ~ \.php$ {
+                    fastcgi_pass 127.0.0.1:9000;
+                    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                    include fastcgi_params;
+                }
+
+                location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+                    expires 1y;
+                    add_header Cache-Control "public, immutable";
+                }
+            }
+
+    ingresses:
+      - hosts:
+          - matomo.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-body-size: "50m"
