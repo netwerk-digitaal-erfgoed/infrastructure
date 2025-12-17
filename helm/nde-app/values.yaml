@@ -3,6 +3,12 @@ workload:
   type: deployment  # or "statefulset"
   replicas: 1
 
+# External service (reverse proxy to external IP, no containers needed)
+externalService:
+  enabled: false
+  ip: ""
+  port: 80
+
 # Container(s) - supports multi-container pods
 containers: []
 # Example:
