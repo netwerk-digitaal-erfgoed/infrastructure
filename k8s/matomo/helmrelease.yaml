@@ -30,6 +30,8 @@ spec:
         existingSecret: matomo-mariadb
         database: matomo
       primary:
+        podAnnotations:
+          recreate-trigger: "1"
         persistence:
           storageClass: hdd
           size: 8Gi
