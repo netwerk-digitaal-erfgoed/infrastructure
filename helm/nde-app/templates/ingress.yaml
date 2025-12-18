@@ -18,7 +18,7 @@ metadata:
     {{- end }}
     {{- $firstHost := index $ingress.hosts 0 }}
     {{- if gt (len $firstHost) 64 }}
-    cert-manager.io/common-name: ""
+    cert-manager.io/common-name: {{ $firstHost | trunc 64 | quote }}
     {{- end }}
     {{- end }}
     {{- with $ingress.annotations }}
