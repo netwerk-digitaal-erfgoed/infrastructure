@@ -23,3 +23,5 @@ spec:
     ingresses:
       - hosts:
           - heritageflix-zuiderzeemuseum-locaties.demo.netwerkdigitaalerfgoed.nl
+        tls:
+          secretName: hf-zzm-locaties-tls
