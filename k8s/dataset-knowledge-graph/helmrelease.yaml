@@ -13,9 +13,10 @@ spec:
         kind: GitRepository
         name: nde
   values:
-    pvcs:
+    persistentVolumes:
       - name: imports
         size: 500Gi
+        mountPath: /app/imports
     cronjobs:
       - name: app
         schedule: "15 1 * * *"
@@ -38,13 +39,6 @@ spec:
               secretKeyRef:
                 name: graphdb
                 key: password
-        volumeMounts:
-          - mountPath: /app/imports
-            name: imports
-        volumes:
-          - name: imports
-            persistentVolumeClaim:
-              claimName: dataset-knowledge-graph-imports
         resources:
           requests:
             cpu: "2"

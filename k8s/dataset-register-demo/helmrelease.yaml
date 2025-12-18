@@ -48,6 +48,6 @@ spec:
         paths:
           - path: /register(/|$)(.*)
             pathType: ImplementationSpecific
-    persistence:
-      enabled: true
-      mountPath: /datasetdescriptions
+    persistentVolumes:
+      - name: data
+        size: 1Gi
