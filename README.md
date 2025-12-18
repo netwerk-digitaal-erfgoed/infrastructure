@@ -9,18 +9,21 @@ Software running in this infrastructure must meet the [NDE Software Requirements
 
 * GitOps using [Flux](https://fluxcd.io) to automatically roll out infrastructure and application changes.
 * Declarative configuration using [Flux HelmRelease](https://fluxcd.io/flux/components/helm/helmreleases/).
-* DNS automation using [ExternalDns](https://kubernetes-sigs.github.io/external-dns/latest/).
-* A shared [Helm chart](helm/nde-app) for deploying applications consistently.
+* DNS automation using [ExternalDNS](https://kubernetes-sigs.github.io/external-dns/latest/).
+* Automatic TLS certificates via [cert-manager](https://cert-manager.io).
+* A shared [Helm chart](helm/nde-app) for deploying applications consistently, supporting Deployments, StatefulSets,
+  CronJobs, ConfigMaps, and multi-container pods.
 
 ## Repository structure
 
 ```
 ├─ helm/
 │  └─ nde-app/       # Helm chart for NDE applications
-├─ k8s/              # Application deployments (HelmReleases)
+├─ k8s/              # Application deployments
+│  ├─ flux.yaml      # Flux image update automation
 │  ├─ rbac/          # Service account and roles
 │  ├─ secrets/       # Encrypted secrets
-│  └─ */             # Application HelmReleases
+│  └─ */             # Application HelmReleases (one or more per app)
 ```
 
 ## Deploying applications
@@ -63,6 +66,7 @@ This creates:
 - a Deployment running the `my-app` container on port 8080
 - a Service that maps port 80 to 8080
 - an HTTPS-enabled Ingress that routes traffic from `my-app.netwerkdigitaalerfgoed.nl` to the application
+- a TLS Certificate for `my-app.netwerkdigitaalerfgoed.nl`
 - a DNS entry for `my-app.netwerkdigitaalerfgoed.nl`.
 
 ### Image automation
