@@ -8,7 +8,7 @@ Software running in this infrastructure must meet the [NDE Software Requirements
 ## Features
 
 * GitOps using [Flux](https://fluxcd.io) to automatically roll out infrastructure and application changes.
-* Declarative configuration using [Flux HelmRelease](https://fluxcd.io/flux/components/helm/helmreleases/).
+* Declarative configuration using [Flux HelmRelease](https://fluxcd.io/flux/components/helm/helmreleases/). Everything is version-controlled, including [secrets](#secrets).
 * DNS automation using [ExternalDNS](https://kubernetes-sigs.github.io/external-dns/latest/).
 * Automatic TLS certificates via [cert-manager](https://cert-manager.io).
 * A shared [Helm chart](helm/nde-app) for deploying applications consistently, supporting Deployments, StatefulSets,
