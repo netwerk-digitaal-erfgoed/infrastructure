@@ -16,6 +16,10 @@ metadata:
     {{- with $.Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- $firstHost := index $ingress.hosts 0 }}
+    {{- if gt (len $firstHost) 64 }}
+    cert-manager.io/common-name: ""
+    {{- end }}
     {{- end }}
     {{- with $ingress.annotations }}
     {{- toYaml . | nindent 4 }}
