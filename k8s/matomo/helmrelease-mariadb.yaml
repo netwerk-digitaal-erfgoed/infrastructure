@@ -21,12 +21,12 @@ spec:
       - name: mariadb
         image:
           repository: mariadb
-          tag: "11.6.2"
+          tag: "11.4.9"
         port: 3306
         flux:
           policy:
             type: semver
-            range: "~11.6"
+            range: "~11.4"
         env:
           - name: MARIADB_ROOT_PASSWORD
             valueFrom:
