@@ -86,14 +86,41 @@ spec:
 
                 client_max_body_size 50m;
 
-                location / {
-                    try_files $uri $uri/ /index.php?$query_string;
+                add_header Referrer-Policy origin always;
+                add_header X-Content-Type-Options "nosniff" always;
+                add_header X-XSS-Protection "1; mode=block" always;
+
+                # Deny access to sensitive directories
+                location ~ ^/(config|tmp|core|lang) {
+                    deny all;
+                    return 404;
                 }
 
-                location ~ \.php$ {
+                location ~ ^/(libs|vendor|plugins|misc|node_modules) {
+                    deny all;
+                    return 404;
+                }
+
+                location ~ /\.ht {
+                    deny all;
+                    return 404;
+                }
+
+                location / {
+                    try_files $uri $uri/ =404;
+                }
+
+                # Only allow specific PHP files to execute
+                location ~ ^/(index|matomo|piwik|js/index|plugins/HeatmapSessionRecording/configs)\.php$ {
                     fastcgi_pass 127.0.0.1:9000;
                     fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
                     include fastcgi_params;
+                }
+
+                # Deny all other PHP files
+                location ~* ^.+\.php$ {
+                    deny all;
+                    return 404;
                 }
 
                 location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
