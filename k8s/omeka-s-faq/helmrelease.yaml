@@ -16,12 +16,11 @@ spec:
   values:
     workload:
       type: statefulset
-
     containers:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-faq
-          tag: latest # {"$imagepolicy": "nde:omeka-s-faq:tag"}
+          tag: 20251206224214-83dc18f # {"$imagepolicy": "nde:omeka-s-faq:tag"}
         port: 80
         env:
           - name: PMF_DB_HOST
@@ -53,11 +52,9 @@ spec:
           - name: omeka-s-faq
             mountPath: /var/www/html/images
             subPath: images
-
     persistentVolumes:
       - name: omeka-s-faq
         size: 5Gi
-
     ingresses:
       - hosts:
           - omeka-s-faq.netwerkdigitaalerfgoed.nl

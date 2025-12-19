@@ -16,12 +16,11 @@ spec:
   values:
     workload:
       type: statefulset
-
     containers:
       - name: annorepo-mongo
         image:
           repository: mongo
-          tag: "8.0.9" # {"$imagepolicy": "nde:annorepo-mongo-annorepo-mongo:tag"}
+          tag: "8.0.16" # {"$imagepolicy": "nde:annorepo-mongo-annorepo-mongo:tag"}
         flux:
           policy:
             type: semver
@@ -30,10 +29,8 @@ spec:
         volumeMounts:
           - mountPath: /data/db
             name: data
-
     service:
       port: 27017
-
     persistence:
       enabled: true
       name: data

@@ -16,12 +16,11 @@ spec:
   values:
     workload:
       type: statefulset
-
     containers:
       - name: app
         image:
           repository: postgres
-          tag: "16.3-alpine" # {"$imagepolicy": "nde:makemyflix-postgres:tag"}
+          tag: "16.11-alpine" # {"$imagepolicy": "nde:makemyflix-postgres:tag"}
         port: 5432
         flux:
           policy:
@@ -39,11 +38,9 @@ spec:
           - name: data
             mountPath: /var/lib/postgresql/data
             subPath: postgres
-
     persistentVolumes:
       - name: data
         size: 1Gi
-
     service:
       port: 5432
       targetPort: 5432

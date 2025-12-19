@@ -16,12 +16,11 @@ spec:
   values:
     workload:
       type: statefulset
-
     containers:
       - name: nginx
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-nginx
-          tag: latest # {"$imagepolicy": "nde:omeka-s-nginx:tag"}
+          tag: 20251208144000-abd1d43 # {"$imagepolicy": "nde:omeka-s-nginx:tag"}
         port: 80
         env:
           - name: RESTART_TRIGGER
@@ -32,7 +31,7 @@ spec:
       - name: php
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-php-fpm
-          tag: latest # {"$imagepolicy": "nde:omeka-s-php:tag"}
+          tag: 20251208144000-abd1d43 # {"$imagepolicy": "nde:omeka-s-php:tag"}
         port: 9000
         env:
           - name: DATABASE_USER
@@ -52,21 +51,17 @@ spec:
         volumeMounts:
           - name: files
             mountPath: /var/www/html/files/
-
     securityContext:
       fsGroup: 82
-
     persistentVolumes:
       - name: files
         size: 20Gi
-
     service:
       ports:
         - name: http
           port: 80
         - name: php-fpm
           port: 9000
-
     ingresses:
       - hosts:
           - omeka.netwerkdigitaalerfgoed.nl
