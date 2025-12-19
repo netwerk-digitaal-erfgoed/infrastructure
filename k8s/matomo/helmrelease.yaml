@@ -25,8 +25,9 @@ spec:
         flux:
           policy:
             type: semver
-            pattern: '^\d+\.\d+\.\d+-alpine$'
-            range: "~1.0.0-0"
+            pattern: '^(?P<version>\d+\.\d+\.\d+)-alpine$'
+            extract: '$version'
+            range: "~1"
         volumeMounts:
           - name: data
             mountPath: /var/www/html
@@ -36,13 +37,14 @@ spec:
       - name: php-fpm
         image:
           repository: matomo
-          tag: "5.0.3-fpm-alpine" # {"$imagepolicy": "nde:matomo-php-fpm:tag"}
+          tag: "5.6.2-fpm-alpine" # {"$imagepolicy": "nde:matomo-php-fpm:tag"}
         port: 9000
         flux:
           policy:
             type: semver
-            pattern: '^\d+\.\d+\.\d+-fpm-alpine$'
-            range: "~5.0.0-0"
+            pattern: '^(?P<version>\d+\.\d+\.\d+)-fpm-alpine$'
+            extract: '$version'
+            range: "~5"
         env:
           - name: MATOMO_DATABASE_HOST
             value: matomo-mariadb
