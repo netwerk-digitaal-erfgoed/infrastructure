@@ -27,7 +27,7 @@ spec:
           policy:
             type: semver
             pattern: '^(?P<version>\d+\.\d+)-alpine$'
-            extract: '$version'
+            extract: '$version.0'
             range: "~16"
         env:
           - name: POSTGRES_PASSWORD
