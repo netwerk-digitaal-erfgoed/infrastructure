@@ -20,11 +20,13 @@ spec:
       - name: nginx
         image:
           repository: nginx
-          tag: "1.29.4" # {"$imagepolicy": "nde:matomo-nginx:tag"}
+          tag: "1.29.4-alpine" # {"$imagepolicy": "nde:matomo-nginx:tag"}
         port: 80
         flux:
           policy:
             type: semver
+            pattern: '^(?P<version>\d+\.\d+\.\d+)-alpine$'
+            extract: '$version'
             range: "~1"
         volumeMounts:
           - name: data
@@ -35,11 +37,13 @@ spec:
       - name: php-fpm
         image:
           repository: matomo
-          tag: "5.6.2" # {"$imagepolicy": "nde:matomo-php-fpm:tag"}
+          tag: "5.6.2-fpm-alpine" # {"$imagepolicy": "nde:matomo-php-fpm:tag"}
         port: 9000
         flux:
           policy:
             type: semver
+            pattern: '^(?P<version>\d+\.\d+\.\d+)-fpm-alpine$'
+            extract: '$version'
             range: "~5"
         env:
           - name: MATOMO_DATABASE_HOST
