@@ -21,7 +21,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-faq
-          tag: latest
+          tag: latest # {"$imagepolicy": "nde:omeka-s-faq:tag"}
         port: 80
         env:
           - name: PMF_DB_HOST

@@ -21,7 +21,7 @@ spec:
       - name: annorepo-mongo
         image:
           repository: mongo
-          tag: "8.0.9"
+          tag: "8.0.9" # {"$imagepolicy": "nde:annorepo-mongo-annorepo-mongo:tag"}
         flux:
           policy:
             type: semver
