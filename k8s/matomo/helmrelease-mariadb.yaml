@@ -21,7 +21,7 @@ spec:
       - name: mariadb
         image:
           repository: mariadb
-          tag: "11.4.9"
+          tag: "11.4.9" # {"$imagepolicy": "nde:matomo-mariadb-mariadb:tag"}
         port: 3306
         flux:
           policy:

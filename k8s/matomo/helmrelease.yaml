@@ -21,7 +21,7 @@ spec:
       - name: nginx
         image:
           repository: nginx
-          tag: "1.27-alpine"
+          tag: "1.27-alpine" # {"$imagepolicy": "nde:matomo-nginx:tag"}
         port: 80
         flux:
           policy:
@@ -37,7 +37,7 @@ spec:
       - name: php-fpm
         image:
           repository: matomo
-          tag: "5-fpm-alpine"
+          tag: "5-fpm-alpine" # {"$imagepolicy": "nde:matomo-php-fpm:tag"}
         port: 9000
         flux:
           policy:
