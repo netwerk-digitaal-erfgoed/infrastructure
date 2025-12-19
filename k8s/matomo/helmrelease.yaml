@@ -25,9 +25,8 @@ spec:
         flux:
           policy:
             type: semver
-            pattern: '^(?P<version>\d+\.\d+\.\d+)-alpine$'
-            extract: '$version'
-            range: "~1"
+            pattern: '^\d+\.\d+\.\d+-alpine$'
+            range: "~1.0.0-0"
         volumeMounts:
           - name: data
             mountPath: /var/www/html
@@ -42,9 +41,8 @@ spec:
         flux:
           policy:
             type: semver
-            pattern: '^(?P<version>\d+\.\d+\.\d+)-fpm-alpine$'
-            extract: '$version'
-            range: "~5"
+            pattern: '^\d+\.\d+\.\d+-fpm-alpine$'
+            range: "~5.0.0-0"
         env:
           - name: MATOMO_DATABASE_HOST
             value: matomo-mariadb
