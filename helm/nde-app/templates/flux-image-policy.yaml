@@ -22,12 +22,10 @@ spec:
     numerical:
       order: {{ (((.flux).policy).order) | default "asc" }}
   {{- else if eq $policyType "semver" }}
-  {{- if (((.flux).policy).pattern) }}
+  {{- if or (((.flux).policy).pattern) (((.flux).policy).extract) }}
   filterTags:
     pattern: {{ (((.flux).policy).pattern) | squote }}
-    {{- if (((.flux).policy).extract) }}
     extract: {{ (((.flux).policy).extract) | squote }}
-    {{- end }}
   {{- end }}
   policy:
     semver:
