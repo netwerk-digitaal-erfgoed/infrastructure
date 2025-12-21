@@ -88,6 +88,12 @@ spec:
                 add_header X-Content-Type-Options "nosniff" always;
                 add_header X-XSS-Protection "1; mode=block" always;
 
+                # Static assets with caching (must come before deny blocks)
+                location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|json)$ {
+                    expires 1y;
+                    add_header Cache-Control "public, immutable";
+                }
+
                 # Deny access to sensitive directories
                 location ~ ^/(config|tmp|core|lang) {
                     deny all;
@@ -119,11 +125,6 @@ spec:
                 location ~* ^.+\.php$ {
                     deny all;
                     return 404;
-                }
-
-                location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
-                    expires 1y;
-                    add_header Cache-Control "public, immutable";
                 }
             }
     ingresses:
