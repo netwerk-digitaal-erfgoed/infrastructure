@@ -53,4 +53,4 @@ cnames:
     target: target.example.com
 ```
 
-This creates a Service of type `ExternalName` with the appropriate ExternalDNS annotation.
+This creates an Ingress with `external-dns.alpha.kubernetes.io/target` annotation.
