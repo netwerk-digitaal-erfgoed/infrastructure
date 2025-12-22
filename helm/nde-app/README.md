@@ -8,6 +8,7 @@ Generic Helm chart for deploying NDE applications. It supports:
 - Persistent volumes
 - ConfigMaps
 - CronJobs
+- CNAME DNS records
 
 ## Flux Image Automation
 
@@ -41,3 +42,15 @@ containers:
         type: semver
         range: "~10.11"  # Only patch updates
 ```
+
+## CNAME DNS Records
+
+Create CNAME records via ExternalDNS without deploying any application:
+
+```yaml
+cnames:
+  - hostname: alias.netwerkdigitaalerfgoed.nl
+    target: target.example.com
+```
+
+This creates a Service of type `ExternalName` with the appropriate ExternalDNS annotation.
