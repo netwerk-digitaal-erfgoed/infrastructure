@@ -1,15 +1,15 @@
 {{- range $index, $cname := .Values.cnames }}
 {{- $name := printf "%s-cname-%d" (include "nde-app.fullname" $) $index }}
 ---
-apiVersion: v1
-kind: Service
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
   name: {{ $name }}
   labels:
     {{- include "nde-app.labels" $ | nindent 4 }}
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: {{ $cname.hostname }}
+    external-dns.alpha.kubernetes.io/target: {{ $cname.target }}
 spec:
-  type: ExternalName
-  externalName: {{ $cname.target }}
+  rules:
+    - host: {{ $cname.hostname }}
 {{- end }}
