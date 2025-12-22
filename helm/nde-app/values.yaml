@@ -111,3 +111,8 @@ cronjobs: []
   #   args: []
   #   env: []
   #   restartPolicy: OnFailure  # Optional, defaults to OnFailure
+
+# CNAME DNS records (via ExternalDNS)
+cnames: []
+  # - hostname: alias.example.com
+  #   target: target.example.com
