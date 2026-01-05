@@ -89,3 +89,7 @@ See [k8s/secrets/README.md](k8s/secrets/README.md) for encryption instructions.
 - **Logs**: Collected through [Loki](https://grafana.com/oss/loki/)
 - **Dashboard**: [Grafana](https://statistieken.netwerkdigitaalerfgoed.nl) (behind login)
 
+## Additional services
+
+UptimeRobot monitors our services. The status page can be found at https://status.netwerkdigitaalerfgoed.nl.
+To configure the status page, log in at the [dashboard](https://dashboard.uptimerobot.com).
