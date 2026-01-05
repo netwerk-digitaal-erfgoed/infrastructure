@@ -24,17 +24,17 @@ spec:
           tag: latest # {"$imagepolicy": "nde:demo:tag"}
         port: 5501
 
-#    ingresses:
-#      - hosts:
-#          - demo.netwerkdigitaalerfgoed.nl
-#        tls:
-#          enabled: true
-#          secretName: demo-tls-v2
-#      - name: network-of-terms-redirect
-#        hosts:
-#          - demo.netwerkdigitaalerfgoed.nl
-#        paths:
-#          - path: /termennetwerk
-#            pathType: Prefix
-#        annotations:
-#          nginx.ingress.kubernetes.io/permanent-redirect: https://termennetwerk.netwerkdigitaalerfgoed.nl
+    ingresses:
+      - hosts:
+          - demo.netwerkdigitaalerfgoed.nl
+        tls:
+          enabled: true
+          secretName: demo-tls-v2
+      - name: network-of-terms-redirect
+        hosts:
+          - demo.netwerkdigitaalerfgoed.nl
+        paths:
+          - path: /termennetwerk
+            pathType: Prefix
+        annotations:
+          nginx.ingress.kubernetes.io/permanent-redirect: https://termennetwerk.netwerkdigitaalerfgoed.nl
