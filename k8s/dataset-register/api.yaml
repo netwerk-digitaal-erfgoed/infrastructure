@@ -47,14 +47,3 @@ spec:
             pathType: ImplementationSpecific
         tls:
           enabled: false
-      - name: redirect
-        className: nginx
-        hosts:
-          - demo.netwerkdigitaalerfgoed.nl
-        annotations:
-          nginx.ingress.kubernetes.io/permanent-redirect: https://datasetregister.netwerkdigitaalerfgoed.nl/api
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            rewrite ^(/register-api)$ $1/ redirect;
-        paths:
-          - path: /register-api(/|$)(.*)
-            pathType: ImplementationSpecific
