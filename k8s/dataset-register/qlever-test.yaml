@@ -33,11 +33,11 @@ spec:
         resources:
           # requests = limits for Guaranteed QoS.
           requests:
-            cpu: "2"
-            memory: 12Gi
+            cpu: "1"
+            memory: 6Gi
           limits:
-            cpu: "2"
-            memory: 12Gi
+            cpu: "1"
+            memory: 6Gi
         startupProbe:
           httpGet:
             path: /?query=ASK%20%7B%7D
@@ -106,8 +106,8 @@ spec:
 
             [server]
             PORT               = 7001
-            MEMORY_FOR_QUERIES = 5G
-            CACHE_MAX_SIZE     = 2G
+            MEMORY_FOR_QUERIES = 2G
+            CACHE_MAX_SIZE     = 1G
             TIMEOUT            = 30s
 
             [runtime]
