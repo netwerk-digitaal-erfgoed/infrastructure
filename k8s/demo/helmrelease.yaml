@@ -29,7 +29,7 @@ spec:
           - demo.netwerkdigitaalerfgoed.nl
         tls:
           enabled: true
-          secretName: demo-tls-v3
+          secretName: demo-tls-v2
         annotations:
           nginx.ingress.kubernetes.io/server-snippet: |
             location ^~ /register-api {
