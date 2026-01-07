@@ -30,17 +30,42 @@ spec:
         tls:
           enabled: true
           secretName: demo-tls-v2
+        paths:
+          - path: /
+            pathType: Prefix
+          - path: /termennetwerk
+            pathType: Prefix
+          - path: /register(/|$)(.*)
+            pathType: ImplementationSpecific
+          - path: /register-api(/|$)(.*)
+            pathType: ImplementationSpecific
+          - path: /geonames
+            pathType: Prefix
         annotations:
-          nginx.ingress.kubernetes.io/server-snippet: |
-            location ^~ /termennetwerk {
+          nginx.ingress.kubernetes.io/use-regex: "true"
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            # /termennetwerk redirect
+            location = /termennetwerk {
               return 301 https://termennetwerk.netwerkdigitaalerfgoed.nl;
             }
-            location ^~ /register-api {
-              return 301 https://datasetregister.netwerkdigitaalerfgoed.nl/api;
+            location ^~ /termennetwerk/ {
+              return 301 https://termennetwerk.netwerkdigitaalerfgoed.nl;
             }
-            location ^~ /register {
+            # /register redirect
+            location = /register {
+              return 301 https://datasetregister.netwerkdigitaalerfgoed.nl/;
+            }
+            location ^~ /register/ {
               return 301 https://datasetregister.netwerkdigitaalerfgoed.nl;
             }
+            # /register-api redirect
+            location = /register-api {
+              return 301 https://datasetregister.netwerkdigitaalerfgoed.nl/api/;
+            }
+            location ^~ /register-api/ {
+              return 301 https://datasetregister.netwerkdigitaalerfgoed.nl/api;
+            }
+            # /geonames redirect
             location ^~ /geonames {
-              return 301 https://geonames.netwerkdigitaalerfgoed.nl;
+              return 301 https://geonames.netwerkdigitaalerfgoed.nl$request_uri;
             }
