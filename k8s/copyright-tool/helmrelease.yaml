@@ -27,5 +27,3 @@ spec:
           - regeljerechten.nl
         annotations:
           nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
-        tls:
-          secretName: copyright-tool-test
