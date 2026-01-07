@@ -35,12 +35,12 @@ spec:
             pathType: Prefix
         annotations:
           nginx.ingress.kubernetes.io/permanent-redirect: https://termennetwerk.netwerkdigitaalerfgoed.nl
-      - name: geonames-redirect
-        hosts:
-          - demo.netwerkdigitaalerfgoed.nl
-        paths:
-          - path: /geonames2?(/|$)(.*)
-            pathType: ImplementationSpecific
-        annotations:
-          nginx.ingress.kubernetes.io/use-regex: "true"
-          nginx.ingress.kubernetes.io/permanent-redirect: https://geonames.netwerkdigitaalerfgoed.nl/$2
+#      - name: geonames-redirect
+#        hosts:
+#          - demo.netwerkdigitaalerfgoed.nl
+#        paths:
+#          - path: /geonames2?(/|$)(.*)
+#            pathType: ImplementationSpecific
+#        annotations:
+#          nginx.ingress.kubernetes.io/use-regex: "true"
+#          nginx.ingress.kubernetes.io/permanent-redirect: https://geonames.netwerkdigitaalerfgoed.nl/$2
