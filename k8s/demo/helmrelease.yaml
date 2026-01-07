@@ -32,6 +32,9 @@ spec:
           secretName: demo-tls-v2
         annotations:
           nginx.ingress.kubernetes.io/server-snippet: |
+            location ^~ /termennetwerk {
+              return 301 https://termennetwerk.netwerkdigitaalerfgoed.nl;
+            }
             location ^~ /register-api {
               return 301 https://datasetregister.netwerkdigitaalerfgoed.nl/api;
             }
