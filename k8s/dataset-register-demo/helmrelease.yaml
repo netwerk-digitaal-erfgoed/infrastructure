@@ -37,6 +37,17 @@ spec:
           - datasetregister.netwerkdigitaalerfgoed.nl
         tls:
           enabled: false
+      - name: redirect
+        className: nginx
+        hosts:
+          - demo.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/permanent-redirect: https://datasetregister.netwerkdigitaalerfgoed.nl
+          nginx.ingress.kubernetes.io/configuration-snippet: |
+            rewrite ^(/register)$ $1/ redirect;
+        paths:
+          - path: /register(/|$)(.*)
+            pathType: ImplementationSpecific
     persistence:
       enabled: true
       mountPath: /datasetdescriptions
