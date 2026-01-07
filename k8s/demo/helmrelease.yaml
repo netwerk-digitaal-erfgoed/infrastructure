@@ -27,9 +27,6 @@ spec:
     ingresses:
       - hosts:
           - demo.netwerkdigitaalerfgoed.nl
-        tls:
-          enabled: true
-          secretName: demo-tls-v2
       - name: network-of-terms-redirect
         hosts:
           - demo.netwerkdigitaalerfgoed.nl
