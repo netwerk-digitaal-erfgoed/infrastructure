@@ -15,7 +15,6 @@ spec:
   values:
     workload:
       type: statefulset
-      replicas: 1
 
     containers:
       - name: app
