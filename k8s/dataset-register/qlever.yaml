@@ -31,6 +31,7 @@ spec:
                 name: dataset-register-qlever
                 key: access-token
         resources:
+          # requests = limits for Guaranteed QoS.
           requests:
             cpu: "2"
             memory: 12Gi
@@ -43,7 +44,7 @@ spec:
             port: 7001
           initialDelaySeconds: 120
           periodSeconds: 30
-          failureThreshold: 10
+          failureThreshold: 10  # Allow up to 7 minutes for indexing
         livenessProbe:
           httpGet:
             path: /?query=ASK%20%7B%7D
