@@ -6,9 +6,9 @@ Generic Helm chart for deploying NDE applications. It supports:
 - Multi-container pods
 - Ingress with automatic TLS certificates
 - Persistent volumes
-- ConfigMaps
+- [ConfigMaps](#configmap)
 - CronJobs
-- CNAME DNS records
+- [CNAME DNS records](#cname-dns-records)
 
 ## Flux Image Automation
 
@@ -54,3 +54,9 @@ cnames:
 ```
 
 This creates an Ingress with `external-dns.alpha.kubernetes.io/target` annotation.
+
+## ConfigMap
+
+Kubernetes does not automatically restart pods when a ConfigMap changes. 
+This chart adds a checksum of the ConfigMap contents as a pod annotation (`checksum/config`),
+ensuring pods restart when the configuration changes.
