@@ -38,7 +38,6 @@ spec:
         tls:
           enabled: false
       - name: redirect
-        className: nginx
         hosts:
           - demo.netwerkdigitaalerfgoed.nl
         annotations:
