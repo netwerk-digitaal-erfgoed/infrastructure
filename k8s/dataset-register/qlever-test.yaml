@@ -15,7 +15,7 @@ spec:
   values:
     workload:
       type: statefulset
-      replicas: 0  # Scaled down to allow copy-update-triples-job to run first
+      replicas: 1
 
     containers:
       - name: app
@@ -63,6 +63,7 @@ spec:
           - -c
           - |
             cd /data
+            curl -sSf -O https://dataset-register.ams3.digitaloceanspaces.com/dataset-register.update-triples
             qlever get-data
             qlever index --overwrite-existing
             qlever start --persist-updates --access-token "$ACCESS_TOKEN"
