@@ -95,6 +95,7 @@ spec:
       - name: qleverfile
         data:
           Qleverfile: |
+            # Restart: 2026-01-08T12:30
             [data]
             NAME              = dataset-register
             GET_DATA_CMD      = curl -sS -O https://dataset-register.ams3.digitaloceanspaces.com/cleaned-up-registrations.nq
