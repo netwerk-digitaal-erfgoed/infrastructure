@@ -60,6 +60,29 @@ spec:
                 key: mariadb-password
           - name: MATOMO_DATABASE_DBNAME
             value: matomo
+          - name: MATOMO_MAIL_TRANSPORT
+            value: smtp
+          - name: MATOMO_MAIL_PORT
+            value: "587"
+          - name: MATOMO_MAIL_ENCRYPTION
+            value: tls
+          - name: MATOMO_MAIL_TYPE
+            value: Login
+          - name: MATOMO_MAIL_HOST
+            valueFrom:
+              secretKeyRef:
+                name: smtp
+                key: SMTP_HOST
+          - name: MATOMO_MAIL_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: smtp
+                key: SMTP_USERNAME
+          - name: MATOMO_MAIL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: smtp
+                key: SMTP_PASSWORD
         volumeMounts:
           - name: data
             mountPath: /var/www/html
