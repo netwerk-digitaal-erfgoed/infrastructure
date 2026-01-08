@@ -15,6 +15,7 @@ spec:
   values:
     workload:
       type: statefulset
+      replicas: 0  # Scaled down to allow copy-update-triples-job to run first
 
     containers:
       - name: app
