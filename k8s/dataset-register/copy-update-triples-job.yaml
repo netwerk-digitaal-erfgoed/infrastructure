@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: copy-update-triples-to-test
+  name: copy-update-triples-to-test-2
   namespace: nde
 spec:
   template:
