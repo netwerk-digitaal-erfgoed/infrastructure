@@ -91,5 +91,6 @@ See [k8s/secrets/README.md](k8s/secrets/README.md) for encryption instructions.
 
 ## Additional services
 
-UptimeRobot monitors our services. The status page can be found at https://status.netwerkdigitaalerfgoed.nl.
-To configure the status page, log in at the [dashboard](https://dashboard.uptimerobot.com).
+* UptimeRobot monitors our services. The status page can be found at https://status.netwerkdigitaalerfgoed.nl.
+  To configure the status page, log in at the [dashboard](https://dashboard.uptimerobot.com).
+* Lettermint.co sends our transactional e-mail.
