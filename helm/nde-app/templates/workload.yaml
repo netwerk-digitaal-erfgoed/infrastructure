@@ -44,11 +44,17 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.shareProcessNamespace }}
+      shareProcessNamespace: true
+      {{- end }}
       containers:
         {{- range .Values.containers }}
         {{- $containerPort := .port }}
         - name: {{ .name }}
           image: "{{ required "image.repository is required" .image.repository }}:{{ required "image.tag is required" .image.tag }}"
+          {{- with .image.pullPolicy }}
+          imagePullPolicy: {{ . }}
+          {{- end }}
           {{- with .port }}
           ports:
             - containerPort: {{ . }}

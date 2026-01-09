@@ -3,7 +3,7 @@ kind: HelmRelease
 metadata:
   name: dataset-register-qlever-test
   annotations:
-    reconcile.fluxcd.io/forceAt: "2026-01-08T12:00:00Z"
+    reconcile.fluxcd.io/forceAt: "2026-01-09T19:00:00Z"
 spec:
   serviceAccountName: nde
   interval: 30m
@@ -23,6 +23,7 @@ spec:
         image:
           repository: adfreiburg/qlever
           tag: REBUILD-INDEX-BETA
+          pullPolicy: Always
         flux:
           enabled: false
         port: 7001
