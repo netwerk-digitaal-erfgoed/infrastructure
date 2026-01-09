@@ -83,6 +83,8 @@ spec:
               secretKeyRef:
                 name: smtp
                 key: SMTP_PASSWORD
+          - name: MATOMO_GENERAL_NOREPLY_EMAIL_ADDRESS
+            value: noreply@netwerkdigitaalerfgoed.nl
         volumeMounts:
           - name: data
             mountPath: /var/www/html
