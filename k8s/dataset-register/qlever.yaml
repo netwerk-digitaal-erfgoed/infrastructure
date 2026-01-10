@@ -2,6 +2,8 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: dataset-register-qlever
+  annotations:
+    reconcile.fluxcd.io/forceAt: "2026-01-10T21:35:00Z"
 spec:
   serviceAccountName: nde
   interval: 30m
