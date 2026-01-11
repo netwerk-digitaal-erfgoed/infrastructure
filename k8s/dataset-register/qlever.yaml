@@ -66,25 +66,36 @@ spec:
           - sh
           - -c
           - |
-            cd /data
-            INDEX_DIR=$(ls -d /data/rebuild.* 2>/dev/null | sort -r | head -1)
-
-            if [ -n "$INDEX_DIR" ]; then
-              echo "Starting from rebuild dir: $INDEX_DIR"
-              cd "$INDEX_DIR"
-            else
-              echo "No rebuild dir, building initial index..."
-              qlever index --overwrite-existing
-            fi
-
-            qlever start --access-token "$ACCESS_TOKEN"
-
-            # Log loop; restarts when sidecar kills qlever log after rebuild.
+            # App container owns the server lifecycle.
+            # Rebuild sidecar kills ServerMain; this loop detects and restarts from newest dir.
             while true; do
               INDEX_DIR=$(ls -d /data/rebuild.* 2>/dev/null | sort -r | head -1)
-              cd "${INDEX_DIR:-/data}"
-              echo "Tailing logs from $(pwd)"
-              qlever log || true
+
+              if [ -n "$INDEX_DIR" ]; then
+                echo "Starting from rebuild dir: $INDEX_DIR"
+                cd "$INDEX_DIR"
+              else
+                echo "No rebuild dir, building initial index..."
+                cd /data
+                qlever index --overwrite-existing
+              fi
+
+              echo "Starting QLever from $(pwd)"
+              qlever start --access-token "$ACCESS_TOKEN"
+
+              # Tail logs in background so they appear in Kubernetes logs.
+              qlever log &
+
+              # Block while server is running
+              while pgrep -f ServerMain > /dev/null; do
+                sleep 10
+              done
+
+              # Kill background log tail.
+              pkill -f "tail.*server-log" || true
+
+              echo "Server exited, restarting..."
+              sleep 2
             done
       - name: s3-sync
         image:
@@ -144,39 +155,37 @@ spec:
           - -c
           - |
             while true; do
-              # Calculate seconds until 3 AM
+              # Calculate seconds until 2:30 AM
               now=$(date +%s)
-              today_3am=$(date -d "today 03:00" +%s 2>/dev/null || date -v3H -v0M -v0S +%s)
-              if [ $now -lt $today_3am ]; then
-                sleep_seconds=$((today_3am - now))
+              today_target=$(date -d "today 02:30" +%s 2>/dev/null || date -v2H -v30M -v0S +%s)
+              if [ $now -lt $today_target ]; then
+                sleep_seconds=$((today_target - now))
               else
-                tomorrow_3am=$(date -d "tomorrow 03:00" +%s 2>/dev/null || date -v+1d -v3H -v0M -v0S +%s)
-                sleep_seconds=$((tomorrow_3am - now))
+                tomorrow_target=$(date -d "tomorrow 02:30" +%s 2>/dev/null || date -v+1d -v2H -v30M -v0S +%s)
+                sleep_seconds=$((tomorrow_target - now))
               fi
 
-              echo "Sleeping until 3 AM ($sleep_seconds seconds)..."
+              echo "Sleeping until 2:30 AM ($sleep_seconds seconds)..."
               sleep $sleep_seconds
 
               echo "Starting index rebuild at $(date)"
 
-              # Find and cd to latest rebuild dir (to read that index), or /data if none
+              # Find and cd to latest rebuild dir (to read that index), or /data if none.
               INDEX_DIR=$(ls -d /data/rebuild.* 2>/dev/null | sort -r | head -1)
               cd "${INDEX_DIR:-/data}"
 
-              # Create new rebuild in /data (not nested)
+              # Create new rebuild in /data (not nested).
               NEW_DIR="/data/rebuild.$(date +%Y-%m-%dT%H:%M:%S)"
               if ! qlever rebuild-index --access-token "$ACCESS_TOKEN" --index-dir "$NEW_DIR"; then
                 echo "ERROR: rebuild-index failed"
                 continue
               fi
-            
-              cd "$NEW_DIR"
-              qlever start --access-token "$ACCESS_TOKEN" --kill-existing-with-same-port
 
-              # Signal app container to restart qlever log in new directory
-              pkill -f "qlever log" || true
+              # Kill server; app container detects and restarts from newest dir.
+              echo "Killing server to trigger restart from $NEW_DIR"
+              pkill -f ServerMain || true
 
-              # Cleanup rebuild directories older than 7 days
+              # Cleanup rebuild directories older than 7 days.
               find /data -maxdepth 1 -name 'rebuild.*' -type d -mtime +7 -exec rm -rf {} \;
 
               echo "Rebuild complete at $(date)"
