@@ -47,9 +47,9 @@ spec:
           httpGet:
             path: /?query=ASK%20%7B%7D
             port: 7001
-          initialDelaySeconds: 120
-          periodSeconds: 30
-          failureThreshold: 10  # Allow up to 7 minutes for indexing
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 60  # Allow time for indexing.
         livenessProbe:
           httpGet:
             path: /?query=ASK%20%7B%7D
