@@ -35,6 +35,11 @@ spec:
             value: "http://opentelemetry-collector:4318"
           - name: OTEL_LOG_LEVEL
             value: "all"
+          - name: API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataset-register-api-token
+                key: token
     ingresses:
       - hosts:
           - datasetregister.netwerkdigitaalerfgoed.nl
