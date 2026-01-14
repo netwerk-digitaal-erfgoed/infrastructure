@@ -35,7 +35,7 @@ spec:
             value: "http://opentelemetry-collector:4318"
           - name: OTEL_LOG_LEVEL
             value: "all"
-          - name: API_TOKEN
+          - name: API_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:
                 name: dataset-register-api-token
