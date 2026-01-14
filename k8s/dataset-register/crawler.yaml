@@ -17,7 +17,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-crawler
-          tag: 20260112144853-a2250a9 # {"$imagepolicy": "nde:dataset-register-crawler:tag"}
+          tag: 20260114093626-ffdf25f # {"$imagepolicy": "nde:dataset-register-crawler:tag"}
         port: 3000
         env:
           - name: SPARQL_URL
