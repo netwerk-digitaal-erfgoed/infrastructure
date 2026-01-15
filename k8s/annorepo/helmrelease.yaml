@@ -18,7 +18,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/knaw-huc/annorepo-server
-          tag: "0.8.0" # {"$imagepolicy": "nde:annorepo:tag"}
+          tag: "0.8.1" # {"$imagepolicy": "nde:annorepo:tag"}
         flux:
           policy:
             type: semver
@@ -31,7 +31,6 @@ spec:
             value: "mongodb://annorepo-mongo:27017/"
           - name: AR_DB_NAME
             value: annorepo
-
     ingresses:
       - hosts:
           - annorepo.demo.netwerkdigitaalerfgoed.nl
