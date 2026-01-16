@@ -20,7 +20,7 @@ spec:
       - name: app
         image:
           repository: ontotext/graphdb
-          tag: "11.2.0" # {"$imagepolicy": "nde:graphdb:tag"}
+          tag: "11.2.1" # {"$imagepolicy": "nde:graphdb:tag"}
         flux:
           policy:
             type: semver
