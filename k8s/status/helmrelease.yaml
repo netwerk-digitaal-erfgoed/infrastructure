@@ -17,3 +17,5 @@ spec:
     cnames:
       - hostname: status.netwerkdigitaalerfgoed.nl
         target: stats.uptimerobot.com
+      - hostname: status.termennetwerk.netwerkdigitaalerfgoed.nl
+        target: stats.uptimerobot.com
