@@ -1,0 +1,29 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ldwizard-erfgoedwizard
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      replicas: 2
+
+    containers:
+      - name: ldwizard-erfgoedwizard
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/ldwizard-erfgoedwizard
+          tag: latest # {"$imagepolicy": "nde:ldwizard-erfgoedwizard:tag"}
+        port: 80
+
+    ingresses:
+      - hosts:
+          - ldwizard.netwerkdigitaalerfgoed.nl
