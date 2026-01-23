@@ -84,7 +84,8 @@ spec:
               fi
 
               echo "Starting QLever from $(pwd)"
-              qlever start --access-token "$ACCESS_TOKEN"
+              # Pass --server-binary because qlever CLI is not up-to-date in the image.
+              qlever start --access-token "$ACCESS_TOKEN" --server-binary qlever-server
 
               # Tail logs in background so they appear in Kubernetes logs.
               qlever log &
