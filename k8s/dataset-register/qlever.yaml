@@ -3,10 +3,13 @@ kind: HelmRelease
 metadata:
   name: dataset-register-qlever
   annotations:
-    reconcile.fluxcd.io/forceAt: "2026-01-23T20:00:00Z"
+    reconcile.fluxcd.io/forceAt: "2026-01-23T20:15:00Z"
 spec:
   serviceAccountName: nde
   interval: 30m
+  upgrade:
+    remediation:
+      remediateLastFailure: false
   chart:
     spec:
       chart: helm/nde-app
