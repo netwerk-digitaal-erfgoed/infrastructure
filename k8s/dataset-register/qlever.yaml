@@ -27,8 +27,8 @@ spec:
       - name: app
         image:
           repository: adfreiburg/qlever
-#          tag: REBUILD-INDEX-BETA
-          tag: commit-27eef33
+          tag: REBUILD-INDEX-BETA
+#          tag: commit-27eef33
         flux:
           enabled: false
         port: 7001
@@ -70,7 +70,7 @@ spec:
           - -c
           - |
             # App container owns the server lifecycle.
-            # Rebuild sidecar kills ServerMain; this loop detects and restarts from newest dir.
+            # Rebuild sidecar kills qlever-server; this loop detects and restarts from newest dir.
             while true; do
               INDEX_DIR=$(ls -d /data/rebuild.* 2>/dev/null | sort -r | head -1)
 
@@ -90,7 +90,7 @@ spec:
               qlever log &
 
               # Block while server is running
-              while pgrep -f ServerMain > /dev/null; do
+              while pgrep -f qlever-server > /dev/null; do
                 sleep 10
               done
 
@@ -134,64 +134,64 @@ spec:
               fi
               sleep 3600
             done
-#      - name: rebuild
-#        image:
-#          repository: adfreiburg/qlever
-#          tag: REBUILD-INDEX-BETA
-#        flux:
-#          enabled: false
-#        env:
-#          - name: ACCESS_TOKEN
-#            valueFrom:
-#              secretKeyRef:
-#                name: dataset-register-qlever
-#                key: access-token
-#        volumeMounts:
-#          - name: data
-#            mountPath: /data
-#          - name: config
-#            mountPath: /data/Qleverfile
-#            subPath: Qleverfile
-#        command:
-#          - sh
-#          - -c
-#          - |
-#            while true; do
-#              # Calculate seconds until 2:30 AM
-#              now=$(date +%s)
-#              today_target=$(date -d "today 02:30" +%s 2>/dev/null || date -v2H -v30M -v0S +%s)
-#              if [ $now -lt $today_target ]; then
-#                sleep_seconds=$((today_target - now))
-#              else
-#                tomorrow_target=$(date -d "tomorrow 02:30" +%s 2>/dev/null || date -v+1d -v2H -v30M -v0S +%s)
-#                sleep_seconds=$((tomorrow_target - now))
-#              fi
-#
-#              echo "Sleeping until 2:30 AM ($sleep_seconds seconds)..."
-#              sleep $sleep_seconds
-#
-#              echo "Starting index rebuild at $(date)"
-#
-#              # Find and cd to latest rebuild dir (to read that index), or /data if none.
-#              INDEX_DIR=$(ls -d /data/rebuild.* 2>/dev/null | sort -r | head -1)
-#              cd "${INDEX_DIR:-/data}"
-#
-#              # Create new rebuild in /data (not nested).
-#              NEW_DIR="/data/rebuild.$(date +%Y-%m-%dT%H:%M:%S)"
-#              if ! qlever rebuild-index --access-token "$ACCESS_TOKEN" --index-dir "$NEW_DIR"; then
-#                echo "ERROR: rebuild-index failed"
-#                continue
-#              fi
-#
-#              # Kill server; app container detects and restarts from newest dir.
-#              echo "Killing server to trigger restart from $NEW_DIR"
-#              pkill -f ServerMain || true
-#
-#              # Cleanup rebuild directories older than 7 days.
-#              find /data -maxdepth 1 -name 'rebuild.*' -type d -mtime +7 -exec rm -rf {} \;
-#
-#              echo "Rebuild complete at $(date)"
-#            done
+      - name: rebuild
+        image:
+          repository: adfreiburg/qlever
+          tag: REBUILD-INDEX-BETA
+        flux:
+          enabled: false
+        env:
+          - name: ACCESS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataset-register-qlever
+                key: access-token
+        volumeMounts:
+          - name: data
+            mountPath: /data
+          - name: config
+            mountPath: /data/Qleverfile
+            subPath: Qleverfile
+        command:
+          - sh
+          - -c
+          - |
+            while true; do
+              # Calculate seconds until 2:30 AM
+              now=$(date +%s)
+              today_target=$(date -d "today 02:30" +%s 2>/dev/null || date -v2H -v30M -v0S +%s)
+              if [ $now -lt $today_target ]; then
+                sleep_seconds=$((today_target - now))
+              else
+                tomorrow_target=$(date -d "tomorrow 02:30" +%s 2>/dev/null || date -v+1d -v2H -v30M -v0S +%s)
+                sleep_seconds=$((tomorrow_target - now))
+              fi
+
+              echo "Sleeping until 2:30 AM ($sleep_seconds seconds)..."
+              sleep $sleep_seconds
+
+              echo "Starting index rebuild at $(date)"
+
+              # Find and cd to latest rebuild dir (to read that index), or /data if none.
+              INDEX_DIR=$(ls -d /data/rebuild.* 2>/dev/null | sort -r | head -1)
+              cd "${INDEX_DIR:-/data}"
+
+              # Create new rebuild in /data (not nested).
+              NEW_DIR="/data/rebuild.$(date +%Y-%m-%dT%H:%M:%S)"
+              if ! qlever rebuild-index --access-token "$ACCESS_TOKEN" --index-dir "$NEW_DIR"; then
+                echo "ERROR: rebuild-index failed"
+                continue
+              fi
+
+              # Kill server; app container detects and restarts from newest dir.
+              echo "Killing server to trigger restart from $NEW_DIR"
+              pkill -f qlever-server || true
+
+              # Cleanup rebuild directories older than 7 days.
+              find /data -maxdepth 1 -name 'rebuild.*' -type d -mtime +7 -exec rm -rf {} \;
+
+              echo "Rebuild complete at $(date)"
+            done
 
     securityContext:
       fsGroup: 100
