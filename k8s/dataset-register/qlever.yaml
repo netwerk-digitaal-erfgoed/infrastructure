@@ -67,8 +67,8 @@ spec:
           - sh
           - -c
           - |
-            # Symlink Qleverfile so it's not in /data (avoids issues with rebuild-index moving files)
-            ln -sf /config/Qleverfile Qleverfile
+            # Copy Qleverfile so it's not mounted in /data (avoids issues with rebuild-index moving files)
+            cp /config/Qleverfile Qleverfile
 
             # Start server
             qlever start --access-token "$ACCESS_TOKEN"
