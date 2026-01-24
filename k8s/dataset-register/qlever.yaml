@@ -92,9 +92,12 @@ spec:
               sleep $sleep_seconds
 
               echo "Starting index rebuild at $(date)"
-              qlever rebuild-index --access-token "$ACCESS_TOKEN" --restart-when-finished || echo "ERROR: rebuild-index failed"
-
-              echo "Rebuild complete at $(date)"
+              if qlever rebuild-index --access-token "$ACCESS_TOKEN" --keep-old-index-dirs all; then
+                echo "Rebuild complete at $(date), restarting server..."
+                qlever stop && qlever start --access-token "$ACCESS_TOKEN"
+              else
+                echo "ERROR: rebuild-index failed"
+              fi
             done
       - name: s3-sync
         image:
