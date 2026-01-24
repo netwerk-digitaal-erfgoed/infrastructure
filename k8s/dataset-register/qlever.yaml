@@ -60,13 +60,16 @@ spec:
           - name: data
             mountPath: /data
           - name: config
-            mountPath: /data/Qleverfile
+            mountPath: /config/Qleverfile
             subPath: Qleverfile
         workingDir: /data
         command:
           - sh
           - -c
           - |
+            # Symlink Qleverfile so it's not in /data (avoids issues with rebuild-index moving files)
+            ln -sf /config/Qleverfile Qleverfile
+
             # Start server
             qlever start --access-token "$ACCESS_TOKEN"
 
