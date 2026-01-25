@@ -29,19 +29,3 @@ jobs:
                 -schema-location default \
                 -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
           done
-
-  k8s-do:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-
-      - name: Store DigitalOcean credentials
-        run: doctl kubernetes cluster kubeconfig save nde
-
-      - name: Dry run apply to validate manifests
-        run: |
-          kubectl apply -R -f $GITHUB_WORKSPACE/k8s-do --dry-run=server
