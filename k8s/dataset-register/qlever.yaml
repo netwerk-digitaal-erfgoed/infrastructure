@@ -94,7 +94,16 @@ spec:
               echo "Starting index rebuild at $(date)"
               if qlever rebuild-index --access-token "$ACCESS_TOKEN" --keep-old-index-dirs all; then
                 echo "Rebuild complete at $(date), restarting server..."
-                qlever stop && qlever start --access-token "$ACCESS_TOKEN"
+                qlever stop
+
+                # Archive update-triples file with timestamp because QLever doesn’t remove it.
+                for f in *.update-triples; do
+                  if [ -f "$f" ]; then
+                    mv "$f" "$f.$(date +%Y-%m-%dT%H:%M:%S)"
+                  fi
+                done
+
+                qlever start --access-token "$ACCESS_TOKEN"
               else
                 echo "ERROR: rebuild-index failed"
               fi
