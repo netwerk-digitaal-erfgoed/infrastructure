@@ -70,11 +70,12 @@ spec:
             # Copy Qleverfile so it's not mounted in /data (avoids issues with rebuild-index moving files)
             cp /config/Qleverfile Qleverfile
 
-            # Start server
-            qlever start --access-token "$ACCESS_TOKEN"
+            start_server() {
+              qlever start --access-token "$ACCESS_TOKEN"
+              qlever log &
+            }
 
-            # Tail logs in background so they appear in Kubernetes logs.
-            qlever log &
+            start_server
 
             # Daily rebuild loop
             while true; do
@@ -103,7 +104,7 @@ spec:
                   fi
                 done
 
-                qlever start --access-token "$ACCESS_TOKEN"
+                start_server
               else
                 echo "ERROR: rebuild-index failed"
               fi
