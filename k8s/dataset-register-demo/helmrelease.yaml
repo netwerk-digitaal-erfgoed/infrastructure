@@ -42,8 +42,6 @@ spec:
           - demo.netwerkdigitaalerfgoed.nl
         annotations:
           nginx.ingress.kubernetes.io/permanent-redirect: https://datasetregister.netwerkdigitaalerfgoed.nl
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            rewrite ^(/register)$ $1/ redirect;
         paths:
           - path: /register(/|$)(.*)
             pathType: ImplementationSpecific
