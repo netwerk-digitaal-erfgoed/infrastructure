@@ -46,5 +46,4 @@ spec:
         tls:
           enabled: true
         annotations:
-          nginx.ingress.kubernetes.io/configuration-snippet: |
-            return 301 https://qlever.netwerkdigitaalerfgoed.nl$request_uri;
+          nginx.ingress.kubernetes.io/permanent-redirect: https://qlever.netwerkdigitaalerfgoed.nl/
