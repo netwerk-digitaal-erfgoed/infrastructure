@@ -52,6 +52,16 @@ spec:
             pathType: ImplementationSpecific
         tls:
           enabled: false
+      - name: test
+        hosts:
+          - datasetregister.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/rewrite-target: /$2
+        paths:
+          - path: /apitest(/|$)(.*)
+            pathType: ImplementationSpecific
+        tls:
+          enabled: false
       - name: redirect
         hosts:
           - demo.netwerkdigitaalerfgoed.nl
