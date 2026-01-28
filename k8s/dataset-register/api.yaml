@@ -19,7 +19,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-api
-          tag: 20260123091839-5eea455 # {"$imagepolicy": "nde:dataset-register-api:tag"}
+          tag: 20260128212215-2b6b0cc # {"$imagepolicy": "nde:dataset-register-api:tag"}
         port: 3000
         env:
           - name: SPARQL_URL
@@ -45,8 +45,8 @@ spec:
           - datasetregister.netwerkdigitaalerfgoed.nl
         annotations:
           nginx.ingress.kubernetes.io/rewrite-target: /$2
-#          nginx.ingress.kubernetes.io/configuration-snippet: |
-#            rewrite ^(/api)$ $1/ redirect;
+          #          nginx.ingress.kubernetes.io/configuration-snippet: |
+          #            rewrite ^(/api)$ $1/ redirect;
         paths:
           - path: /api(/|$)(.*)
             pathType: ImplementationSpecific
