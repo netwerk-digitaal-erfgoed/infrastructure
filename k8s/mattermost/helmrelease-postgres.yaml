@@ -6,6 +6,7 @@ metadata:
   annotations:
     reconcile.fluxcd.io/forceAt: "2026-01-30T11:30:00Z"
 spec:
+  suspend: true
   serviceAccountName: nde
   interval: 30m
   install:
