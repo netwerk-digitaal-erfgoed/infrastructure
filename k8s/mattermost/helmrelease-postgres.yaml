@@ -1,60 +1,50 @@
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
-metadata:
-  name: mattermost-postgres
-  namespace: nde
-  annotations:
-    reconcile.fluxcd.io/forceAt: "2026-01-30T11:30:00Z"
-spec:
-  suspend: true
-  serviceAccountName: nde
-  interval: 30m
-  install:
-    remediation:
-      remediateLastFailure: true
-  upgrade:
-    remediation:
-      remediateLastFailure: true
-  chart:
-    spec:
-      chart: helm/nde-app
-      reconcileStrategy: Revision
-      sourceRef:
-        kind: GitRepository
-        name: nde
-  values:
-    workload:
-      type: statefulset
-    containers:
-      - name: app
-        image:
-          repository: postgres
-          tag: "18.1-alpine"
-        port: 5432
-        flux:
-          enabled: false
+#apiVersion: helm.toolkit.fluxcd.io/v2
+#kind: HelmRelease
+#metadata:
+#  name: mattermost-postgres
+#  namespace: nde
+#spec:
+#  serviceAccountName: nde
+#  interval: 30m
+#  chart:
+#    spec:
+#      chart: helm/nde-app
+#      reconcileStrategy: Revision
+#      sourceRef:
+#        kind: GitRepository
+#        name: nde
+#  values:
+#    workload:
+#      type: statefulset
+#    containers:
+#      - name: app
+#        image:
+#          repository: postgres
+#          tag: "18.1-alpine"
+#        flux:
 #          policy:
 #            type: semver
 #            pattern: '^(?P<version>\d+\.\d+)-alpine$'
 #            extract: '$version.0'
 #            range: "~18"
-        env:
-          - name: POSTGRES_DB
-            value: mattermost
-          - name: POSTGRES_USER
-            value: mattermost
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: mattermost-postgres
-                key: password
-        volumeMounts:
-          - name: data
-            mountPath: /var/lib/postgresql/data
-            subPath: postgres
-    persistentVolumes:
-      - name: data
-        size: 10Gi
-    service:
-      port: 5432
-      targetPort: 5432
+#        port: 5432
+#        env:
+#          - name: POSTGRES_DB
+#            value: mattermost
+#          - name: POSTGRES_USER
+#            value: mattermost
+#          - name: POSTGRES_PASSWORD
+#            valueFrom:
+#              secretKeyRef:
+#                name: mattermost-postgres
+#                key: password
+#        volumeMounts:
+#          - name: data
+#            mountPath: /var/lib/postgresql
+#            subPath: postgres
+#    persistentVolumes:
+#      - name: data
+#        size: 10Gi
+#    service:
+#      port: 5432
+#      targetPort: 5432
