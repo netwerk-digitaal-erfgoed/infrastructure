@@ -8,6 +8,9 @@ metadata:
 spec:
   serviceAccountName: nde
   interval: 30m
+  upgrade:
+    remediation:
+      remediateLastFailure: true
   chart:
     spec:
       chart: helm/nde-app
