@@ -21,13 +21,13 @@ spec:
         image:
           repository: postgres
           tag: "18.1-alpine" # {"$imagepolicy": "nde:status-postgres:tag"}
-        port: 5432
         flux:
           policy:
             type: semver
             pattern: '^(?P<version>\d+\.\d+)-alpine$'
             extract: '$version.0'
             range: "~18"
+        port: 5432
         env:
           - name: POSTGRES_PASSWORD
             valueFrom:
