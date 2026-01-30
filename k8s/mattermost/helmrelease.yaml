@@ -27,6 +27,8 @@ spec:
             type: semver
             range: "~11"
         env:
+          - name: MM_SERVICESETTINGS_SITEURL
+            value: https://chat.netwerkdigitaalerfgoed.nl
           - name: MM_SQLSETTINGS_DRIVERNAME
             value: postgres
           - name: MM_SQLSETTINGS_DATASOURCE
