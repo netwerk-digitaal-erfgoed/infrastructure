@@ -8,6 +8,9 @@ metadata:
 spec:
   serviceAccountName: nde
   interval: 30m
+  install:
+    remediation:
+      remediateLastFailure: true
   upgrade:
     remediation:
       remediateLastFailure: true
