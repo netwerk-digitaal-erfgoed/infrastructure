@@ -1,0 +1,45 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: mattermost
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      type: statefulset
+    containers:
+      - name: app
+        image:
+          repository: mattermost/mattermost-team-edition
+          tag: "11.3.0" # {"$imagepolicy": "nde:mattermost:tag"}
+        port: 8065
+        flux:
+          policy:
+            type: semver
+            range: "~11"
+        env:
+          - name: MM_SQLSETTINGS_DRIVERNAME
+            value: postgres
+          - name: MM_SQLSETTINGS_DATASOURCE
+            valueFrom:
+              secretKeyRef:
+                name: mattermost-postgres
+                key: datasource
+        volumeMounts:
+          - name: data
+            mountPath: /mattermost/data
+    persistentVolumes:
+      - name: data
+        size: 20Gi
+    ingresses:
+      - hosts:
+          - chat.netwerkdigitaalerfgoed.nl
