@@ -3,6 +3,8 @@ kind: HelmRelease
 metadata:
   name: mattermost-postgres
   namespace: nde
+  annotations:
+    reconcile.fluxcd.io/forceAt: "2026-01-30T11:30:00Z"
 spec:
   serviceAccountName: nde
   interval: 30m
