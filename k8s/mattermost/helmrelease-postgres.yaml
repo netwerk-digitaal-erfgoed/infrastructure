@@ -31,11 +31,12 @@ spec:
           tag: "18.1-alpine" # {"$imagepolicy": "nde:mattermost-postgres:tag"}
         port: 5432
         flux:
-          policy:
-            type: semver
-            pattern: '^(?P<version>\d+\.\d+)-alpine$'
-            extract: '$version.0'
-            range: "~18"
+          enabled: false
+#          policy:
+#            type: semver
+#            pattern: '^(?P<version>\d+\.\d+)-alpine$'
+#            extract: '$version.0'
+#            range: "~18"
         env:
           - name: POSTGRES_DB
             value: mattermost
