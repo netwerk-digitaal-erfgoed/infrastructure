@@ -1,45 +1,44 @@
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
-metadata:
-  name: status-postgres
-  namespace: nde
-spec:
-  serviceAccountName: nde
-  interval: 30m
-  chart:
-    spec:
-      chart: helm/nde-app
-      reconcileStrategy: Revision
-      sourceRef:
-        kind: GitRepository
-        name: nde
-  values:
-    workload:
-      type: statefulset
-    containers:
-      - name: app
-        image:
-          repository: postgres
-          tag: "18.1-alpine" # {"$imagepolicy": "nde:status-postgres:tag"}
-        port: 5432
-        flux:
-          policy:
-            type: semver
-            pattern: '^(?P<version>\d+\.\d+)-alpine$'
-            extract: '$version.0'
-            range: "~18"
-        env:
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: status-postgres
-                key: password
-        volumeMounts:
-          - name: data
-            mountPath: /var/lib/postgresql
-            subPath: postgres
-    persistentVolumes:
-      - name: data
-        size: 5Gi
-    service:
-      port: 5432
+#apiVersion: helm.toolkit.fluxcd.io/v2
+#kind: HelmRelease
+#metadata:
+#  name: status-postgres
+#  namespace: nde
+#spec:
+#  serviceAccountName: nde
+#  interval: 30m
+#  chart:
+#    spec:
+#      chart: helm/nde-app
+#      reconcileStrategy: Revision
+#      sourceRef:
+#        kind: GitRepository
+#        name: nde
+#  values:
+#    workload:
+#      type: statefulset
+#    containers:
+#      - name: app
+#        image:
+#          repository: postgres
+#          tag: "18.1-alpine" # {"$imagepolicy": "nde:status-postgres:tag"}
+#        port: 5432
+#        flux:
+#          policy:
+#            type: semver
+#            pattern: '^(?P<version>\d+\.\d+)-alpine$'
+#            extract: '$version.0'
+#            range: "~18"
+#        env:
+#          - name: POSTGRES_PASSWORD
+#            valueFrom:
+#              secretKeyRef:
+#                name: status-postgres
+#                key: password
+#        volumeMounts:
+#          - name: data
+#            mountPath: /var/lib/postgresql
+#    persistentVolumes:
+#      - name: data
+#        size: 5Gi
+#    service:
+#      port: 5432
