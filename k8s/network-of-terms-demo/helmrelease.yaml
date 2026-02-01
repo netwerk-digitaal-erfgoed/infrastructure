@@ -20,7 +20,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-demo
-          tag: 20260130145756-b86749a # {"$imagepolicy": "nde:network-of-terms-demo:tag"}
+          tag: 20260201194528-56b543f # {"$imagepolicy": "nde:network-of-terms-demo:tag"}
         port: 80
     ingresses:
       - hosts:
