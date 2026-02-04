@@ -16,6 +16,8 @@ spec:
   values:
     workload:
       type: statefulset
+    securityContext:
+      fsGroup: 2000
     containers:
       - name: app
         image:
