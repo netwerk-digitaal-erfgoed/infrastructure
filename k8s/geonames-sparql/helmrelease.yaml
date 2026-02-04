@@ -32,7 +32,7 @@ spec:
             memory: 8Gi
         env:
           - name: JVM_ARGS
-            value: "-Xmx8g"
+            value: "-Xmx8g -Xlog:gc*:stdout:time,level,tags"
         volumeMounts:
           - name: fuseki
             mountPath: /fuseki
