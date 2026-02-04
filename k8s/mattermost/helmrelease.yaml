@@ -34,6 +34,25 @@ spec:
               secretKeyRef:
                 name: mattermost-postgres
                 key: datasource
+          - name: MM_EMAILSETTINGS_SENDEMAILNOTIFICATIONS
+            value: "true"
+          - name: MM_EMAILSETTINGS_SMTPSERVER
+            value: smtp.lettermint.co
+          - name: MM_EMAILSETTINGS_SMTPPORT
+            value: "587"
+          - name: MM_EMAILSETTINGS_SMTPUSERNAME
+            value: lettermint
+          - name: MM_EMAILSETTINGS_SMTPPASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mattermost-smtp
+                key: password
+          - name: MM_EMAILSETTINGS_CONNECTIONSECURITY
+            value: STARTTLS
+          - name: MM_EMAILSETTINGS_FEEDBACKEMAIL
+            value: noreply@netwerkdigitaalerfgoed.nl
+          - name: MM_EMAILSETTINGS_FEEDBACKNAME
+            value: Mattermost
         volumeMounts:
           - name: data
             mountPath: /mattermost/data
