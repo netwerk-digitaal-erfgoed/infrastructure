@@ -57,6 +57,8 @@ spec:
             value: noreply@netwerkdigitaalerfgoed.nl
           - name: MM_EMAILSETTINGS_FEEDBACKNAME
             value: Mattermost
+          - name: MM_PLUGINSETTINGS_PLUGINSTATES
+            value: '{"playbooks":{"Enable":false},"mattermost-ai":{"Enable":false}}'
         volumeMounts:
           - name: data
             mountPath: /mattermost/data
@@ -66,3 +68,5 @@ spec:
     ingresses:
       - hosts:
           - chat.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-body-size: "100m"
