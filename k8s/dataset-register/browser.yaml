@@ -31,3 +31,5 @@ spec:
             pathType: Prefix
           - path: /en
             pathType: Prefix
+          - path: /sitemap.xml
+            pathType: Prefix
