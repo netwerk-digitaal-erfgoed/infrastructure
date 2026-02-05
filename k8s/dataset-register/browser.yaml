@@ -21,6 +21,12 @@ spec:
           repository: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-browser
           tag: 20260202155606-e3b2895 # {"$imagepolicy": "nde:dataset-register-browser:tag"}
         port: 3000
+        env:
+          - name: PROTOCOL_HEADER
+            value: "x-forwarded-proto"
+          - name: HOST_HEADER
+            value: "x-forwarded-host"
+
     ingresses:
       - hosts:
           - datasetregister.netwerkdigitaalerfgoed.nl
