@@ -20,7 +20,7 @@ spec:
       - name: nginx
         image:
           repository: nginx
-          tag: "1.29.4-alpine" # {"$imagepolicy": "nde:matomo-nginx:tag"}
+          tag: "1.29.5-alpine" # {"$imagepolicy": "nde:matomo-nginx:tag"}
         port: 80
         flux:
           policy:
