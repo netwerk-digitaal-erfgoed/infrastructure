@@ -130,6 +130,12 @@ spec:
                 [
                   text:field "countryCode" ;
                   text:predicate gn:countryCode ;
+                  text:boost 2.0 ;                # Boost above alternateName matches.                         
+                  text:analyzer [
+                    a text:ConfigurableAnalyzer ;
+                    text:tokenizer text:KeywordTokenizer ;
+                    text:filters ( text:LowerCaseFilter ) ;
+                  ] ;            
                 ]
               ) ;
             .
