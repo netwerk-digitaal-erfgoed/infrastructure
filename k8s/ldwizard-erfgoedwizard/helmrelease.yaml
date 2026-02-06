@@ -16,14 +16,12 @@ spec:
   values:
     workload:
       replicas: 2
-
     containers:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/ldwizard-erfgoedwizard
-          tag: latest # {"$imagepolicy": "nde:ldwizard-erfgoedwizard:tag"}
+          tag: 20260205094928-9b1ea48 # {"$imagepolicy": "nde:ldwizard-erfgoedwizard:tag"}
         port: 80
-
     ingresses:
       - hosts:
           - ldwizard.netwerkdigitaalerfgoed.nl
