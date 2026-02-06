@@ -25,5 +25,6 @@ spec:
     ingresses:
       - hosts:
           - regeljerechten.nl
+          - www.regeljerechten.nl
         annotations:
           nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
