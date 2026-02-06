@@ -107,10 +107,25 @@ spec:
             :index a text:TextIndexLucene ;
               text:directory <file:/data/index> ;
               text:entityMap :entityMap ;
+            
+              # The default analyzer skips tokens < 3 chars, such as country codes (‘NL’, ‘BE’).
+              # Matching such short tokens against name and alternateName is very slow,
+              # returning many irrelevant results.
+              # The countryCode field has its own analyzer, so country codes remain searchable there.
+              text:defineAnalyzers (
+                [ text:defineFilter :lengthFilter ;
+                  text:filter [
+                    a text:GenericFilter ;
+                    text:class "org.apache.lucene.analysis.miscellaneous.LengthFilter" ;
+                    text:params (
+                      [ text:paramName "min" ; text:paramValue 3 ]
+                      [ text:paramName "max" ; text:paramValue 2147483647 ]
+                    ) ] ]
+              ) ;
               text:analyzer [
                 a text:ConfigurableAnalyzer ;
                 text:tokenizer text:StandardTokenizer ;
-                text:filters ( text:ASCIIFoldingFilter text:LowerCaseFilter ) ;
+                text:filters ( text:ASCIIFoldingFilter text:LowerCaseFilter :lengthFilter ) ;
               ] ;
             .
 
@@ -130,7 +145,9 @@ spec:
                 [
                   text:field "countryCode" ;
                   text:predicate gn:countryCode ;
-                  text:boost 2.0 ;                # Boost above alternateName matches.                         
+                  text:boost 2.0 ;                # Boost above alternateName matches.
+            
+                  # A custom analyzer that only applies to countryCode, which keeps country codes searchable. 
                   text:analyzer [
                     a text:ConfigurableAnalyzer ;
                     text:tokenizer text:KeywordTokenizer ;
