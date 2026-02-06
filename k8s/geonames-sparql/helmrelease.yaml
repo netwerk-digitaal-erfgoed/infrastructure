@@ -121,6 +121,14 @@ spec:
                       [ text:paramName "min" ; text:paramValue 3 ]
                       [ text:paramName "max" ; text:paramValue 2147483647 ]
                     ) ] ]
+                [ text:defineFilter :countryCodeLengthFilter ;
+                  text:filter [
+                    a text:GenericFilter ;
+                    text:class "org.apache.lucene.analysis.miscellaneous.LengthFilter" ;
+                    text:params (
+                      [ text:paramName "min" ; text:paramValue 2 ]
+                      [ text:paramName "max" ; text:paramValue 2 ]
+                    ) ] ]
               ) ;
               text:analyzer [
                 a text:ConfigurableAnalyzer ;
@@ -147,11 +155,14 @@ spec:
                   text:predicate gn:countryCode ;
                   text:boost 2.0 ;                # Boost above alternateName matches.
             
-                  # A custom analyzer that only applies to countryCode, which keeps country codes searchable. 
+                  # A custom analyzer that only applies to countryCode, which keeps country codes searchable.
+                  # Uses StandardTokenizer (not KeywordTokenizer) so that in multi-field queries
+                  # like "dorp be", the query is split into separate tokens and "be" can match the country code.
+                  # The countryCodeLengthFilter (min=2, max=2) skips non-country-code tokens like "dorp".
                   text:analyzer [
                     a text:ConfigurableAnalyzer ;
-                    text:tokenizer text:KeywordTokenizer ;
-                    text:filters ( text:LowerCaseFilter ) ;
+                    text:tokenizer text:StandardTokenizer ;
+                    text:filters ( text:LowerCaseFilter :countryCodeLengthFilter ) ;
                   ] ;            
                 ]
               ) ;
