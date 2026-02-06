@@ -3,6 +3,9 @@ kind: Job
 metadata:
   name: geonames-sparql-reindex
   namespace: nde
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: Enabled
+    reconcile.fluxcd.io/requestedAt: "2026-02-06"
 spec:
   template:
     spec:
