@@ -108,10 +108,9 @@ spec:
               text:directory <file:/data/index> ;
               text:entityMap :entityMap ;
             
-              # The default analyzer skips tokens < 3 chars, such as country codes (‘NL’, ‘BE’).
-              # Matching such short tokens against name and alternateName is very slow,
-              # returning many irrelevant results.
-              # The countryCode field has its own analyzer, so country codes remain searchable there.
+              # The default analyzer skips tokens < 3 chars, such as country codes ('NL', 'BE').
+              # Matching such short tokens is very slow, returning many irrelevant results.
+              # Country code matching is handled in the SPARQL query instead.
               text:defineAnalyzers (
                 [ text:defineFilter :lengthFilter ;
                   text:filter [
@@ -120,14 +119,6 @@ spec:
                     text:params (
                       [ text:paramName "min" ; text:paramValue 3 ]
                       [ text:paramName "max" ; text:paramValue 2147483647 ]
-                    ) ] ]
-                [ text:defineFilter :countryCodeLengthFilter ;
-                  text:filter [
-                    a text:GenericFilter ;
-                    text:class "org.apache.lucene.analysis.miscellaneous.LengthFilter" ;
-                    text:params (
-                      [ text:paramName "min" ; text:paramValue 2 ]
-                      [ text:paramName "max" ; text:paramValue 2 ]
                     ) ] ]
               ) ;
               text:analyzer [
@@ -150,20 +141,7 @@ spec:
                   text:field "alternateName" ;
                   text:predicate gn:alternateName ;
                 ]
-                [
-                  text:field "countryCode" ;
-                  text:predicate gn:countryCode ;
-                  text:boost 2.0 ;                # Boost above alternateName matches.
-            
-                  # A custom analyzer that only applies to countryCode, which keeps country codes searchable.
-                  # Uses StandardTokenizer (not KeywordTokenizer) so that in multi-field queries
-                  # like "dorp be", the query is split into separate tokens and "be" can match the country code.
-                  # The countryCodeLengthFilter (min=2, max=2) skips non-country-code tokens like "dorp".
-                  text:analyzer [
-                    a text:ConfigurableAnalyzer ;
-                    text:tokenizer text:StandardTokenizer ;
-                    text:filters ( text:LowerCaseFilter :countryCodeLengthFilter ) ;
-                  ] ;            
-                ]
+                # countryCode is no longer in the text index;
+                # country code matching is handled in the SPARQL query instead.
               ) ;
             .
