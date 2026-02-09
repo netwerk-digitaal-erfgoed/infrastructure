@@ -135,7 +135,8 @@ spec:
                 [
                   text:field "name" ;
                   text:predicate gn:name ;
-                  text:boost 3.0 ;
+                  # text:boost is silently ignored (never implemented in Jena, removed from Lucene in 7.0).
+                  # Boosting is done at query time using Lucene's ^N syntax in the SPARQL query instead.
                 ]
                 [
                   text:field "alternateName" ;
