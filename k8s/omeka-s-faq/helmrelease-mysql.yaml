@@ -16,12 +16,11 @@ spec:
   values:
     workload:
       type: statefulset
-
     containers:
       - name: mariadb
         image:
           repository: mariadb
-          tag: "11.4.9" # {"$imagepolicy": "nde:omeka-s-faq-mysql-mariadb:tag"}
+          tag: "11.4.10" # {"$imagepolicy": "nde:omeka-s-faq-mysql-mariadb:tag"}
         port: 3306
         flux:
           policy:
@@ -48,11 +47,9 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /var/lib/mysql
-
     persistentVolumes:
       - name: data
         size: 8Gi
-
     service:
       port: 3306
       targetPort: 3306
