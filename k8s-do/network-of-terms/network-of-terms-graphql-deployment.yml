@@ -25,6 +25,8 @@ spec:
               value: "http://opentelemetry-collector:4318"
             - name: TRUST_PROXY
               value: 'true'
+            - name: STATUS_SERVICE_URL
+              value: https://status.termennetwerk.netwerkdigitaalerfgoed.nl
           ports:
             - containerPort: 3123
           readinessProbe:

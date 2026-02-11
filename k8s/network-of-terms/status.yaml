@@ -32,6 +32,9 @@ spec:
               secretKeyRef:
                 name: network-of-terms-gtaa-credentials
                 key: credentials
+          - name: LDES_BASE_URL
+            value: https://status.termennetwerk.netwerkdigitaalerfgoed.nl
+
     ingresses:
       - hosts:
           - status.termennetwerk.netwerkdigitaalerfgoed.nl
