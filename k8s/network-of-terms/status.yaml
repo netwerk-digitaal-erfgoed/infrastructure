@@ -19,7 +19,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-status
-          tag: 20260211150749-d1513c3 # {"$imagepolicy": "nde:network-of-terms-status:tag"}
+          tag: 20260211190127-4e0edac # {"$imagepolicy": "nde:network-of-terms-status:tag"}
         port: 3000
         env:
           - name: DATABASE_URL
@@ -34,7 +34,6 @@ spec:
                 key: credentials
           - name: LDES_BASE_URL
             value: https://status.termennetwerk.netwerkdigitaalerfgoed.nl
-
     ingresses:
       - hosts:
           - status.termennetwerk.netwerkdigitaalerfgoed.nl
