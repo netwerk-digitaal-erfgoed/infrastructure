@@ -25,7 +25,7 @@ spec:
       - name: app
         image:
           repository: adfreiburg/qlever
-          tag: REBUILD-INDEX-BETA@sha256:ce9317e811a3c9892fa42d7a99ec0d3db856afb41749984f6145b3f125df8c7c
+          tag: commit-3436848
         flux:
           enabled: false
         port: 7001
