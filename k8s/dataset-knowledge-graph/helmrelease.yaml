@@ -27,7 +27,7 @@ spec:
           - name: QLEVER_PORT
             value: "7100"
           - name: SPARQL_UPDATE_URL
-            value: "http://graphdb"
+            value: "http://graphdb/repositories/dataset-knowledge-graph/statements"
           - name: SPARQL_UPDATE_AUTHORIZATION
             valueFrom:
               secretKeyRef:
