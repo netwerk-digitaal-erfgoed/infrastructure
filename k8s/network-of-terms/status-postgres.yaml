@@ -20,7 +20,7 @@ spec:
       - name: app
         image:
           repository: postgres
-          tag: "18.2-alpine" # {"$imagepolicy": "nde:status-postgres:tag"}
+          tag: "18.3-alpine" # {"$imagepolicy": "nde:status-postgres:tag"}
         flux:
           policy:
             type: semver
