@@ -19,7 +19,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-status
-          tag: 20260227103342-8d1fe0c # {"$imagepolicy": "nde:network-of-terms-status:tag"}
+          tag: 20260227133904-2a188b4 # {"$imagepolicy": "nde:network-of-terms-status:tag"}
         port: 3000
         env:
           - name: DATABASE_URL
