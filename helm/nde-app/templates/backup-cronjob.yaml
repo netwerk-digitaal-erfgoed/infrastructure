@@ -56,13 +56,5 @@ spec:
                 {{- with .env }}
                 {{- toYaml . | nindent 16 }}
                 {{- end }}
-              {{- with .volumeMounts }}
-              volumeMounts:
-                {{- toYaml . | nindent 16 }}
-              {{- end }}
-          {{- with .volumes }}
-          volumes:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
           restartPolicy: OnFailure
 {{- end }}

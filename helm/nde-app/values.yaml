@@ -121,8 +121,6 @@ backup: {}
   # s3:
   #   secretName: backup-s3     # Optional, defaults to backup-s3
   # env: []                      # Optional extra env vars
-  # volumeMounts: []             # Optional, for file-based backups
-  # volumes: []                  # Optional, for file-based backups
 
 # CNAME DNS records (via ExternalDNS)
 cnames: []
