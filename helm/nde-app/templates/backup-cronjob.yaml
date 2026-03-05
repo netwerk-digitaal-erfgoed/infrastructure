@@ -1,5 +1,6 @@
 {{- with .Values.backup }}
 {{- $secretName := (.s3).secretName | default "backup-s3" }}
+{{- $defaultImage := printf "%s:%s" (index $.Values.containers 0).image.repository (index $.Values.containers 0).image.tag }}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -18,7 +19,7 @@ spec:
         spec:
           containers:
             - name: backup
-              image: {{ required "backup.image is required" .image }}
+              image: {{ .image | default $defaultImage }}
               command: ["/bin/sh"]
               args:
                 - -c

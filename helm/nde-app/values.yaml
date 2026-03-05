@@ -116,7 +116,7 @@ cronjobs: []
 # Backup to S3 (generates a CronJob that pipes command output to S3)
 backup: {}
   # schedule: "0 3 * * *"       # Optional, defaults to daily at 3am
-  # image: amazon/aws-cli:2.27.31  # Required, must include backup tools and aws-cli
+  # image: ""                    # Optional, defaults to first container's image
   # command: "pg_dump -U user -d db"  # Required, must output to stdout (gzip is added automatically)
   # s3:
   #   secretName: backup-s3     # Optional, defaults to backup-s3
