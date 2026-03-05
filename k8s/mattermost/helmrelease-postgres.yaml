@@ -20,7 +20,13 @@ spec:
       - name: app
         image:
           repository: postgres
-          tag: "17-alpine"
+          tag: "18.3-alpine" # {"$imagepolicy": "nde:mattermost-postgres:tag"}
+        flux:
+          policy:
+            type: semver
+            pattern: '^(?P<version>\d+\.\d+)-alpine$'
+            extract: '$version.0'
+            range: "~18"
         port: 5432
         env:
           - name: POSTGRES_DB
@@ -35,10 +41,16 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /var/lib/postgresql
-            subPath: postgres
     persistentVolumes:
       - name: data
         size: 10Gi
     service:
       port: 5432
-      targetPort: 5432
+    backup:
+      command: "pg_dump -h mattermost-postgres -U mattermost -d mattermost"
+      env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mattermost-postgres
+              key: password
