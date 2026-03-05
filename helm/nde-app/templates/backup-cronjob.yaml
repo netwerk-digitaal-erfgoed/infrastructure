@@ -25,7 +25,7 @@ spec:
                 - -c
                 - |
                   set -eu
-                  apk add --no-cache s3cmd
+                  pip install --break-system-packages s3cmd 2>/dev/null || apk add --no-cache s3cmd
                   S3_HOST=$(echo "$S3_ENDPOINT" | sed 's|https\?://||')
                   FILENAME="{{ include "nde-app.fullname" $ }}/$(date +%Y-%m-%d_%H%M%S).gz"
                   {{ .command }} | gzip | \
