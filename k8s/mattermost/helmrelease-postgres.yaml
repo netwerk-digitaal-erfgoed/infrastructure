@@ -42,3 +42,11 @@ spec:
     service:
       port: 5432
       targetPort: 5432
+    backup:
+      command: "pg_dump -h mattermost-postgres -U mattermost -d mattermost"
+      env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mattermost-postgres
+              key: password
