@@ -40,6 +40,8 @@ spec:
                 key: datasource
           - name: MM_EMAILSETTINGS_SENDEMAILNOTIFICATIONS
             value: "true"
+          - name: MM_EMAILSETTINGS_SMTPAUTH
+            value: "true"
           - name: MM_EMAILSETTINGS_SMTPSERVER
             value: smtp.lettermint.co
           - name: MM_EMAILSETTINGS_SMTPPORT
