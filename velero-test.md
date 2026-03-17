@@ -7,8 +7,6 @@ The first one doesn't change the helmrelease, this doesn't change the helm chart
 The second one adds a "backup.enabled=true", this adds the annotation for velero. It picks all volumes mentioned in the helmrelease.
 The third one overwrites the volumes to be backed up to a single one, so you can select specifically.
 
-(Note that to test it locally, I commented out some ingress / image automation parts, and reduced the memory request.)
-
 To add it in a helmrelease, add this backup block.
 ```
 ....
