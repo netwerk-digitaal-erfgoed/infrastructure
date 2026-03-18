@@ -183,7 +183,7 @@ spec:
 
             [server]
             PORT               = 7001
-            MEMORY_FOR_QUERIES = 5G
+            MEMORY_FOR_QUERIES = 8G
             CACHE_MAX_SIZE     = 2G
             TIMEOUT            = 30s
             PERSIST_UPDATES    = true
