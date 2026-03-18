@@ -8,8 +8,14 @@ metadata:
     {{- include "nde-app.labels" $ | nindent 4 }}
 spec:
   schedule: {{ required "cronjobs[].schedule is required" .schedule | quote }}
+  {{- with .concurrencyPolicy }}
+  concurrencyPolicy: {{ . }}
+  {{- end }}
   jobTemplate:
     spec:
+      {{- with .backoffLimit }}
+      backoffLimit: {{ . }}
+      {{- end }}
       template:
         metadata:
           labels:
