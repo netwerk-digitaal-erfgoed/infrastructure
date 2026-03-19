@@ -21,6 +21,12 @@ spec:
         # https://v3.helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
         checksum/config: {{ toYaml .Values.configMaps | sha256sum }}
       {{- end }}
+      {{- if .Values.backup.enabled }}
+        {{- $backupVols := include "nde-app.backupVolumeNames.workload" . }}
+        {{- if $backupVols }}
+        backup.velero.io/backup-volumes: {{ $backupVols | quote }}
+        {{- end }}
+      {{- end }}
       labels:
         {{- include "nde-app.selectorLabels" . | nindent 8 }}
         app: {{ include "nde-app.fullname" . }}
