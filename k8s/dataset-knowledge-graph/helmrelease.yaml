@@ -18,7 +18,7 @@ spec:
         size: 500Gi
     cronjobs:
       - name: app
-        schedule: "15 1 * * *"
+        schedule: "45 13 * * *"
         concurrencyPolicy: Replace
         backoffLimit: 1
         image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph
