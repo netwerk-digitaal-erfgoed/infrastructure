@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: dataset-knowledge-graph
 spec:
-  schedule: "15 3 * * *"
+  schedule: "25 13 * * *"
   jobTemplate:
     spec:
       template:
