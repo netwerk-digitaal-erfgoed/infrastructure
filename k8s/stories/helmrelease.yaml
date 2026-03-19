@@ -20,7 +20,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/stories
-          tag: 20251201155721-86cc193 # {"$imagepolicy": "nde:stories:tag"}
+          tag: 20260319122758-34bcd38 # {"$imagepolicy": "nde:stories:tag"}
         port: 80
     ingresses:
       - hosts:
