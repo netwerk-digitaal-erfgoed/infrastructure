@@ -57,6 +57,11 @@ spec:
     ingresses:
       - hosts:
           - triplestore.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/enable-cors: "true"
+          nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+          nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
+          nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Accept"
         paths:
           - path: /
             pathType: Prefix
