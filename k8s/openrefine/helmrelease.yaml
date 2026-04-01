@@ -30,6 +30,13 @@ spec:
           policy:
             type: semver
             range: '>=3.9.3 <4.0.0'
+        resources:
+          requests:
+            cpu: "250m"
+            memory: 1Gi
+          limits:
+            cpu: "1"
+            memory: 2Gi
     ingresses:
       - hosts:
           - openrefine.netwerkdigitaalerfgoed.nl
