@@ -23,6 +23,13 @@ spec:
           initContainers:
             - name: prepare-fuseki
               image: stain/jena-fuseki:5.1.0 # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
+              resources:
+                requests:
+                  cpu: "2"
+                  memory: 6Gi
+                limits:
+                  cpu: "4"
+                  memory: 8Gi
               volumeMounts:
                 - name: data
                   mountPath: /data
@@ -46,6 +53,13 @@ spec:
           containers:
             - name: restart-server
               image: bitnami/kubectl:latest
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: 250m
+                  memory: 384Mi
               volumeMounts:
                 - name: data
                   mountPath: /data
