@@ -29,10 +29,10 @@ spec:
         port: 3030
         resources:
           requests:
-            cpu: 2
+            cpu: 500m
             memory: 8Gi
           limits:
-            cpu: 4
+            cpu: 2
             memory: 14Gi
         env:
           - name: JVM_ARGS
