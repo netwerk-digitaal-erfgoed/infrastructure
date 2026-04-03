@@ -30,6 +30,8 @@ spec:
         resources:
           requests:
             memory: 8Gi
+          limits:
+            memory: 10Gi
         env:
           - name: JVM_ARGS
             value: "-Xmx8g -Xlog:gc*:stdout:time,level,tags"
