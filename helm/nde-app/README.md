@@ -60,3 +60,39 @@ This creates an Ingress with `external-dns.alpha.kubernetes.io/target` annotatio
 Kubernetes does not automatically restart pods when a ConfigMap changes. 
 This chart adds a checksum of the ConfigMap contents as a pod annotation (`checksum/config`),
 ensuring pods restart when the configuration changes.
+
+## Velero Volume Backups
+
+Velero backup annotation support is opt-in.
+
+Default behavior (no HelmRelease changes needed):
+
+```yaml
+backup:
+  enabled: false
+```
+
+Enable Velero backup annotation on pod templates:
+
+```yaml
+backup:
+  enabled: true
+```
+
+When enabled, the chart sets `backup.velero.io/backup-volumes` automatically using PVC-backed volume names from:
+
+- `persistence.name` (StatefulSet single volume)
+- `persistentVolumes[].name` (StatefulSet multiple volumeClaimTemplates)
+- `volumes[].name` where `volumes[].persistentVolumeClaim` is set
+
+You can override auto-detection with explicit names:
+
+```yaml
+backup:
+  enabled: true
+  volumes:
+    - data
+    - fuseki
+```
+
+For CronJobs, you can also set `cronjobs[].backupVolumes` to override per job.
