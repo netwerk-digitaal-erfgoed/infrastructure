@@ -3,7 +3,7 @@ kind: HelmRelease
 metadata:
   name: dataset-register-qlever
   annotations:
-    reconcile.fluxcd.io/forceAt: "2026-01-23T20:15:00Z"
+    reconcile.fluxcd.io/forceAt: "2026-04-05T11:54:24Z"
 spec:
   serviceAccountName: nde
   interval: 30m
