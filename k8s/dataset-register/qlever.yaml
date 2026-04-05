@@ -170,13 +170,13 @@ spec:
           Qleverfile: |
             [data]
             NAME              = dataset-register
-            GET_DATA_CMD      = curl -sS -O https://dataset-register.ams3.digitaloceanspaces.com/cleaned-up-registrations.nq
+            GET_DATA_CMD      = curl -sS -O https://dataset-register.ams3.digitaloceanspaces.com/data.nq
             TEXT_DESCRIPTION  = All literals, search with FILTER CONTAINS(?var, "...")
             DESCRIPTION       = NDE Dataset Register
             FORMAT            = nq
 
             [index]
-            INPUT_FILES     = cleaned-up-registrations.nq
+            INPUT_FILES     = data.nq
             CAT_INPUT_FILES = cat ${INPUT_FILES}
             SETTINGS_JSON   = { "ascii-prefixes-only": true, "num-triples-per-batch": 100000 }
             TEXT_INDEX      = none
