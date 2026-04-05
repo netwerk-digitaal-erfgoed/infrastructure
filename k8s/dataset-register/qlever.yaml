@@ -2,8 +2,6 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: dataset-register-qlever
-  annotations:
-    reconcile.fluxcd.io/forceAt: "2026-04-05T17:11:24Z"
 spec:
   serviceAccountName: nde
   interval: 30m
@@ -55,7 +53,7 @@ spec:
             path: /?query=ASK%20%7B%7D
             port: 7001
           timeoutSeconds: 5
-          failureThreshold: 10
+          failureThreshold: 3
         volumeMounts:
           - name: data
             mountPath: /data
@@ -67,6 +65,9 @@ spec:
           - sh
           - -c
           - |
+            # Trap SIGTERM so kubelet (and kill 1) can terminate PID 1 cleanly.
+            trap 'echo "SIGTERM received, stopping qlever-server"; qlever stop --access-token "$ACCESS_TOKEN" 2>/dev/null || true; exit 0' TERM INT
+
             # Copy Qleverfile so it's not mounted in /data (avoids issues with rebuild-index moving files)
             cp /config/Qleverfile Qleverfile
 
