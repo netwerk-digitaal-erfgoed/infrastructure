@@ -94,7 +94,21 @@ spec:
               sleep $sleep_seconds
 
               echo "Starting index rebuild at $(date)"
-              if qlever rebuild-index --access-token "$ACCESS_TOKEN" --keep-old-index-dirs all; then
+              qlever rebuild-index --access-token "$ACCESS_TOKEN" --keep-old-index-dirs all
+
+              # rebuild-index may silently fail (https://github.com/ad-freiburg/qlever/issues/2806)
+              # but still move the old index to previous.*. Check and revert if needed.
+              if [ ! -f dataset-register.meta-data.json ]; then
+                echo "ERROR: index missing after rebuild at $(date), restoring from previous..."
+                latest_prev=$(ls -dt previous.* 2>/dev/null | head -1)
+                if [ -n "$latest_prev" ]; then
+                  mv "$latest_prev"/dataset-register.* . 2>/dev/null || true
+                  mv "$latest_prev"/Qleverfile . 2>/dev/null || true
+                  echo "Restored index from $latest_prev at $(date)"
+                else
+                  echo "FATAL: no previous index to restore from at $(date)"
+                fi
+              else
                 echo "Rebuild complete at $(date), restarting server..."
                 qlever stop
 
@@ -106,8 +120,6 @@ spec:
                 done
 
                 start_server
-              else
-                echo "ERROR: rebuild-index failed"
               fi
             done
       - name: s3-sync
