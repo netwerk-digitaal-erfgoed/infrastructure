@@ -19,7 +19,7 @@ spec:
       - name: nginx
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-nginx
-          tag: 20260331184026-8d5810d # {"$imagepolicy": "nde:dataset-register-demo-nginx:tag"}
+          tag: 20260408130017-2f938a6 # {"$imagepolicy": "nde:dataset-register-demo-nginx:tag"}
         port: 80
         volumeMounts:
           - mountPath: /datasetdescriptions
