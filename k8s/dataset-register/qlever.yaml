@@ -23,7 +23,7 @@ spec:
       - name: app
         image:
           repository: adfreiburg/qlever
-          tag: commit-9ec88a0
+          tag: commit-4d113e0
         flux:
           enabled: false
         port: 7001
