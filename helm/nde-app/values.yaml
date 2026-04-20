@@ -74,6 +74,13 @@ volumes: []
   #   configMap:
   #     name: my-config
 
+# Velero pod volume backup annotation
+backup:
+  enabled: false
+  # Optional explicit volume names for backup.velero.io/backup-volumes.
+  # If empty, the chart auto-detects PVC-backed volume names from values.
+  volumes: []
+
 # Persistence (StatefulSet only) - single volume
 persistence:
   enabled: false
