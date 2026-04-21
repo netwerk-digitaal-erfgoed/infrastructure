@@ -36,6 +36,8 @@ spec:
             pathType: Prefix
           - path: /en
             pathType: Prefix
+          - path: /proxy
+            pathType: Prefix
           - path: /sitemap.xml
             pathType: Prefix
           - path: /robots.txt
