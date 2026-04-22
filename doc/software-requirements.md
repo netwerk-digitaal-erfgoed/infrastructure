@@ -33,7 +33,7 @@ See [CLARIAH #15](https://github.com/CLARIAH/clariah-plus/blob/main/requirements
 
 ### 5. The container must be continuously tagged with an incremental version number.
 
-The container MUST be re-tagged and released as a new Docker image continuously to reflect ongoing updates and
+The container MUST be re-tagged and released as a new Docker image continuously to reflect updates and
 maintenance (e.g. dependency upgrades, security patches, bug fixes).
 
 The tag must either be a [semantic version increment](https://semver.org) or a simple timestamp-based increment
