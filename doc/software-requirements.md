@@ -31,9 +31,9 @@ The software service MUST be packaged as an [OCI](https://opencontainers.org) co
 
 See [CLARIAH #15](https://github.com/CLARIAH/clariah-plus/blob/main/requirements/software-requirements.md#15-services-must-be-packaged-as-containers).
 
-### 5. The container must be periodically tagged with an incremental version number.
+### 5. The container must be continuously tagged with an incremental version number.
 
-The container MUST be re-tagged and released as a new Docker image periodically to reflect ongoing updates and
+The container MUST be re-tagged and released as a new Docker image continuously to reflect ongoing updates and
 maintenance (e.g. dependency upgrades, security patches, bug fixes).
 
 The tag must either be a [semantic version increment](https://semver.org) or a simple timestamp-based increment
