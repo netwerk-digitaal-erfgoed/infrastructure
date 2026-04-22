@@ -42,5 +42,5 @@ spec:
             pathType: Prefix
           - path: /robots.txt
             pathType: Prefix
-          - path: /validate
-            pathType: Prefix
+          - path: /validate(/|$)(.*)
+            pathType: ImplementationSpecific
