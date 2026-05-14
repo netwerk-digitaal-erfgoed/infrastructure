@@ -19,7 +19,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-api
-          tag: 20260514122441-58e628a # {"$imagepolicy": "nde:dataset-register-api:tag"}
+          tag: 20260514131419-a40ba3f # {"$imagepolicy": "nde:dataset-register-api:tag"}
         port: 3000
         env:
           - name: SPARQL_URL
