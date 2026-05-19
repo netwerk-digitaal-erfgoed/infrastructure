@@ -4,7 +4,7 @@ metadata:
   name: geonames-sparql-indexer
   namespace: nde
 spec:
-  schedule: "22 18 19 5 *"
+  schedule: "0 2 * * *"
   concurrencyPolicy: Replace
   jobTemplate:
     spec:
