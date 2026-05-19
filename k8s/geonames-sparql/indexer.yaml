@@ -5,6 +5,7 @@ metadata:
   namespace: nde
 spec:
   schedule: "0 2 * * *"
+  concurrencyPolicy: Replace
   jobTemplate:
     spec:
       template:
