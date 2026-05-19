@@ -48,6 +48,7 @@ spec:
                   curl -sS -O https://geonames.ams3.digitaloceanspaces.com/geonames.zip
                   unzip geonames.zip
                   ./tdbloader2 --loc=/data/tdb geonames.ttl
+                  rm -f /data/tdb/tdb.lock
                   echo "Creating Lucene index..."
                   java $JVM_ARGS -cp $FUSEKI_HOME/fuseki-server.jar jena.textindexer --desc=/fuseki-config/config.ttl
                   chmod -R g+w /data/*
