@@ -26,9 +26,6 @@ spec:
   values:
     workload:
       type: statefulset
-      # TEMP: scale to 0 to break the OrderedReady deadlock again.
-      # Restore to 1 once the failing pod is gone.
-      replicas: 0
 
     containers:
       - name: app
@@ -48,19 +45,17 @@ spec:
             cpu: 2
             memory: 14Gi
         env:
-          # Override FUSEKI_BASE so it points at $FUSEKI_HOME (which the image
-          # owns as the fuseki user). The default /fuseki/run isn't writable
-          # in our setup because the subPath mount auto-creates it as root.
-          - name: FUSEKI_BASE
-            value: /fuseki
-          # Apache's entrypoint reads JAVA_OPTIONS, not JVM_ARGS. Set both for safety.
+          # Apache's entrypoint reads JAVA_OPTIONS (not JVM_ARGS, which the old stain image used).
           - name: JAVA_OPTIONS
             value: "-Xmx8g -Xlog:gc*:stdout:time,level,tags"
-          - name: JVM_ARGS
-            value: "-Xmx8g -Xlog:gc*:stdout:time,level,tags"
         volumeMounts:
+          # Writable emptyDir for FUSEKI_BASE (default /fuseki/run). Fuseki creates
+          # shiro.ini, configuration/, system/ etc. here. State is regenerable, ephemeral
+          # by design.
+          - name: fuseki-run
+            mountPath: /fuseki/run
           - name: config
-            mountPath: /fuseki/config.ttl
+            mountPath: /fuseki/run/config.ttl
             subPath: config.ttl
           - name: data
             mountPath: /data
@@ -79,6 +74,8 @@ spec:
       - name: config
         configMap:
           name: geonames-sparql-fuseki-config
+      - name: fuseki-run
+        emptyDir: {}
 
     persistentVolumes:
       - name: data
