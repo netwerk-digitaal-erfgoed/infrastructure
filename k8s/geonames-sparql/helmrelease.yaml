@@ -26,6 +26,9 @@ spec:
   values:
     workload:
       type: statefulset
+      # TEMP: scale to 0 to break the OrderedReady deadlock again.
+      # Restore to 1 once the failing pod is gone.
+      replicas: 0
 
     containers:
       - name: app
