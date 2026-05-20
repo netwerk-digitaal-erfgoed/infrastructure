@@ -26,10 +26,6 @@ spec:
   values:
     workload:
       type: statefulset
-      # TEMP: scaled to 0 to unblock a stuck rollout caused by the OrderedReady
-      # podManagementPolicy + CrashLoopBackOff pod. Restore to 1 once the old
-      # pod is gone.
-      replicas: 0
 
     containers:
       - name: app
