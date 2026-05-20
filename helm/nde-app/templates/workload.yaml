@@ -13,14 +13,14 @@ spec:
       {{- include "nde-app.selectorLabels" . | nindent 6 }}
   {{- if eq .Values.workload.type "statefulset" }}
   serviceName: {{ include "nde-app.fullname" . }}
-  # Optional opt-in: set workload.podManagementPolicy in values to override the
-  # K8s default (OrderedReady). Recommended for new single-replica StatefulSets:
-  #   workload:
-  #     podManagementPolicy: Parallel
-  # NOTE: podManagementPolicy is IMMUTABLE — emitting it for an existing SS will
-  # fail on helm upgrade if the value differs from the current live spec.
-  {{- with .Values.workload.podManagementPolicy }}
-  podManagementPolicy: {{ . }}
+  # New StatefulSets default to Parallel. podManagementPolicy is IMMUTABLE on
+  # an existing SS, so for upgrades we omit the field (K8s preserves the live
+  # value, which is OrderedReady for SS created without this default). Explicit
+  # override via .Values.workload.podManagementPolicy is honored either way.
+  {{- if .Values.workload.podManagementPolicy }}
+  podManagementPolicy: {{ .Values.workload.podManagementPolicy }}
+  {{- else if .Release.IsInstall }}
+  podManagementPolicy: Parallel
   {{- end }}
   {{- end }}
   template:
