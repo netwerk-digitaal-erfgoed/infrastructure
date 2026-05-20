@@ -20,12 +20,12 @@ spec:
     containers:
       - name: app
         image:
-          repository: stain/jena-fuseki
-          tag: "5.1.0" # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
+          repository: netwerkdigitaalerfgoed/fuseki
+          tag: "6.1.0" # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
         flux:
           policy:
             type: semver
-            range: ">=5.1.0"
+            range: ">=6.1.0"
         port: 3030
         resources:
           requests:
