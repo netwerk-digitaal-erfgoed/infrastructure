@@ -32,6 +32,11 @@ spec:
         image:
           repository: netwerkdigitaalerfgoed/fuseki
           tag: "6.1.0" # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
+        # Fuseki Main does not auto-load $FUSEKI_BASE/config.ttl — it must be
+        # passed explicitly via --config. Without this, Fuseki starts admin-only
+        # with no datasets and /sparql returns 404.
+        args:
+          - --config=/fuseki/run/config.ttl
         flux:
           policy:
             type: semver
