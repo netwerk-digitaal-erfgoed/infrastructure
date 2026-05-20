@@ -26,7 +26,9 @@ spec:
           serviceAccountName: statefulset-manager
           initContainers:
             - name: prepare-fuseki
-              image: stain/jena-fuseki:5.1.0 # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
+              # Pinned: indexer still uses tdbloader2 (TDB1-era loader bundled in stain/jena-fuseki).
+              # Migrate to netwerkdigitaalerfgoed/fuseki + tdb2.xloader in a separate PR.
+              image: stain/jena-fuseki:5.1.0
               resources:
                 requests:
                   cpu: "1"

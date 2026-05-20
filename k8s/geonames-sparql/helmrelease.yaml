@@ -20,12 +20,12 @@ spec:
     containers:
       - name: app
         image:
-          repository: stain/jena-fuseki
-          tag: "5.1.0" # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
+          repository: netwerkdigitaalerfgoed/fuseki
+          tag: "6.1.0" # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
         flux:
           policy:
             type: semver
-            range: ">=5.1.0"
+            range: ">=6.1.0"
         port: 3030
         resources:
           requests:
@@ -38,8 +38,6 @@ spec:
           - name: JVM_ARGS
             value: "-Xmx8g -Xlog:gc*:stdout:time,level,tags"
         volumeMounts:
-          - name: fuseki
-            mountPath: /fuseki
           - name: config
             mountPath: /fuseki/config.ttl
             subPath: config.ttl
@@ -64,6 +62,9 @@ spec:
     persistentVolumes:
       - name: data
         size: 50Gi
+      # Retained but no longer mounted. Fuseki 6.1 runs entirely from its image.
+      # Safe to delete this entry (and the orphaned PVC) once we are sure
+      # nothing in /fuseki is needed.
       - name: fuseki
         size: 10Gi
 
