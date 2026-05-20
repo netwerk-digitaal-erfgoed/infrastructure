@@ -45,14 +45,19 @@ spec:
             cpu: 2
             memory: 14Gi
         env:
+          # Override FUSEKI_BASE so it points at $FUSEKI_HOME (which the image
+          # owns as the fuseki user). The default /fuseki/run isn't writable
+          # in our setup because the subPath mount auto-creates it as root.
+          - name: FUSEKI_BASE
+            value: /fuseki
+          # Apache's entrypoint reads JAVA_OPTIONS, not JVM_ARGS. Set both for safety.
+          - name: JAVA_OPTIONS
+            value: "-Xmx8g -Xlog:gc*:stdout:time,level,tags"
           - name: JVM_ARGS
             value: "-Xmx8g -Xlog:gc*:stdout:time,level,tags"
         volumeMounts:
           - name: config
-            # Fuseki 6 reads its config from $FUSEKI_BASE/config.ttl, which is
-            # /fuseki/run/config.ttl with Apache's recipe (FUSEKI_BASE=/fuseki/run).
-            # The old stain image had FUSEKI_BASE=/fuseki, so /fuseki/config.ttl worked there.
-            mountPath: /fuseki/run/config.ttl
+            mountPath: /fuseki/config.ttl
             subPath: config.ttl
           - name: data
             mountPath: /data
