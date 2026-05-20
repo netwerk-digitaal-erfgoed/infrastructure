@@ -49,7 +49,10 @@ spec:
             value: "-Xmx8g -Xlog:gc*:stdout:time,level,tags"
         volumeMounts:
           - name: config
-            mountPath: /fuseki/config.ttl
+            # Fuseki 6 reads its config from $FUSEKI_BASE/config.ttl, which is
+            # /fuseki/run/config.ttl with Apache's recipe (FUSEKI_BASE=/fuseki/run).
+            # The old stain image had FUSEKI_BASE=/fuseki, so /fuseki/config.ttl worked there.
+            mountPath: /fuseki/run/config.ttl
             subPath: config.ttl
           - name: data
             mountPath: /data
