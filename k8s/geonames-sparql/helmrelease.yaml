@@ -13,6 +13,16 @@ spec:
       sourceRef:
         kind: GitRepository
         name: nde
+  # Don't block helm upgrade on pod readiness — let the StatefulSet controller
+  # roll the pod on its own schedule. Otherwise a CrashLoopBackOff pod stalls
+  # Flux retries for 5 minutes per attempt.
+  install:
+    disableWait: true
+  upgrade:
+    disableWait: true
+    # Force `helm upgrade --force`: replace (delete + create) resources instead
+    # of patching. Bypasses StatefulSet rollouts that are stuck mid-update.
+    force: true
   values:
     workload:
       type: statefulset
