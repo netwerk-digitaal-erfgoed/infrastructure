@@ -96,7 +96,8 @@ spec:
       targetPort: 3030
 
     ingresses:
-      - hosts:
+      - ingressClassName: nginx-shared
+        hosts:
           - geonames.netwerkdigitaalerfgoed.nl
         paths:
           - path: /

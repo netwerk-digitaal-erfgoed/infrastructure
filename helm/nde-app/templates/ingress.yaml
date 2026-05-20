@@ -25,6 +25,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- with $ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+  {{- end }}
   {{- if $ingress.hosts }}
   {{- if and (ne (($ingress.tls).enabled) false) (or $isFirst (($ingress.tls).enabled)) }}
   tls:
