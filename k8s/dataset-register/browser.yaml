@@ -30,6 +30,8 @@ spec:
       - hosts:
           - datasetregister.netwerkdigitaalerfgoed.nl
         paths:
+          - path: /dataset
+            pathType: Prefix
           - path: /datasets
             pathType: Prefix
           - path: /_app
