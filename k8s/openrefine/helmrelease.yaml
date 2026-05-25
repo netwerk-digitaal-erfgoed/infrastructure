@@ -17,7 +17,7 @@ spec:
       - name: app
         image:
           repository: easypi/openrefine
-          tag: 3.9.5 # {"$imagepolicy": "nde:openrefine:tag"}
+          tag: 3.10.1 # {"$imagepolicy": "nde:openrefine:tag"}
         env:
           - name: REFINE_EXTRA_OPTS
             value: refine.display.new.version.notice=false
