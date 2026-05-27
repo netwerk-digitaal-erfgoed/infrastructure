@@ -4,7 +4,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dataset-knowledge-graph-manual-2026-05-22
+  name: dataset-knowledge-graph-manual-2026-05-27-a
   namespace: nde
   labels:
     app.kubernetes.io/name: dataset-knowledge-graph
