@@ -18,6 +18,13 @@ spec:
       {{- end }}
       template:
         metadata:
+          {{- if $.Values.backup.enabled }}
+          {{- $backupVols := include "nde-app.backupVolumeNames.cronjob" (list $ .) }}
+          {{- if $backupVols }}
+          annotations:
+            backup.velero.io/backup-volumes: {{ $backupVols | quote }}
+          {{- end }}
+          {{- end }}
           labels:
             {{- include "nde-app.selectorLabels" $ | nindent 12 }}
             app: {{ include "nde-app.fullname" $ }}-{{ .name }}
