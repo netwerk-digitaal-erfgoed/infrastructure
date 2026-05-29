@@ -1,12 +1,15 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: geonames-sparql-reindex-6
+  name: geonames-sparql-reindex-7
   namespace: nde
   annotations:
     kustomize.toolkit.fluxcd.io/force: Enabled
     reconcile.fluxcd.io/requestedAt: "2026-05-29T10:02:47Z"
 spec:
+  # One attempt: on failure the init scripts hold the pod alive (sleep) so its logs
+  # stay readable in the Dashboard — so we don't want the Job to retry/recreate.
+  backoffLimit: 0
   template:
     spec:
       affinity:
@@ -53,20 +56,24 @@ spec:
             - sh
             - -c
             - |
-              set -e
-              rm -rf /data/*
+              # On any failure, keep the pod alive (sleep) so its logs stay readable in
+              # the Dashboard: we have no kubectl exec, and failed pods are GC'd quickly,
+              # which has lost us three xloader failures already. Prune the Job via GitOps
+              # once inspected (or it self-exits after the sleep).
+              fail() { echo "### prepare-tdb FAILED at: $1 (rc=$?) — holding pod 2h for log inspection ###"; sleep 7200; exit 1; }
+              rm -rf /data/* || fail "rm staging"
               # Do all bulk work (download, unzipped TTL, xloader temp files) on the
               # node-local scratch emptyDir, so the 50Gi data PVC only has to hold the
               # live production index plus the freshly built staging index.
-              cd /scratch
-              curl -sS -O https://geonames.ams3.digitaloceanspaces.com/geonames.zip
-              unzip geonames.zip
+              cd /scratch || fail "cd scratch"
+              curl -sS -O https://geonames.ams3.digitaloceanspaces.com/geonames.zip || fail "download"
+              unzip geonames.zip || fail "unzip"
               mkdir -p /scratch/tmp
-              tdb2.xloader --loc /data/tdb --tmpdir /scratch/tmp /scratch/geonames.ttl
+              tdb2.xloader --loc /data/tdb --tmpdir /scratch/tmp /scratch/geonames.ttl || fail "xloader"
               # Make the TDB2 store group-writable so the Fuseki server (group 100 via
               # fsGroup) can open it read-write after the swap. Done here because xloader
               # writes the files as root (this image's default user).
-              chmod -R g+w /data
+              chmod -R g+w /data || fail "chmod"
         # 2) Build the Lucene text index. jena.textindexer ships only in the Fuseki
         #    server jar (jena-text is not in the apache-jena CLI distribution), so run it
         #    from the Fuseki image — Apache's documented method
@@ -92,10 +99,11 @@ spec:
             - sh
             - -c
             - |
-              set -e
+              # On failure, hold the pod alive so logs stay readable (see prepare-tdb).
+              fail() { echo "### build-text-index FAILED at: $1 (rc=$?) — holding pod 2h for log inspection ###"; sleep 7200; exit 1; }
               echo "Creating Lucene index..."
-              jar=$(ls /fuseki/jena-fuseki-server-*.jar)
-              "$JAVA_HOME/bin/java" -Xmx6g -cp "$jar" jena.textindexer --desc=/fuseki-config/config.ttl
+              jar=$(ls /fuseki/jena-fuseki-server-*.jar) || fail "find fuseki jar"
+              "$JAVA_HOME/bin/java" -Xmx6g -cp "$jar" jena.textindexer --desc=/fuseki-config/config.ttl || fail "textindexer"
       containers:
         - name: restart-server
           image: bitnami/kubectl:latest
