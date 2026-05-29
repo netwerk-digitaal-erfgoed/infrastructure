@@ -26,9 +26,11 @@ spec:
           serviceAccountName: statefulset-manager
           initContainers:
             - name: prepare-fuseki
-              # Pinned: indexer still uses tdbloader2 (TDB1-era loader bundled in stain/jena-fuseki).
-              # Migrate to netwerkdigitaalerfgoed/fuseki + tdb2.xloader in a separate PR.
-              image: stain/jena-fuseki:5.1.0
+              # Jena CLI tools image (tdb2.xloader, jena.textindexer on PATH), pinned to
+              # the SAME Jena version as the Fuseki server: the geonames-sparql-fuseki
+              # ImagePolicy resolves the tag and jena-tools is published in lockstep with
+              # fuseki (identical tags), so the loader and server never drift.
+              image: netwerkdigitaalerfgoed/jena-tools:6.1.0 # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
               resources:
                 requests:
                   cpu: "1"
@@ -42,20 +44,32 @@ spec:
                   subPath: staging
                 - name: fuseki-config
                   mountPath: /fuseki-config
+                - name: scratch
+                  mountPath: /scratch
               env:
+                # xloader uses external sort (which wants OS memory + page cache), not a
+                # large JVM heap, so keep the heap modest and leave room for sort(1).
                 - name: JVM_ARGS
-                  value: "-Xmx6G"
+                  value: "-Xmx4G"
               command:
                 - sh
                 - -c
                 - |
+                  set -e
                   rm -rf /data/*
+                  # Do all bulk work (download, unzipped TTL, xloader temp files) on the
+                  # node-local scratch emptyDir, so the 50Gi data PVC only has to hold the
+                  # live production index plus the freshly built staging index.
+                  cd /scratch
                   curl -sS -O https://geonames.ams3.digitaloceanspaces.com/geonames.zip
                   unzip geonames.zip
-                  ./tdbloader2 --loc=/data/tdb geonames.ttl
-                  rm -f /data/tdb/tdb.lock
+                  # tdb2.xloader: external-sort bulk loader for large datasets on bounded
+                  # memory. Builds a fresh TDB2 store; --tmpdir holds the large sort files.
+                  # tdb2.xloader and jena.textindexer are on PATH from the jena-tools image.
+                  mkdir -p /scratch/tmp
+                  tdb2.xloader --loc /data/tdb --tmpdir /scratch/tmp /scratch/geonames.ttl
                   echo "Creating Lucene index..."
-                  java $JVM_ARGS -cp $FUSEKI_HOME/fuseki-server.jar jena.textindexer --desc=/fuseki-config/config.ttl
+                  jena.textindexer --desc=/fuseki-config/config.ttl
                   chmod -R g+w /data/*
           containers:
             - name: restart-server
@@ -87,5 +101,10 @@ spec:
             - name: fuseki-config
               configMap:
                 name: geonames-sparql-fuseki-config
+            # Node-local scratch for download + unzipped TTL + xloader sort files.
+            # sizeLimit bounds it so an overflow evicts only this pod, not the node.
+            - name: scratch
+              emptyDir:
+                sizeLimit: 40Gi
           securityContext:
             fsGroup: 100
