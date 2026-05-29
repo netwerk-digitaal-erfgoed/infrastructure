@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: geonames-sparql-reindex-3
+  name: geonames-sparql-reindex-4
   namespace: nde
   annotations:
     kustomize.toolkit.fluxcd.io/force: Enabled
@@ -23,6 +23,13 @@ spec:
       initContainers:
         - name: prepare-fuseki
           image: stain/jena-fuseki:5.1.0 # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
+          resources:
+            requests:
+              cpu: "1"
+              memory: 4Gi
+            limits:
+              cpu: "3"
+              memory: 8Gi
           volumeMounts:
             - name: data
               mountPath: /data
@@ -31,7 +38,7 @@ spec:
               mountPath: /fuseki-config
           env:
             - name: JVM_ARGS
-              value: "-Xmx3600M"
+              value: "-Xmx6G"
           command:
             - sh
             - -c
