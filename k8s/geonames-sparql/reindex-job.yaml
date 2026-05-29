@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: geonames-sparql-reindex-4
+  name: geonames-sparql-reindex-5
   namespace: nde
   annotations:
     kustomize.toolkit.fluxcd.io/force: Enabled
@@ -36,19 +36,38 @@ spec:
               subPath: staging
             - name: fuseki-config
               mountPath: /fuseki-config
+            - name: scratch
+              mountPath: /scratch
           env:
+            # xloader uses external sort (which wants OS memory + page cache), not a
+            # large JVM heap, so keep the heap modest and leave room for sort(1).
             - name: JVM_ARGS
-              value: "-Xmx6G"
+              value: "-Xmx4G"
           command:
             - sh
             - -c
             - |
+              set -e
+              JENA_VERSION=6.1.0
               rm -rf /data/*
+              # Do all bulk work (download, unzipped TTL, xloader temp files) on the
+              # node-local scratch emptyDir, so the 50Gi data PVC only has to hold the
+              # live production index plus the freshly built staging index.
+              cd /scratch
               curl -sS -O https://geonames.ams3.digitaloceanspaces.com/geonames.zip
               unzip geonames.zip
-              ./tdbloader2 --loc=/data/tdb geonames.ttl
+              # The Fuseki image ships only the server, not the Jena CLI tools, so fetch
+              # the matching Apache Jena tools (tdb2.xloader, jena.textindexer) at runtime.
+              curl -sSL -O "https://repo1.maven.org/maven2/org/apache/jena/apache-jena/${JENA_VERSION}/apache-jena-${JENA_VERSION}.tar.gz"
+              tar xzf "apache-jena-${JENA_VERSION}.tar.gz"
+              export JENA_HOME="/scratch/apache-jena-${JENA_VERSION}"
+              export PATH="$JENA_HOME/bin:$PATH"
+              # tdb2.xloader: external-sort bulk loader for large datasets on bounded
+              # memory. Builds a fresh TDB2 store; --tmpdir holds the large sort files.
+              mkdir -p /scratch/tmp
+              tdb2.xloader --loc /data/tdb --tmpdir /scratch/tmp /scratch/geonames.ttl
               echo "Creating Lucene index..."
-              java $JVM_ARGS -cp $FUSEKI_HOME/fuseki-server.jar jena.textindexer --desc=/fuseki-config/config.ttl
+              jena.textindexer --desc=/fuseki-config/config.ttl
               chmod -R g+w /data/*
       containers:
         - name: restart-server
@@ -73,5 +92,10 @@ spec:
         - name: fuseki-config
           configMap:
             name: geonames-sparql-fuseki-config
+        # Node-local scratch for download + unzipped TTL + xloader sort files.
+        # sizeLimit bounds it so an overflow evicts only this pod, not the node.
+        - name: scratch
+          emptyDir:
+            sizeLimit: 40Gi
       securityContext:
         fsGroup: 100
