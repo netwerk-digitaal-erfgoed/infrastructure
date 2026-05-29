@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: geonames-sparql-reindex-2
+  name: geonames-sparql-reindex-3
   namespace: nde
   annotations:
     kustomize.toolkit.fluxcd.io/force: Enabled
