@@ -29,7 +29,10 @@ spec:
           resources:
             requests:
               cpu: "1"
-              memory: 4Gi
+              # xloader is memory-frugal (external sort, modest heap), so a 2Gi request
+              # is plenty for scheduling; the 8Gi limit covers the peak. Lower request =
+              # less pressure on the near-full nde namespace memory quota.
+              memory: 2Gi
             limits:
               cpu: "3"
               memory: 8Gi
