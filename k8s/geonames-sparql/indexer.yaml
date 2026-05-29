@@ -26,11 +26,11 @@ spec:
           serviceAccountName: statefulset-manager
           initContainers:
             - name: prepare-fuseki
-              # stain/jena-fuseki only provides a JRE + curl/unzip/tar; it ships neither
-              # the TDB2 tools nor (per netwerkdigitaalerfgoed/fuseki) the Jena CLI tools.
-              # So we fetch the matching Apache Jena tools at runtime and load with
-              # tdb2.xloader (external-sort, memory-frugal) instead of the TDB1 tdbloader2.
-              image: stain/jena-fuseki:5.1.0
+              # Jena CLI tools image (tdb2.xloader, jena.textindexer on PATH), pinned to
+              # the SAME Jena version as the Fuseki server: the geonames-sparql-fuseki
+              # ImagePolicy resolves the tag and jena-tools is published in lockstep with
+              # fuseki (identical tags), so the loader and server never drift.
+              image: netwerkdigitaalerfgoed/jena-tools:6.1.0 # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
               resources:
                 requests:
                   cpu: "1"
@@ -56,7 +56,6 @@ spec:
                 - -c
                 - |
                   set -e
-                  JENA_VERSION=6.1.0
                   rm -rf /data/*
                   # Do all bulk work (download, unzipped TTL, xloader temp files) on the
                   # node-local scratch emptyDir, so the 50Gi data PVC only has to hold the
@@ -64,14 +63,9 @@ spec:
                   cd /scratch
                   curl -sS -O https://geonames.ams3.digitaloceanspaces.com/geonames.zip
                   unzip geonames.zip
-                  # The Fuseki image ships only the server, not the Jena CLI tools, so fetch
-                  # the matching Apache Jena tools (tdb2.xloader, jena.textindexer) at runtime.
-                  curl -sSL -O "https://repo1.maven.org/maven2/org/apache/jena/apache-jena/${JENA_VERSION}/apache-jena-${JENA_VERSION}.tar.gz"
-                  tar xzf "apache-jena-${JENA_VERSION}.tar.gz"
-                  export JENA_HOME="/scratch/apache-jena-${JENA_VERSION}"
-                  export PATH="$JENA_HOME/bin:$PATH"
                   # tdb2.xloader: external-sort bulk loader for large datasets on bounded
                   # memory. Builds a fresh TDB2 store; --tmpdir holds the large sort files.
+                  # tdb2.xloader and jena.textindexer are on PATH from the jena-tools image.
                   mkdir -p /scratch/tmp
                   tdb2.xloader --loc /data/tdb --tmpdir /scratch/tmp /scratch/geonames.ttl
                   echo "Creating Lucene index..."
