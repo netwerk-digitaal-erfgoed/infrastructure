@@ -20,7 +20,7 @@ spec:
       - name: mariadb
         image:
           repository: mariadb
-          tag: "10.6.26" # {"$imagepolicy": "nde:omeka-mysql-mariadb:tag"}
+          tag: "10.6.27" # {"$imagepolicy": "nde:omeka-mysql-mariadb:tag"}
         port: 3306
         flux:
           policy:
