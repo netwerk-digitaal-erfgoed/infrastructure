@@ -4,7 +4,11 @@ metadata:
   name: geonames-sparql-indexer
   namespace: nde
 spec:
-  schedule: "0 2 * * *"
+  # Staggered to 04:00 so it does not collide with the dataset-knowledge-graph
+  # CronJob (02:00) on the shared, near-full node. Two 12Gi-class jobs running at
+  # once caused node memory pressure that got the reindex pod killed; the 2h gap
+  # lets dkg finish (and release its memory) before the reindex starts.
+  schedule: "0 4 * * *"
   concurrencyPolicy: Replace
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 3
