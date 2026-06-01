@@ -35,12 +35,16 @@ spec:
                 key: access-token
         resources:
           # requests = limits for Guaranteed QoS.
+          # Right-sized from 12Gi: qlever serves on ~0.7Gi (memory-mapped, frugal),
+          # so 12Gi reserved ~11Gi of standing quota it never used. 4Gi keeps a
+          # ~5.7x headroom over steady serving while freeing 8Gi on the near-full
+          # nde quota. Revisit if a bulk re-import needs more (its only real peak).
           requests:
             cpu: "2"
-            memory: 12Gi
+            memory: 4Gi
           limits:
             cpu: "2"
-            memory: 12Gi
+            memory: 4Gi
         startupProbe:
           httpGet:
             path: /?query=ASK%20%7B%7D
