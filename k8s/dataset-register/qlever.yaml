@@ -34,17 +34,19 @@ spec:
                 name: dataset-register-qlever
                 key: access-token
         resources:
-          # requests = limits for Guaranteed QoS.
-          # Right-sized from 12Gi: qlever serves on ~0.7Gi (memory-mapped, frugal),
-          # so 12Gi reserved ~11Gi of standing quota it never used. 4Gi keeps a
-          # ~5.7x headroom over steady serving while freeing 8Gi on the near-full
-          # nde quota. Revisit if a bulk re-import needs more (its only real peak).
+          # qlever is memory-mapped: the cgroup memory LIMIT bounds working set +
+          # mmap'd index page cache, NOT just RSS. Capping the limit too low starves
+          # the page cache and queries fault from disk (very slow) — the working-set
+          # metric stays ~0.7Gi and hides this. So keep the limit at 12Gi for caching
+          # headroom, but lower the request to 4Gi (~5.7x the ~0.7Gi working set) to
+          # free ~8Gi of standing request-quota on the near-full nde namespace.
+          # Burstable QoS as a result (request < limit).
           requests:
             cpu: "2"
             memory: 4Gi
           limits:
             cpu: "2"
-            memory: 4Gi
+            memory: 12Gi
         startupProbe:
           httpGet:
             path: /?query=ASK%20%7B%7D
