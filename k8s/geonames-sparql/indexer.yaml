@@ -53,7 +53,7 @@ spec:
                 # xloader uses external sort (which wants OS memory + page cache), not a
                 # large JVM heap, so keep the heap modest and leave room for sort(1).
                 - name: JVM_ARGS
-                  value: "-Xmx4G"
+                  value: "-Xmx2G"
               command:
                 - sh
                 - -c
@@ -67,6 +67,15 @@ spec:
                   curl -sS -O https://geonames.ams3.digitaloceanspaces.com/geonames.zip
                   unzip geonames.zip
                   mkdir -p /scratch/tmp
+                  # tdb2.xloader hard-codes GNU sort --buffer-size=50% — of the HOST's RAM,
+                  # not the cgroup limit (no config knob exists). On a big node that balloons
+                  # past the memory limit and the kubelet kills the pod. Shadow /usr/bin/sort
+                  # with a wrapper that appends -S 1G (GNU sort: last --buffer-size wins), so
+                  # it uses a fixed 1Gi buffer and spills to --tmpdir on disk. Validated: full
+                  # 137.7M-triple load completes in an 8Gi no-swap container.
+                  cp /usr/bin/sort /usr/bin/sort.real
+                  printf '#!/bin/sh\nexec /usr/bin/sort.real "$@" -S 1G\n' > /usr/bin/sort
+                  chmod +x /usr/bin/sort
                   tdb2.xloader --loc /data/tdb --tmpdir /scratch/tmp /scratch/geonames.ttl
                   # Make the TDB2 store group-writable so the Fuseki server (group 100 via
                   # fsGroup) can open it read-write after the swap. Done here because xloader
