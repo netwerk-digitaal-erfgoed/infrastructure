@@ -1,11 +1,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: geonames-sparql-reindex-8
+  name: geonames-sparql-reindex-9
   namespace: nde
   annotations:
     kustomize.toolkit.fluxcd.io/force: Enabled
-    reconcile.fluxcd.io/requestedAt: "2026-05-29T10:02:47Z"
+    reconcile.fluxcd.io/requestedAt: "2026-06-02T17:03:41Z"
 spec:
   # One attempt: on failure the init scripts hold the pod alive (sleep) so its logs
   # stay readable in the Dashboard — so we don't want the Job to retry/recreate.
