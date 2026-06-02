@@ -71,14 +71,17 @@ spec:
                   curl -sS -O https://geonames.ams3.digitaloceanspaces.com/geonames.zip
                   unzip geonames.zip
                   mkdir -p /scratch/tmp
-                  # tdb2.xloader hard-codes GNU sort --buffer-size=50% — of the HOST's RAM,
-                  # not the cgroup limit (no config knob exists). On a big node that balloons
-                  # past the memory limit and the kubelet kills the pod. Shadow /usr/bin/sort
-                  # with a wrapper that appends -S 1G (GNU sort: last --buffer-size wins), so
-                  # it uses a fixed 1Gi buffer and spills to --tmpdir on disk. Validated: full
-                  # 137.7M-triple load completes in an 8Gi no-swap container.
+                  # tdb2.xloader’s sort calls hard-code GNU sort --buffer-size=50% – of the
+                  # HOST’s RAM, not the cgroup limit. The percentage is emitted by the Java
+                  # node-table and index builders, with no config knob. GNU sort uses the
+                  # LARGEST buffer size given, so appending -S does NOT override it; the
+                  # --buffer-size argument must be stripped. Shadow /usr/bin/sort with a
+                  # wrapper that removes any --buffer-size and forces -S 1G, so sort spills
+                  # to --tmpdir on disk and stays within the cgroup memory limit. Validated
+                  # on the amd64 image under a hard docker --memory cap (appending -S was a
+                  # no-op: GNU sort kept the larger 50% buffer and OOM-killed the pod).
                   cp /usr/bin/sort /usr/bin/sort.real
-                  printf '#!/bin/sh\nexec /usr/bin/sort.real "$@" -S 1G\n' > /usr/bin/sort
+                  printf '%s\n' '#!/bin/sh' 'set -f' 'n=""' 'for a in "$@"; do' '  case "$a" in --buffer-size=*) ;; *) n="$n $a" ;; esac' 'done' 'exec /usr/bin/sort.real $n -S 1G' > /usr/bin/sort
                   chmod +x /usr/bin/sort
                   tdb2.xloader --loc /data/tdb --tmpdir /scratch/tmp /scratch/geonames.ttl
                   # Make the TDB2 store group-writable so the Fuseki server (group 100 via
