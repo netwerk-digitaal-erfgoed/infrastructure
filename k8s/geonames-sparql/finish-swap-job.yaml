@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  # One-off: reindex-10 loaded the 137.7M-triple TDB store into production, but the
+  # restart-server step failed to move the Lucene text index (mv: Permission denied —
+  # renaming a directory needs write on the directory itself, and build-text-index
+  # created /data/staging/index as UID 1000 mode 755, which the group-100 restart-server
+  # container could not move). The text index was built successfully and still sits in
+  # /data/staging/index, so this job finishes the swap (move it into production) as root,
+  # without redoing the ~48m load. The permanent fix (chmod in build-text-index) lands in
+  # reindex-job.yaml / indexer.yaml. Prune this Job via GitOps once it has completed.
+  name: geonames-sparql-finish-swap
+  namespace: nde
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: Enabled
+    reconcile.fluxcd.io/requestedAt: "2026-06-03T18:01:41Z"
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccountName: statefulset-manager
+      # Run as root so it can move the UID-1000-owned text index directory.
+      securityContext:
+        runAsUser: 0
+        fsGroup: 100
+      containers:
+        - name: finish-swap
+          image: bitnami/kubectl:latest
+          volumeMounts:
+            # Mount the whole PVC (no subPath) so both staging and production are visible.
+            - name: data
+              mountPath: /data
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              if [ ! -d /data/staging/index ]; then
+                echo "### /data/staging/index missing — nothing to finish; aborting ###"
+                exit 1
+              fi
+              echo "Found staging text index; scaling Fuseki down for the swap"
+              kubectl scale statefulset/geonames-sparql --replicas=0
+              kubectl rollout status statefulset/geonames-sparql --watch
+              rm -rf /data/production/index
+              mv /data/staging/index /data/production/index
+              # Group-writable so a future server (group 100 via fsGroup) can open it.
+              chmod -R g+w /data/production/index
+              kubectl scale statefulset/geonames-sparql --replicas=1
+      restartPolicy: OnFailure
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data-geonames-sparql-0
