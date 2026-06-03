@@ -116,6 +116,12 @@ spec:
               echo "Creating Lucene index..."
               jar=$(ls /fuseki/jena-fuseki-server-*.jar) || fail "find fuseki jar"
               "$JAVA_HOME/bin/java" -Xmx6g -cp "$jar" jena.textindexer --desc=/fuseki-config/config.ttl || fail "textindexer"
+              # Make the text index group-writable so the restart-server container (group
+              # 100 via fsGroup, but a different UID) can move it staging→production.
+              # Renaming a directory needs write on the directory itself; this container
+              # creates /data/index as UID 1000 mode 755, so without this the swap fails
+              # with "mv: Permission denied" (which is exactly what bit reindex-10).
+              chmod -R g+w /data/index || fail "chmod index"
       containers:
         - name: restart-server
           image: bitnami/kubectl:latest
