@@ -4,7 +4,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dataset-knowledge-graph-manual-2026-06-04-b
+  name: dataset-knowledge-graph-manual-2026-06-04-c
   namespace: nde
   labels:
     app.kubernetes.io/name: dataset-knowledge-graph
@@ -30,6 +30,11 @@ spec:
               value: native
             - name: QLEVER_PORT
               value: "7100"
+            # Experiment (option D): cap QLever well below the 16Gi container
+            # limit so over-budget queries on huge datasets abort gracefully
+            # (HTTP 500, caught per stage) instead of OOM-killing the pod.
+            - name: QLEVER_MEMORY_MAX_SIZE
+              value: 8G
             - name: SPARQL_UPDATE_URL
               value: http://graphdb/repositories/dataset-knowledge-graph/statements
             - name: SPARQL_UPDATE_AUTHORIZATION
