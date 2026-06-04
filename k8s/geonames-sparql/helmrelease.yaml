@@ -51,8 +51,13 @@ spec:
             memory: 14Gi
         env:
           # Apache's entrypoint reads JAVA_OPTIONS (not JVM_ARGS, which the old stain image used).
+          # TDB2 and the Lucene index are memory-mapped — they live in the OS page cache,
+          # NOT the JVM heap — so a small heap plus a large page cache is fastest. The heap
+          # is barely used (~0.3Gi idle), so cap it low and leave the rest of the 14Gi limit
+          # for page cache to keep the index hot. Cold full-text queries were ~5s vs <100ms
+          # warm; more resident index = fewer cold faults.
           - name: JAVA_OPTIONS
-            value: "-Xmx8g -Xlog:gc*:stdout:time,level,tags"
+            value: "-Xmx4g -Xlog:gc*:stdout:time,level,tags"
         volumeMounts:
           # Writable emptyDir for FUSEKI_BASE (default /fuseki/run). Fuseki creates
           # shiro.ini, configuration/, system/ etc. here. State is regenerable, ephemeral
