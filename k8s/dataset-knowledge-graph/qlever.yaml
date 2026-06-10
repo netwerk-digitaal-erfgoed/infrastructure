@@ -1,0 +1,240 @@
+# Read-only QLever that serves the Dataset Knowledge Graph.
+#
+# This replaces GraphDB as the DKG output store (see issue #298). The pipeline
+# CronJob (helmrelease.yaml) writes one n-quads file per analysed dataset onto a
+# shared volume; this long-running pod serves SPARQL from an index built over
+# those files and rebuilds whenever the pipeline drops a `.rebuild` marker — on a
+# successful AND a partially-failed run alike, so operators always see the set
+# that was processed.
+#
+# Read-only on purpose: NO SPARQL UPDATE, no PERSIST_UPDATES, no access token.
+# The KG is a pure derived/cache, rebuilt from the files; QLever's UPDATE path is
+# too flaky to depend on.
+#
+# Co-location: the shared volume is ReadWriteOnce, so the CronJob pins itself to
+# this pod's node via podAffinity (helmrelease.yaml). This pod is therefore the
+# scheduling anchor; keep its labels stable.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dataset-knowledge-graph-qlever
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  upgrade:
+    remediation:
+      remediateLastFailure: false
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      type: statefulset
+
+    containers:
+      - name: app
+        image:
+          repository: adfreiburg/qlever
+          tag: commit-4d113e0
+        flux:
+          enabled: false
+        port: 7001
+        env:
+          # Local time for the daily fallback rebuild (see the loop below).
+          - name: TZ
+            value: Europe/Amsterdam
+        resources:
+          # QLever is memory-mapped: the cgroup memory LIMIT bounds working set +
+          # mmap'd index page cache. The DKG summaries are far smaller than the
+          # source data they describe, so this index is modest; keep headroom for
+          # the page cache but a low request to be a good tenant.
+          requests:
+            cpu: "1"
+            memory: 2Gi
+          limits:
+            cpu: "2"
+            memory: 8Gi
+        startupProbe:
+          httpGet:
+            path: /?query=ASK%20%7B%7D
+            port: 7001
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 60 # Allow time for the initial index build.
+        livenessProbe:
+          httpGet:
+            path: /?query=ASK%20%7B%7D
+            port: 7001
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+          - name: data
+            mountPath: /data
+          - name: config
+            mountPath: /config/Qleverfile
+            subPath: Qleverfile
+        workingDir: /data
+        command:
+          - sh
+          - -c
+          - |
+            # Terminate qlever-server cleanly when the kubelet sends SIGTERM.
+            trap 'echo "SIGTERM received, stopping qlever-server"; qlever stop 2>/dev/null || true; exit 0' TERM INT
+
+            # Copy the Qleverfile out of the read-only mount so rebuild-index can
+            # move files around the working directory without fighting it.
+            cp /config/Qleverfile Qleverfile
+
+            # The pipeline writes here; make sure the directories exist so the
+            # first boot (before any pipeline run) and the input glob both work.
+            mkdir -p nq validation/nq
+
+            start_server() {
+              qlever start
+              qlever log &
+            }
+
+            # Build an initial index from whatever has been produced so far, so
+            # the server always has something to serve (an empty graph until the
+            # first pipeline run completes).
+            if [ ! -f dkg.meta-data.json ]; then
+              echo "No index yet, building initial index at $(date)"
+              qlever index || echo "Initial index build failed (no data yet?)"
+            fi
+
+            start_server
+
+            # Rebuild the served index from the current n-quads, then swap it in.
+            rebuild() {
+              echo "Rebuilding index at $(date)"
+              qlever rebuild-index --keep-old-index-dirs all
+
+              # rebuild-index can silently fail yet still move the old index aside
+              # (https://github.com/ad-freiburg/qlever/issues/2806); verify the new
+              # index exists and restore the previous one if not.
+              if [ ! -f dkg.meta-data.json ]; then
+                echo "ERROR: index missing after rebuild at $(date), restoring previous..."
+                latest_prev=$(ls -dt previous.* 2>/dev/null | head -1)
+                if [ -n "$latest_prev" ]; then
+                  mv "$latest_prev"/dkg.* . 2>/dev/null || true
+                  mv "$latest_prev"/Qleverfile . 2>/dev/null || true
+                  echo "Restored index from $latest_prev"
+                else
+                  echo "FATAL: no previous index to restore from"
+                fi
+              else
+                echo "Rebuild complete at $(date), restarting server..."
+                qlever stop
+                start_server
+              fi
+            }
+
+            SENTINEL=/data/nq/.rebuild
+            last_scheduled_day=""
+            echo "Watching $SENTINEL; daily fallback rebuild at 01:00 $TZ"
+            while true; do
+              trigger=""
+
+              # Event-driven: the pipeline drops this marker after every run
+              # (success or partial failure) so fresh output is served promptly.
+              if [ -f "$SENTINEL" ]; then
+                trigger="sentinel"
+              fi
+
+              # Safety net: rebuild once a day at 01:00 even if a run was hard-
+              # killed before it could drop the marker (a finally block does not
+              # run on OOM/SIGKILL). Atomic per-dataset writes mean a rebuild that
+              # races a running pipeline indexes only the completed files and skips
+              # the in-flight *.tmp, so it never reads a half-written file.
+              today=$(date +%Y-%m-%d)
+              if [ "$(date +%H)" = "01" ] && [ "$today" != "$last_scheduled_day" ]; then
+                trigger="schedule"
+                last_scheduled_day="$today"
+              fi
+
+              if [ -n "$trigger" ]; then
+                echo "Rebuild trigger: $trigger at $(date)"
+                # Consume the marker first, so a run that finishes during the
+                # rebuild re-triggers the next cycle instead of being missed.
+                rm -f "$SENTINEL"
+                rebuild
+              fi
+              sleep 30
+            done
+    securityContext:
+      fsGroup: 100
+
+    # Pin to the 8-core/32GB node pool so this pod and the co-located DKG run
+    # (which follows it via podAffinity) both have enough RAM on one node.
+    nodeSelector:
+      surf.nl/nodesize: 8core32gb
+
+    # Mount the shared ReadWriteOnce volume the pipeline writes its n-quads to.
+    # It is a standalone PVC (created below via pvcs), not a volumeClaimTemplate,
+    # so the CronJob can mount the very same claim.
+    volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: dataset-knowledge-graph-qlever-nq
+      - name: config
+        configMap:
+          name: dataset-knowledge-graph-qlever-qleverfile
+
+    pvcs:
+      - name: nq
+        size: 50Gi
+        accessMode: ReadWriteOnce
+
+    ingresses:
+      # Shared SPARQL host, one path per QLever instance. nginx rewrites the
+      # path prefix to QLever's /sparql endpoint; the query string passes through
+      # unchanged. Public endpoint:
+      #   https://sparql.netwerkdigitaalerfgoed.nl/dataset-knowledge-graph
+      # NOTE: on a shared host exactly one Ingress may own the TLS certificate;
+      # whichever service is added first owns it, the rest reuse the secret.
+      - hosts:
+          - sparql.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/rewrite-target: /sparql
+        paths:
+          - path: /dataset-knowledge-graph
+            pathType: Prefix
+
+    configMaps:
+      - name: qleverfile
+        data:
+          Qleverfile: |
+            [data]
+            NAME             = dkg
+            # Data is produced on the shared volume by the pipeline, so there is
+            # nothing to fetch on (re)build.
+            GET_DATA_CMD     = true
+            DESCRIPTION      = NDE Dataset Knowledge Graph
+            FORMAT           = nq
+
+            [index]
+            # One named graph per analysed dataset (summaries) plus the derived
+            # SHACL validation graphs. `find` tolerates missing dirs/files so an
+            # empty or partial cache still indexes.
+            INPUT_FILES      = nq/*.nq validation/nq/*.nq
+            CAT_INPUT_FILES  = find nq validation/nq -name '*.nq' -exec cat {} +
+            SETTINGS_JSON    = { "ascii-prefixes-only": false, "num-triples-per-batch": 100000 }
+            TEXT_INDEX       = none
+
+            [server]
+            PORT               = 7001
+            MEMORY_FOR_QUERIES = 6G
+            CACHE_MAX_SIZE     = 2G
+            TIMEOUT            = 120s
+            # Read-only: no updates are ever applied to this store.
+            PERSIST_UPDATES    = false
+
+            [runtime]
+            SYSTEM = native
+
+            [ui]
+            UI_CONFIG = dataset-knowledge-graph
