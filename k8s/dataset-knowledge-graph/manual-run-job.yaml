@@ -35,28 +35,17 @@ spec:
             # (HTTP 500, caught per stage) instead of OOM-killing the pod.
             - name: QLEVER_MEMORY_MAX_SIZE
               value: 8G
-            - name: SPARQL_UPDATE_URL
-              value: http://graphdb/repositories/dataset-knowledge-graph/statements
-            - name: SPARQL_UPDATE_AUTHORIZATION
-              valueFrom:
-                secretKeyRef:
-                  key: authorization
-                  name: graphdb
-            - name: GRAPHDB_URL
-              value: http://graphdb
-            - name: GRAPHDB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  key: username
-                  name: graphdb
-            - name: GRAPHDB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: graphdb
+            - name: OUTPUT_CACHE_DIR
+              value: /data/nq
+            - name: OUTPUT_VALIDATION_CACHE_DIR
+              value: /data/validation/nq
+            - name: REBUILD_SENTINEL_PATH
+              value: /data/nq/.rebuild
           volumeMounts:
             - mountPath: /app/imports
               name: imports
+            - mountPath: /data
+              name: nq
           resources:
             limits:
               cpu: "3"
@@ -64,8 +53,22 @@ spec:
             requests:
               cpu: "2"
               memory: 12Gi
+      # Restrict to the 8-core/32GB node pool, then co-locate with the serving
+      # QLever pod so both can mount the ReadWriteOnce `nq` volume.
+      nodeSelector:
+        surf.nl/nodesize: 8core32gb
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: dataset-knowledge-graph-qlever
+              topologyKey: kubernetes.io/hostname
       volumes:
         - name: imports
           persistentVolumeClaim:
             claimName: dataset-knowledge-graph-imports
+        - name: nq
+          persistentVolumeClaim:
+            claimName: dataset-knowledge-graph-qlever-nq
       restartPolicy: OnFailure

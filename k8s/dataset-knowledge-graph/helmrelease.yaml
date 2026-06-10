@@ -35,32 +35,41 @@ spec:
           # killed the run at 12G instead degrades, and the run completes.
           - name: QLEVER_MEMORY_MAX_SIZE
             value: "8G"
-          - name: SPARQL_UPDATE_URL
-            value: "http://graphdb/repositories/dataset-knowledge-graph/statements"
-          - name: SPARQL_UPDATE_AUTHORIZATION
-            valueFrom:
-              secretKeyRef:
-                name: graphdb
-                key: authorization
-          - name: GRAPHDB_URL
-            value: "http://graphdb"
-          - name: GRAPHDB_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: graphdb
-                key: username
-          - name: GRAPHDB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: graphdb
-                key: password
+          # Output store: write one n-quads file per dataset onto the shared
+          # volume, then signal the read-only serving QLever (qlever.yaml) to
+          # rebuild. No GraphDB; the KG is rebuilt from these files each run.
+          - name: OUTPUT_CACHE_DIR
+            value: /data/nq
+          - name: OUTPUT_VALIDATION_CACHE_DIR
+            value: /data/validation/nq
+          - name: REBUILD_SENTINEL_PATH
+            value: /data/nq/.rebuild
         volumeMounts:
           - mountPath: /app/imports
             name: imports
+          - mountPath: /data
+            name: nq
         volumes:
           - name: imports
             persistentVolumeClaim:
               claimName: dataset-knowledge-graph-imports
+          # The same ReadWriteOnce claim the serving QLever mounts. RWO allows
+          # multiple pods only on one node, hence the podAffinity below.
+          - name: nq
+            persistentVolumeClaim:
+              claimName: dataset-knowledge-graph-qlever-nq
+        # Restrict to the 8-core/32GB node pool (enough RAM for this run plus the
+        # co-located QLever), then pin onto the exact node where the serving
+        # QLever pod lives so both can mount the ReadWriteOnce `nq` volume.
+        nodeSelector:
+          surf.nl/nodesize: 8core32gb
+        affinity:
+          podAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchLabels:
+                    app: dataset-knowledge-graph-qlever
+                topologyKey: kubernetes.io/hostname
         resources:
           requests:
             cpu: "2"
