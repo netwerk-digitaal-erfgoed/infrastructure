@@ -98,12 +98,29 @@ spec:
               qlever log &
             }
 
+            # QLever needs at least one input file to build an index; on a cold
+            # cache (before the first pipeline run, or if everything was pruned)
+            # there are none, so seed a single placeholder triple in a dedicated
+            # graph. The server can then start and serve (empty of datasets)
+            # instead of failing on a missing index. It is removed again as soon
+            # as real n-quads exist, so it never appears in a populated index.
+            BOOTSTRAP=nq/_bootstrap.nq
+            seed_if_empty() {
+              if find nq validation/nq -name '*.nq' ! -name '_bootstrap.nq' \
+                   -print -quit 2>/dev/null | grep -q .; then
+                rm -f "$BOOTSTRAP"
+              else
+                echo '<https://data.netwerkdigitaalerfgoed.nl/dkg/.well-known/bootstrap> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://def.nde.nl/dkg#Bootstrap> <https://data.netwerkdigitaalerfgoed.nl/dkg/.well-known/bootstrap> .' > "$BOOTSTRAP"
+              fi
+            }
+
             # Build an initial index from whatever has been produced so far, so
             # the server always has something to serve (an empty graph until the
             # first pipeline run completes).
             if [ ! -f dkg.meta-data.json ]; then
               echo "No index yet, building initial index at $(date)"
-              qlever index || echo "Initial index build failed (no data yet?)"
+              seed_if_empty
+              qlever index || echo "Initial index build failed"
             fi
 
             start_server
@@ -111,6 +128,7 @@ spec:
             # Rebuild the served index from the current n-quads, then swap it in.
             rebuild() {
               echo "Rebuilding index at $(date)"
+              seed_if_empty
               qlever rebuild-index --keep-old-index-dirs all
 
               # rebuild-index can silently fail yet still move the old index aside
