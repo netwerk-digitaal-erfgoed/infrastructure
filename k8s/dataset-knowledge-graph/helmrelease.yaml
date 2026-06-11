@@ -85,8 +85,11 @@ spec:
           requests:
             cpu: "2"
             memory: 12Gi
+          # The analysis qlever-index import is the slow phase and is parallel,
+          # CPU-bound: it uses ~6 cores at peak (p95 5.9) but was throttled at 3.
+          # See netwerk-digitaal-erfgoed/dataset-knowledge-graph#337.
           limits:
-            cpu: "3"
+            cpu: "6"
             memory: 16Gi
         securityContext:
           fsGroup: 100
