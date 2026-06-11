@@ -92,8 +92,9 @@ spec:
             # Terminate qlever-server cleanly when the kubelet sends SIGTERM.
             trap 'echo "SIGTERM received, stopping qlever-server"; qlever stop 2>/dev/null || true; exit 0' TERM INT
 
-            # Copy the Qleverfile out of the read-only mount so rebuild-index can
-            # move files around the working directory without fighting it.
+            # Copy the Qleverfile out of the read-only /config mount into the
+            # working dir: the qlever CLI expects it in the cwd, and `qlever index`
+            # writes the index files (index.*) alongside it here.
             cp /config/Qleverfile Qleverfile
 
             # The pipeline writes here; make sure the directories exist so the
@@ -132,30 +133,40 @@ spec:
 
             start_server
 
-            # Rebuild the served index from the current n-quads, then swap it in.
+            # Rebuild the served index from the current n-quads.
+            #
+            # FULL offline rebuild with `qlever index`, NOT `qlever rebuild-index`.
+            # rebuild-index rebuilds only the triples the server already has loaded
+            # (plus any persisted SPARQL updates); it does NOT re-read INPUT_FILES,
+            # so it silently ignores the .nq files the pipeline wrote since the
+            # server booted (verified on the prod image: it "rebuilds in 0 seconds"
+            # and the newly added graphs never appear). Our KG is file-based, so the
+            # refresh must re-read every file — which only the full `qlever index`
+            # does. (rebuild-index is the right tool only for an UPDATE-driven store
+            # like dataset-register, where new data arrives via SPARQL UPDATE.)
+            #
+            # The server must be stopped during the build (qlever memory-maps the
+            # index in place). For resilience we first copy the current index aside,
+            # keeping exactly one backup: if the rebuild fails we restore it, so the
+            # server always comes back on the previous index rather than on nothing.
             rebuild() {
               echo "Rebuilding index at $(date)"
               seed_if_empty
-              qlever rebuild-index --keep-old-index-dirs all
+              qlever stop 2>/dev/null || true
 
-              # rebuild-index can silently fail yet still move the old index aside
-              # (https://github.com/ad-freiburg/qlever/issues/2806); verify the new
-              # index exists and restore the previous one if not.
-              if [ ! -f index.meta-data.json ]; then
-                echo "ERROR: index missing after rebuild at $(date), restoring previous..."
-                latest_prev=$(ls -dt previous.* 2>/dev/null | head -1)
-                if [ -n "$latest_prev" ]; then
-                  mv "$latest_prev"/index.* . 2>/dev/null || true
-                  mv "$latest_prev"/Qleverfile . 2>/dev/null || true
-                  echo "Restored index from $latest_prev"
-                else
-                  echo "FATAL: no previous index to restore from"
-                fi
-              else
+              rm -rf previous.*
+              backup="previous.$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+              mkdir -p "$backup"
+              cp -a index.* "$backup"/ 2>/dev/null || true
+
+              if qlever index --overwrite-existing && [ -f index.meta-data.json ]; then
                 echo "Rebuild complete at $(date), restarting server..."
-                qlever stop
-                start_server
+              else
+                echo "ERROR: rebuild failed at $(date), restoring previous index..."
+                rm -f index.* 2>/dev/null || true
+                cp -a "$backup"/index.* . 2>/dev/null || true
               fi
+              start_server
             }
 
             SENTINEL=/data/nq/.rebuild
@@ -263,12 +274,21 @@ spec:
             FORMAT           = nq
 
             [index]
-            # One named graph per analysed dataset (summaries), the derived
-            # SHACL validation graphs, and the pipeline's provenance graph (the
-            # per-dataset processing records the skip gate reads back). `find`
-            # tolerates missing dirs/files so an empty or partial cache still
+            # CAT_INPUT_FILES is the actual data fed to the indexer: every .nq
+            # across the three graph dirs — one named graph per analysed dataset
+            # (summaries), the derived SHACL validation graphs, and the pipeline's
+            # provenance graph (the per-dataset records the skip gate reads back).
+            # `find` tolerates missing/empty dirs, so a cold or partial cache still
             # indexes.
-            INPUT_FILES      = nq/*.nq validation/nq/*.nq provenance/nq/*.nq
+            #
+            # INPUT_FILES is only qlever-control's pre-flight existence check (run
+            # BEFORE CAT_INPUT_FILES); if any of its globs matches zero files the
+            # build aborts with "Did you call qlever get-data?". So it is a SINGLE
+            # pattern over nq/, which the bootstrap seed keeps non-empty — listing
+            # validation/ and provenance/ here too would abort whenever either is
+            # empty (cold start, or a run with no validation reports yet), even
+            # though CAT_INPUT_FILES handles them fine.
+            INPUT_FILES      = nq/*.nq
             CAT_INPUT_FILES  = find nq validation/nq provenance/nq -name '*.nq' -exec cat {} +
             SETTINGS_JSON    = { "ascii-prefixes-only": false, "num-triples-per-batch": 100000 }
             TEXT_INDEX       = none
