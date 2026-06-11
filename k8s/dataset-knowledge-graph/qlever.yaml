@@ -21,7 +21,14 @@ metadata:
 spec:
   serviceAccountName: nde
   interval: 30m
+  # This pod builds its index on start, so it is not Ready immediately. Don't let
+  # Helm block on readiness during install/upgrade — otherwise the 5m wait times
+  # out (worsened by the cluster's client rate limiter), the release is marked
+  # failed, and the new spec never sticks. K8s readiness still gates traffic.
+  install:
+    disableWait: true
   upgrade:
+    disableWait: true
     remediation:
       remediateLastFailure: false
   chart:
