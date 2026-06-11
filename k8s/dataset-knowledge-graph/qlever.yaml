@@ -212,15 +212,19 @@ spec:
       # path prefix to QLever's /sparql endpoint; the query string passes through
       # unchanged. Public endpoint:
       #   https://sparql.netwerkdigitaalerfgoed.nl/dataset-knowledge-graph
+      # The rewrite is scoped to a capture-group regex path (mirrors the proven
+      # dataset-register-api ingress) so it applies ONLY to this prefix — a plain
+      # rewrite-target rewrote every request on the host, including cert-manager's
+      # /.well-known/acme-challenge path, which broke HTTP-01 and blocked the cert.
       # NOTE: on a shared host exactly one Ingress may own the TLS certificate;
       # whichever service is added first owns it, the rest reuse the secret.
       - hosts:
           - sparql.netwerkdigitaalerfgoed.nl
         annotations:
-          nginx.ingress.kubernetes.io/rewrite-target: /sparql
+          nginx.ingress.kubernetes.io/rewrite-target: /sparql$2
         paths:
-          - path: /dataset-knowledge-graph
-            pathType: Prefix
+          - path: /dataset-knowledge-graph(/|$)(.*)
+            pathType: ImplementationSpecific
 
     configMaps:
       - name: qleverfile
