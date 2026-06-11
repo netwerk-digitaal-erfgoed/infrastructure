@@ -52,23 +52,24 @@ spec:
           limits:
             cpu: 500m
             memory: 256Mi
-        # `/probe/` negotiates to a 303, which counts as a successful httpGet
-        # probe (any status < 400), and proves the .htaccess rewrite is live.
+        # Probe a static file that returns 200 directly. Do NOT probe `/probe/`:
+        # it 303-redirects to an https URL, which the kubelet follows into plain
+        # TLS on port 80 and fails, killing the pod (CrashLoopBackOff).
         startupProbe:
           httpGet:
-            path: /probe/
+            path: /probe/index-en.html
             port: 80
           periodSeconds: 5
           failureThreshold: 12
         livenessProbe:
           httpGet:
-            path: /probe/
+            path: /probe/index-en.html
             port: 80
           timeoutSeconds: 5
           failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: /probe/
+            path: /probe/index-en.html
             port: 80
 
     service:
