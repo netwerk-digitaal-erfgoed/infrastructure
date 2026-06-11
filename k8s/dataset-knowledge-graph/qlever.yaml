@@ -215,23 +215,40 @@ spec:
         accessMode: ReadWriteOnce
 
     ingresses:
-      # Shared SPARQL host, one path per QLever instance. nginx rewrites the
-      # path prefix to QLever's /sparql endpoint; the query string passes through
-      # unchanged. Public endpoint:
+      # Shared SPARQL host (sparql.netwerkdigitaalerfgoed.nl), one path per QLever
+      # instance. Public endpoint:
       #   https://sparql.netwerkdigitaalerfgoed.nl/dataset-knowledge-graph
-      # The rewrite is scoped to a capture-group regex path (mirrors the proven
-      # dataset-register-api ingress) so it applies ONLY to this prefix — a plain
-      # rewrite-target rewrote every request on the host, including cert-manager's
-      # /.well-known/acme-challenge path, which broke HTTP-01 and blocked the cert.
-      # NOTE: on a shared host exactly one Ingress may own the TLS certificate;
-      # whichever service is added first owns it, the rest reuse the secret.
+      #
+      # Split into TWO ingresses on the same host because `rewrite-target` is an
+      # ingress-WIDE annotation, and cert-manager injects its HTTP-01
+      # `/.well-known/acme-challenge/<token>` path into the cert-bearing ingress —
+      # so a rewrite on that ingress mangles the ACME path and the cert never
+      # issues. So:
+      #
+      #  1. Cert holder (first ingress, gets TLS + cert-manager.io/issuer): NO
+      #     rewrite. cert-manager injects the ACME path here and it validates. Its
+      #     own placeholder path never receives real traffic.
+      #  2. Traffic (second ingress, no TLS so no ACME injection): the regex
+      #     rewrite that maps the public prefix to QLever's /sparql. nginx merges
+      #     both ingresses for the host and serves traffic over the cert from (1).
       - hosts:
+          - sparql.netwerkdigitaalerfgoed.nl
+        paths:
+          # Placeholder: exists only so this ingress is valid and owns the host's
+          # TLS cert; it does not overlap the traffic path below. Real requests go
+          # to the rewrite ingress.
+          - path: /dataset-knowledge-graph-tls-holder
+            pathType: Prefix
+      - name: rewrite
+        hosts:
           - sparql.netwerkdigitaalerfgoed.nl
         annotations:
           nginx.ingress.kubernetes.io/rewrite-target: /sparql$2
         paths:
           - path: /dataset-knowledge-graph(/|$)(.*)
             pathType: ImplementationSpecific
+        tls:
+          enabled: false
 
     configMaps:
       - name: qleverfile
