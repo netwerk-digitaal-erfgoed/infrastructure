@@ -17,6 +17,14 @@ metadata:
 spec:
   serviceAccountName: nde
   interval: 30m
+  # Do not block the release on pod readiness. Kubernetes still gates traffic on
+  # the readiness probe; this just stops a slow or temporarily failing image pull
+  # from timing out the helm upgrade and wedging the release until the next 30m
+  # reconcile (as `dataset-knowledge-graph-qlever` and `geonames-sparql` do).
+  install:
+    disableWait: true
+  upgrade:
+    disableWait: true
   chart:
     spec:
       chart: helm/nde-app
