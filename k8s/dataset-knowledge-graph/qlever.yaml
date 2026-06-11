@@ -124,7 +124,7 @@ spec:
             # Build an initial index from whatever has been produced so far, so
             # the server always has something to serve (an empty graph until the
             # first pipeline run completes).
-            if [ ! -f dkg.meta-data.json ]; then
+            if [ ! -f index.meta-data.json ]; then
               echo "No index yet, building initial index at $(date)"
               seed_if_empty
               qlever index || echo "Initial index build failed"
@@ -141,11 +141,11 @@ spec:
               # rebuild-index can silently fail yet still move the old index aside
               # (https://github.com/ad-freiburg/qlever/issues/2806); verify the new
               # index exists and restore the previous one if not.
-              if [ ! -f dkg.meta-data.json ]; then
+              if [ ! -f index.meta-data.json ]; then
                 echo "ERROR: index missing after rebuild at $(date), restoring previous..."
                 latest_prev=$(ls -dt previous.* 2>/dev/null | head -1)
                 if [ -n "$latest_prev" ]; then
-                  mv "$latest_prev"/dkg.* . 2>/dev/null || true
+                  mv "$latest_prev"/index.* . 2>/dev/null || true
                   mv "$latest_prev"/Qleverfile . 2>/dev/null || true
                   echo "Restored index from $latest_prev"
                 else
@@ -238,7 +238,7 @@ spec:
         data:
           Qleverfile: |
             [data]
-            NAME             = dkg
+            NAME             = index
             # Data is produced on the shared volume by the pipeline, so there is
             # nothing to fetch on (re)build.
             GET_DATA_CMD     = true
