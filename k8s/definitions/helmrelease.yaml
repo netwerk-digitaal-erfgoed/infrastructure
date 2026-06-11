@@ -29,13 +29,12 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/definitions
-          tag: latest
-        # The image is rebuilt and pushed on every push to main. `Always` pulls
-        # the newest image when a pod starts, so a vocabulary change is picked up
-        # by a rollout restart (or the next reschedule). If we later publish
-        # semver image tags, this can move to Flux image automation like
-        # geonames-sparql.
-        imagePullPolicy: Always
+          # Flux tracks the 14-digit timestamp tags the definitions CI publishes
+          # (the chart's default numerical image policy) and bumps this line on
+          # every push, so a vocabulary change auto-deploys within ~1 minute. The
+          # chart auto-adds the `ghcr` imagePullSecret, so the package can stay
+          # private.
+          tag: "20260611130149" # {"$imagepolicy": "nde:definitions:tag"}
         port: 80
         resources:
           # Static file serving with Apache; tiny footprint.
