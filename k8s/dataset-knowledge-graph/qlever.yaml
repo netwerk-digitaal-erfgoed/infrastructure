@@ -72,12 +72,19 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 10
           failureThreshold: 60 # Allow time for the initial index build.
+        # Lenient on purpose: a rebuild stops the server while it re-indexes
+        # offline (see the rebuild() command above), so the server is briefly
+        # unreachable on every rebuild. 10s x 30 = ~5 min tolerance keeps a normal
+        # rebuild from being mistaken for a hang and killed mid-build (builds take
+        # a few seconds today — large margin as the KG grows), while still
+        # auto-restarting a genuinely hung server.
         livenessProbe:
           httpGet:
             path: /?query=ASK%20%7B%7D
             port: 7001
+          periodSeconds: 10
           timeoutSeconds: 5
-          failureThreshold: 3
+          failureThreshold: 30
         volumeMounts:
           - name: data
             mountPath: /data
