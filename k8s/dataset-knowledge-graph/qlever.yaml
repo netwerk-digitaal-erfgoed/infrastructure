@@ -98,7 +98,7 @@ spec:
 
             # The pipeline writes here; make sure the directories exist so the
             # first boot (before any pipeline run) and the input glob both work.
-            mkdir -p nq validation/nq
+            mkdir -p nq validation/nq provenance/nq
 
             start_server() {
               qlever start
@@ -113,7 +113,7 @@ spec:
             # as real n-quads exist, so it never appears in a populated index.
             BOOTSTRAP=nq/_bootstrap.nq
             seed_if_empty() {
-              if find nq validation/nq -name '*.nq' ! -name '_bootstrap.nq' \
+              if find nq validation/nq provenance/nq -name '*.nq' ! -name '_bootstrap.nq' \
                    -print -quit 2>/dev/null | grep -q .; then
                 rm -f "$BOOTSTRAP"
               else
@@ -263,11 +263,13 @@ spec:
             FORMAT           = nq
 
             [index]
-            # One named graph per analysed dataset (summaries) plus the derived
-            # SHACL validation graphs. `find` tolerates missing dirs/files so an
-            # empty or partial cache still indexes.
-            INPUT_FILES      = nq/*.nq validation/nq/*.nq
-            CAT_INPUT_FILES  = find nq validation/nq -name '*.nq' -exec cat {} +
+            # One named graph per analysed dataset (summaries), the derived
+            # SHACL validation graphs, and the pipeline's provenance graph (the
+            # per-dataset processing records the skip gate reads back). `find`
+            # tolerates missing dirs/files so an empty or partial cache still
+            # indexes.
+            INPUT_FILES      = nq/*.nq validation/nq/*.nq provenance/nq/*.nq
+            CAT_INPUT_FILES  = find nq validation/nq provenance/nq -name '*.nq' -exec cat {} +
             SETTINGS_JSON    = { "ascii-prefixes-only": false, "num-triples-per-batch": 100000 }
             TEXT_INDEX       = none
 
