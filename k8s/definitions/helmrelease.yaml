@@ -1,0 +1,88 @@
+# Serves the NDE RDF vocabularies published under https://def.nde.nl/.
+#
+# A small Apache container (built from netwerk-digitaal-erfgoed/definitions)
+# serves WIDOCO-generated documentation with content negotiation: a browser
+# gets HTML, a client asking for text/turtle, application/rdf+xml,
+# application/n-triples or application/ld+json gets that serialization. Each
+# vocabulary module is a path under the host: /probe, /metric, /pid-scheme,
+# /iiif.
+#
+# Stateless and read-only: no volumes, no database. The content is baked into
+# the image at build time, so a vocabulary change ships as a new image.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: definitions
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  # Do not block the release on pod readiness. Kubernetes still gates traffic on
+  # the readiness probe; this just stops a slow or temporarily failing image pull
+  # from timing out the helm upgrade and wedging the release until the next 30m
+  # reconcile (as `dataset-knowledge-graph-qlever` and `geonames-sparql` do).
+  install:
+    disableWait: true
+  upgrade:
+    disableWait: true
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/definitions
+          # Flux tracks the 14-digit timestamp tags the definitions CI publishes
+          # (the chart's default numerical image policy) and bumps this line on
+          # every push, so a vocabulary change auto-deploys within ~1 minute. The
+          # chart auto-adds the `ghcr` imagePullSecret, so the package can stay
+          # private.
+          tag: "20260611130149" # {"$imagepolicy": "nde:definitions:tag"}
+        port: 80
+        resources:
+          # Static file serving with Apache; tiny footprint.
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        # `/probe/` negotiates to a 303, which counts as a successful httpGet
+        # probe (any status < 400), and proves the .htaccess rewrite is live.
+        startupProbe:
+          httpGet:
+            path: /probe/
+            port: 80
+          periodSeconds: 5
+          failureThreshold: 12
+        livenessProbe:
+          httpGet:
+            path: /probe/
+            port: 80
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /probe/
+            port: 80
+
+    service:
+      port: 80
+      targetPort: 80
+
+    ingresses:
+      # def.nde.nl is a new apex under nde.nl (not *.netwerkdigitaalerfgoed.nl).
+      # The chart enables TLS by default and cert-manager issues a per-host
+      # certificate (secret definitions-tls) once def.nde.nl resolves to the
+      # cluster ingress, so DNS for def.nde.nl is a prerequisite for the cert.
+      - ingressClassName: nginx-shared
+        hosts:
+          - def.nde.nl
+        paths:
+          - path: /
+            pathType: Prefix
