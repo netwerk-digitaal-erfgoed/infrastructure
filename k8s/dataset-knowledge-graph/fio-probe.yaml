@@ -1,0 +1,65 @@
+# One-off storage probe for the `hdd` StorageClass the DKG PVCs use, to see
+# whether large-dataset imports are I/O-bound on the volume (qlever-index writes
+# ~6 GB of permutations + spills during a build).
+#
+# Uses a FRESH 20Gi PVC so it doesn't touch the live `imports` volume.
+# `--direct=1` bypasses the page cache to measure real device throughput.
+#
+# Read results from the Job's pod logs, then CLEAN UP: delete this file (so Flux
+# prunes the Job + PVC) — or delete the objects in the Dashboard. To re-run, bump
+# the name suffix (a Job's spec.template is immutable, so editing in place breaks
+# the Flux reconcile).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: fio-probe-hdd
+  namespace: nde
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: hdd
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: fio-probe-hdd
+  namespace: nde
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: fio-probe-hdd
+    spec:
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 100
+      containers:
+        - name: fio
+          image: alpine:3.20
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              apk add --no-cache fio >/dev/null 2>&1 || { echo "apk add fio failed (no egress?)"; exit 1; }
+              cd /data
+              echo "===== SEQ WRITE  (bs=1M, 4G, direct, fsync) — mimics index-file writes ====="
+              fio --name=seqwrite  --filename=fio.bin --rw=write     --bs=1M  --size=4G --direct=1 --iodepth=16 --numjobs=1 --end_fsync=1 --group_reporting
+              echo "===== SEQ READ   (bs=1M, 4G, direct) ====="
+              fio --name=seqread   --filename=fio.bin --rw=read      --bs=1M  --size=4G --direct=1 --iodepth=16 --numjobs=1 --group_reporting
+              echo "===== RAND WRITE (bs=64k, 2G, direct) — mimics sort/vocab spills ====="
+              fio --name=randwrite --filename=fio.bin --rw=randwrite --bs=64k --size=2G --direct=1 --iodepth=16 --numjobs=1 --group_reporting
+              rm -f fio.bin
+              echo "===== DONE ====="
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests: {cpu: "1", memory: 1Gi}
+            limits: {cpu: "2", memory: 2Gi}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: fio-probe-hdd
