@@ -20,7 +20,11 @@ spec:
       - name: app
         schedule: "0 2 * * *"
         timeZone: Europe/Amsterdam
-        concurrencyPolicy: Forbid
+        # Replace, not Forbid: if a previous run is still going when the next
+        # one is due, terminate it and start fresh rather than skipping the new
+        # run. The KG is rebuilt from scratch each run, so the latest run always
+        # wins; this also avoids two pipelines racing on the shared RWO volume.
+        concurrencyPolicy: Replace
         backoffLimit: 1
         image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph
         imagePullPolicy: Always
