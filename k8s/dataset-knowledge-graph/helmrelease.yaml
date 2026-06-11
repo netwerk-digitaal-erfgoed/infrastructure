@@ -42,6 +42,17 @@ spec:
             value: /data/nq
           - name: OUTPUT_VALIDATION_CACHE_DIR
             value: /data/validation/nq
+          # Per-dataset processing records (provenance) for skipping unchanged
+          # datasets: written here for the serving QLever to index (see
+          # qlever.yaml's Qleverfile), and read back from the served endpoint
+          # below at the start of the next run.
+          - name: OUTPUT_PROVENANCE_CACHE_DIR
+            value: /data/provenance/nq
+          # The served (read-only) QLever the skip gate queries for the previous
+          # run's records. Setting this activates dataset skipping; unset, every
+          # dataset is reprocessed.
+          - name: SERVED_SPARQL_ENDPOINT
+            value: https://sparql.netwerkdigitaalerfgoed.nl/dataset-knowledge-graph
           - name: REBUILD_SENTINEL_PATH
             value: /data/nq/.rebuild
         volumeMounts:
