@@ -39,6 +39,10 @@ containers: []
 # Image pull secrets (ghcr.io images auto-add ghcr secret)
 imagePullSecrets: []
 
+# Pod priority. References a PriorityClass (see k8s/priority-classes); empty
+# leaves the pod at the cluster default priority of 0.
+priorityClassName: ""
+
 # Pod security context
 securityContext: {}
   # fsGroup: 82
