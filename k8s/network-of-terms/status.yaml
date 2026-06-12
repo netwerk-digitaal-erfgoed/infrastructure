@@ -13,7 +13,6 @@ spec:
         kind: GitRepository
         name: nde
   values:
-    priorityClassName: nde-high
     workload:
       replicas: 1
     containers:
