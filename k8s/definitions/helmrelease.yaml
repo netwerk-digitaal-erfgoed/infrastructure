@@ -42,7 +42,7 @@ spec:
           # every push, so a vocabulary change auto-deploys within ~1 minute. The
           # chart auto-adds the `ghcr` imagePullSecret, so the package can stay
           # private.
-          tag: "20260611130149" # {"$imagepolicy": "nde:definitions:tag"}
+          tag: "20260612121339" # {"$imagepolicy": "nde:definitions:tag"}
         port: 80
         resources:
           # Static file serving with Apache; tiny footprint.
@@ -71,11 +71,9 @@ spec:
           httpGet:
             path: /probe/index-en.html
             port: 80
-
     service:
       port: 80
       targetPort: 80
-
     ingresses:
       # def.nde.nl is a new apex under nde.nl (not *.netwerkdigitaalerfgoed.nl).
       # The chart enables TLS by default and cert-manager issues a per-host
