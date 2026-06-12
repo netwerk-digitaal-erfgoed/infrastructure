@@ -24,6 +24,7 @@ spec:
     # of patching. Bypasses StatefulSet rollouts that are stuck mid-update.
     force: true
   values:
+    priorityClassName: nde-high
     workload:
       type: statefulset
 

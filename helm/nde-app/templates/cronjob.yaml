@@ -29,6 +29,9 @@ spec:
           imagePullSecrets:
             - name: ghcr
           {{- end }}
+          {{- with .priorityClassName }}
+          priorityClassName: {{ . }}
+          {{- end }}
           {{- with .securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
