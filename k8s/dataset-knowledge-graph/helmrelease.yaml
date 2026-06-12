@@ -33,12 +33,16 @@ spec:
             value: native
           - name: QLEVER_PORT
             value: "7100"
-          # Cap QLever well below the 16Gi container limit so over-budget queries
-          # on huge datasets abort gracefully (HTTP 500, caught per stage) instead
-          # of OOM-killing the pod. Validated: at 8G a 219.9M-triple linkset that
-          # killed the run at 12G instead degrades, and the run completes.
+          # QLever query-memory budget, kept WELL BELOW the container memory limit
+          # so an over-budget query on a huge dataset aborts gracefully (HTTP 500,
+          # caught per stage) instead of OOM-killing the pod and aborting the whole
+          # run. Raised 8G -> 12G together with the container limit 16Gi -> 22Gi so
+          # the graceful-degradation gap is preserved (~10Gi), letting heavier
+          # per-dataset analysis queries on large dumps complete. History: 12G
+          # under the old 16Gi limit OOM-killed the run; 12G under 22Gi does not.
+          # See netwerk-digitaal-erfgoed/dataset-knowledge-graph#340.
           - name: QLEVER_MEMORY_MAX_SIZE
-            value: "8G"
+            value: "12G"
           # Output store: write one n-quads file per dataset onto the shared
           # volume, then signal the read-only serving QLever (qlever.yaml) to
           # rebuild. No GraphDB; the KG is rebuilt from these files each run.
@@ -94,6 +98,11 @@ spec:
           # See netwerk-digitaal-erfgoed/dataset-knowledge-graph#337.
           limits:
             cpu: "6"
-            memory: 16Gi
+            # 22Gi (raised from 16Gi) draws on the 8-core/32GiB node's real free
+            # RAM (~17GiB actually free; node memory requests are ~95% committed,
+            # so we raise the LIMIT, not the request). Keeps a ~10Gi gap above
+            # QLEVER_MEMORY_MAX_SIZE=12G so over-budget queries fail gracefully
+            # (HTTP 500 per stage) rather than OOM-killing the pod. See #340.
+            memory: 22Gi
         securityContext:
           fsGroup: 100
