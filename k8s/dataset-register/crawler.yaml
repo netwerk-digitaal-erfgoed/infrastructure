@@ -30,7 +30,7 @@ spec:
           - name: CRAWLER_SCHEDULE
             value: "0 * * * *"
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
-            value: "http://opentelemetry-collector:4318"
+            value: "http://nde-otel.monitoring.svc.cluster.local:4318"
         resources:
           requests:
             cpu: "500m"
