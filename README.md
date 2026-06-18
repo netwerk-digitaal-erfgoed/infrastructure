@@ -69,6 +69,13 @@ This creates:
 - a TLS Certificate for `my-app.netwerkdigitaalerfgoed.nl`
 - a DNS entry for `my-app.netwerkdigitaalerfgoed.nl`.
 
+### Resource limits
+
+The cluster is managed by SURF, which applies a `LimitRange` to the namespace. Defaults per container, unless a HelmRelease sets its own `resources`:
+
+- Memory limit: **256M**
+- CPU: **250m**
+
 ### Image automation
 
 Flux automatically updates image tags when new versions are pushed. The `# {"$imagepolicy": ...}` comment enables this.
