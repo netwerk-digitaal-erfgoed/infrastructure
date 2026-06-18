@@ -85,9 +85,21 @@ spec:
                 key: SMTP_PASSWORD
           - name: MATOMO_GENERAL_NOREPLY_EMAIL_ADDRESS
             value: noreply@netwerkdigitaalerfgoed.nl
+        # The SURF LimitRange default (256M) is too low for 12 PHP-FPM workers under
+        # dashboard load, which caused upstream resets surfacing as 502/503.
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: "1"
+            memory: 768Mi
         volumeMounts:
           - name: data
             mountPath: /var/www/html
+          - name: php-fpm-config
+            mountPath: /usr/local/etc/php-fpm.d/zzz-matomo.conf
+            subPath: zzz-matomo.conf
     securityContext:
       fsGroup: 82
     persistentVolumes:
@@ -97,7 +109,22 @@ spec:
       - name: nginx-config
         configMap:
           name: matomo-nginx
+      - name: php-fpm-config
+        configMap:
+          name: matomo-php-fpm
     configMaps:
+      - name: php-fpm
+        data:
+          # Sorts after the image's zz-docker.conf so these directives win.
+          # Raises the worker pool above the image default (pm.max_children = 5),
+          # which was exhausted under dashboard load and returned 502/503.
+          zzz-matomo.conf: |
+            [www]
+            pm = dynamic
+            pm.max_children = 12
+            pm.start_servers = 4
+            pm.min_spare_servers = 2
+            pm.max_spare_servers = 6
       - name: nginx
         data:
           default.conf: |

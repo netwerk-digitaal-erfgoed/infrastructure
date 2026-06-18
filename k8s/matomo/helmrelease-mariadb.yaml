@@ -44,9 +44,32 @@ spec:
                 key: mariadb-password
           - name: MARIADB_DATABASE
             value: matomo
+        # The SURF LimitRange default (256M) is below InnoDB’s buffer pool plus
+        # per-connection overhead, which OOM-killed MariaDB (crash recovery in the logs).
+        resources:
+          requests:
+            cpu: 100m
+            memory: 384Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
         volumeMounts:
           - name: data
             mountPath: /var/lib/mysql
+          - name: mariadb-config
+            mountPath: /etc/mysql/conf.d/zzz-matomo.cnf
+            subPath: zzz-matomo.cnf
+    volumes:
+      - name: mariadb-config
+        configMap:
+          name: matomo-mariadb-config
+    configMaps:
+      - name: config
+        data:
+          zzz-matomo.cnf: |
+            [mariadbd]
+            # Raised from the 128M default to cache more of the Matomo working set.
+            innodb_buffer_pool_size = 256M
     persistentVolumes:
       - name: data
         size: 8Gi
