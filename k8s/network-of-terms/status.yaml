@@ -34,6 +34,12 @@ spec:
                 key: credentials
           - name: LDES_BASE_URL
             value: https://status.termennetwerk.netwerkdigitaalerfgoed.nl
+          # Serve the observations already persisted in Postgres immediately on
+          # restart; the periodic cron refreshes them within POLLING_INTERVAL_SECONDS.
+          # Keeps the initial check and its materialized-view refresh off the
+          # startup critical path (they blocked the server from listening before).
+          - name: RUN_ON_START
+            value: 'false'
     ingresses:
       - hosts:
           - status.termennetwerk.netwerkdigitaalerfgoed.nl
