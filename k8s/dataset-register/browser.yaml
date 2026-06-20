@@ -26,6 +26,17 @@ spec:
             value: "x-forwarded-proto"
           - name: HOST_HEADER
             value: "x-forwarded-host"
+          - name: PUBLIC_TYPESENSE_HOST
+            value: "search.datasetregister.netwerkdigitaalerfgoed.nl"
+          - name: PUBLIC_TYPESENSE_PROTOCOL
+            value: "https"
+          - name: PUBLIC_TYPESENSE_PORT
+            value: "443"
+          - name: PUBLIC_TYPESENSE_SEARCH_ONLY_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: dataset-register-typesense
+                key: search-only-api-key
     ingresses:
       - hosts:
           - datasetregister.netwerkdigitaalerfgoed.nl
