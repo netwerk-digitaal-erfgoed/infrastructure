@@ -26,17 +26,22 @@ spec:
             value: "x-forwarded-proto"
           - name: HOST_HEADER
             value: "x-forwarded-host"
-          - name: PUBLIC_TYPESENSE_HOST
-            value: "search.datasetregister.netwerkdigitaalerfgoed.nl"
-          - name: PUBLIC_TYPESENSE_PROTOCOL
-            value: "https"
-          - name: PUBLIC_TYPESENSE_PORT
-            value: "443"
-          - name: PUBLIC_TYPESENSE_SEARCH_ONLY_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: dataset-register-typesense
-                key: search-only-api-key
+          # Typesense search cutover switch. The browser uses Typesense only when
+          # both PUBLIC_TYPESENSE_HOST and PUBLIC_TYPESENSE_SEARCH_ONLY_API_KEY
+          # are set; otherwise it falls back to SPARQL. Kept commented so the
+          # browser stays on SPARQL until the index exists and the search-only
+          # key is provisioned – uncomment to flip search to Typesense.
+          # - name: PUBLIC_TYPESENSE_HOST
+          #   value: "search.datasetregister.netwerkdigitaalerfgoed.nl"
+          # - name: PUBLIC_TYPESENSE_PROTOCOL
+          #   value: "https"
+          # - name: PUBLIC_TYPESENSE_PORT
+          #   value: "443"
+          # - name: PUBLIC_TYPESENSE_SEARCH_ONLY_API_KEY
+          #   valueFrom:
+          #     secretKeyRef:
+          #       name: dataset-register-typesense
+          #       key: search-only-api-key
     ingresses:
       - hosts:
           - datasetregister.netwerkdigitaalerfgoed.nl
