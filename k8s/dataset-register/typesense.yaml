@@ -1,0 +1,91 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dataset-register-typesense
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      type: statefulset
+
+    service:
+      port: 8108
+
+    containers:
+      - name: app
+        image:
+          # v30 is required: earlier versions lack Dutch stemming and the
+          # Synonym Sets API the search index relies on. Flux auto-updates within
+          # v30 only (see flux.policy); moving to v31 is a deliberate manual bump.
+          repository: typesense/typesense
+          tag: "30.2" # {"$imagepolicy": "nde:dataset-register-typesense:tag"}
+        flux:
+          enabled: true
+          policy:
+            type: semver
+            # Stable Typesense tags are 2-part (30.0, 30.1, 30.2, …). The pattern
+            # keeps only those – excluding the -arm64/-amd64 arch variants and the
+            # 31.0.rcN prereleases – and the range pins us to v30 so a v31 release
+            # is never auto-selected.
+            pattern: '^(?P<version>\d+\.\d+)$'
+            extract: '$version'
+            range: ">=30.0.0 <31.0.0"
+        port: 8108
+        env:
+          - name: TYPESENSE_DATA_DIR
+            value: "/data"
+          - name: TYPESENSE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: dataset-register-typesense
+                key: api-key
+          - name: TYPESENSE_ENABLE_CORS
+            value: "true"
+        resources:
+          requests:
+            cpu: "250m"
+            memory: 512Mi
+          limits:
+            cpu: "1"
+            memory: 2Gi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8108
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8108
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+          - name: data
+            mountPath: /data
+
+    persistentVolumes:
+      - name: data
+        size: 10Gi
+
+    # The browser queries Typesense directly from the client with the
+    # search-only key, so it needs a publicly reachable HTTPS host. A dedicated
+    # subdomain is used because the Typesense client builds plain
+    # `protocol://host:port` URLs with no base path, so a path-prefix on the
+    # main host would not work. The first ingress gets TLS auto-configured by
+    # the chart. CORS is enabled on the server (TYPESENSE_ENABLE_CORS) so the
+    # browser app on datasetregister.netwerkdigitaalerfgoed.nl can call it.
+    ingresses:
+      - hosts:
+          - search.datasetregister.netwerkdigitaalerfgoed.nl
+        paths:
+          - path: /
+            pathType: Prefix

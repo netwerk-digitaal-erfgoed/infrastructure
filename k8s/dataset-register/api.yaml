@@ -40,6 +40,17 @@ spec:
               secretKeyRef:
                 name: dataset-register-api-token
                 key: token
+          - name: TYPESENSE_HOST
+            value: "dataset-register-typesense"
+          - name: TYPESENSE_PORT
+            value: "8108"
+          - name: TYPESENSE_PROTOCOL
+            value: "http"
+          - name: TYPESENSE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: dataset-register-typesense
+                key: api-key
         resources:
           requests:
             cpu: "250m"
