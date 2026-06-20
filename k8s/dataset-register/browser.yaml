@@ -19,29 +19,33 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-browser
-          tag: 20260619054537-7c9404f # {"$imagepolicy": "nde:dataset-register-browser:tag"}
+          # Browser auto-update is PAUSED for the Typesense cutover: the image-policy
+          # setter is removed so this tag stays pinned while the crawler builds the
+          # index after #2119 merges. To resume (the cutover), re-add the setter
+          # comment for policy nde:dataset-register-browser:tag on the tag line
+          # below (see api.yaml for the exact format).
+          tag: 20260619054537-7c9404f
         port: 3000
         env:
           - name: PROTOCOL_HEADER
             value: "x-forwarded-proto"
           - name: HOST_HEADER
             value: "x-forwarded-host"
-          # Typesense search cutover switch. The browser uses Typesense only when
-          # both PUBLIC_TYPESENSE_HOST and PUBLIC_TYPESENSE_SEARCH_ONLY_API_KEY
-          # are set; otherwise it falls back to SPARQL. Kept commented so the
-          # browser stays on SPARQL until the index exists and the search-only
-          # key is provisioned – uncomment to flip search to Typesense.
-          # - name: PUBLIC_TYPESENSE_HOST
-          #   value: "search.datasetregister.netwerkdigitaalerfgoed.nl"
-          # - name: PUBLIC_TYPESENSE_PROTOCOL
-          #   value: "https"
-          # - name: PUBLIC_TYPESENSE_PORT
-          #   value: "443"
-          # - name: PUBLIC_TYPESENSE_SEARCH_ONLY_API_KEY
-          #   valueFrom:
-          #     secretKeyRef:
-          #       name: dataset-register-typesense
-          #       key: search-only-api-key
+          # Typesense search config for the browser. The #2119 browser image has no
+          # SPARQL listing, so these must be present before that image deploys – the
+          # browser stays pinned (see the tag above) until the index is built and
+          # verified, then unpinning deploys the new image onto a ready Typesense.
+          - name: PUBLIC_TYPESENSE_HOST
+            value: "search.datasetregister.netwerkdigitaalerfgoed.nl"
+          - name: PUBLIC_TYPESENSE_PROTOCOL
+            value: "https"
+          - name: PUBLIC_TYPESENSE_PORT
+            value: "443"
+          - name: PUBLIC_TYPESENSE_SEARCH_ONLY_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: dataset-register-typesense
+                key: search-only-api-key
     ingresses:
       - hosts:
           - datasetregister.netwerkdigitaalerfgoed.nl
