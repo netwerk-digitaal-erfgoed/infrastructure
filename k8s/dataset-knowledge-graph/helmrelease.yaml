@@ -43,26 +43,21 @@ spec:
           # See netwerk-digitaal-erfgoed/dataset-knowledge-graph#340.
           - name: QLEVER_MEMORY_MAX_SIZE
             value: "12G"
-          # Output store: write one n-quads file per dataset onto the shared
-          # volume, then signal the read-only serving QLever (qlever.yaml) to
-          # rebuild. No GraphDB; the KG is rebuilt from these files each run.
-          - name: OUTPUT_CACHE_DIR
-            value: /data/nq
-          - name: OUTPUT_VALIDATION_CACHE_DIR
-            value: /data/validation/nq
-          # Per-dataset processing records (provenance) for skipping unchanged
-          # datasets: written here for the serving QLever to index (see
-          # qlever.yaml's Qleverfile), and read back from the served endpoint
-          # below at the start of the next run.
-          - name: OUTPUT_PROVENANCE_CACHE_DIR
-            value: /data/provenance/nq
+          # Output store: the pipeline writes one n-quads file per dataset onto
+          # the shared volume, then signals the read-only serving QLever
+          # (qlever.yaml) to rebuild from them. No GraphDB; the KG is rebuilt from
+          # these files each run. OUTPUT_DIR is the single root: the pipeline
+          # derives /data/nq (summaries), /data/validation/nq, /data/provenance/nq
+          # (skip-gate records, read back from the served endpoint below) and
+          # /data/validity/nq (RDF-validity verdicts) beneath it, and the QLever
+          # rebuild indexes every .nq under it (see qlever.yaml's Qleverfile).
+          - name: OUTPUT_DIR
+            value: /data
           # The served (read-only) QLever the skip gate queries for the previous
           # run's records. Setting this activates dataset skipping; unset, every
           # dataset is reprocessed.
           - name: SERVED_SPARQL_ENDPOINT
             value: https://sparql.netwerkdigitaalerfgoed.nl/dataset-knowledge-graph
-          - name: REBUILD_SENTINEL_PATH
-            value: /data/nq/.rebuild
         volumeMounts:
           - mountPath: /app/imports
             name: imports

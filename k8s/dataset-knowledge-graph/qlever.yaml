@@ -104,9 +104,12 @@ spec:
             # writes the index files (index.*) alongside it here.
             cp /config/Qleverfile Qleverfile
 
-            # The pipeline writes here; make sure the directories exist so the
-            # first boot (before any pipeline run) and the input glob both work.
-            mkdir -p nq validation/nq provenance/nq
+            # The pipeline writes here. Only nq/ must pre-exist: it holds the
+            # bootstrap seed and the rebuild sentinel. The per-purpose
+            # subdirectories (validation/nq, provenance/nq, validity/nq) are
+            # created by the pipeline when it writes them, and the recursive
+            # index glob below finds whatever exists.
+            mkdir -p nq
 
             start_server() {
               qlever start
@@ -121,7 +124,7 @@ spec:
             # as real n-quads exist, so it never appears in a populated index.
             BOOTSTRAP=nq/_bootstrap.nq
             seed_if_empty() {
-              if find nq validation/nq provenance/nq -name '*.nq' ! -name '_bootstrap.nq' \
+              if find . -name '*.nq' ! -name '_bootstrap.nq' \
                    -print -quit 2>/dev/null | grep -q .; then
                 rm -f "$BOOTSTRAP"
               else
@@ -282,21 +285,24 @@ spec:
 
             [index]
             # CAT_INPUT_FILES is the actual data fed to the indexer: every .nq
-            # across the three graph dirs — one named graph per analysed dataset
-            # (summaries), the derived SHACL validation graphs, and the pipeline's
-            # provenance graph (the per-dataset records the skip gate reads back).
-            # `find` tolerates missing/empty dirs, so a cold or partial cache still
-            # indexes.
+            # anywhere beneath the output root (cwd is the shared volume). The
+            # pipeline writes one named graph per analysed dataset under nq/
+            # (summaries), validation/nq/ (SHACL reports), provenance/nq/ (the
+            # records the skip gate reads back) and validity/nq/ (RDF-validity
+            # verdicts). A recursive `find` indexes every output type without
+            # enumerating directories here, so a new per-dataset output dir is
+            # picked up with no change to this file; it also tolerates a cold or
+            # partial cache.
             #
             # INPUT_FILES is only qlever-control's pre-flight existence check (run
             # BEFORE CAT_INPUT_FILES); if any of its globs matches zero files the
             # build aborts with "Did you call qlever get-data?". So it is a SINGLE
             # pattern over nq/, which the bootstrap seed keeps non-empty — listing
-            # validation/ and provenance/ here too would abort whenever either is
-            # empty (cold start, or a run with no validation reports yet), even
-            # though CAT_INPUT_FILES handles them fine.
+            # the other dirs here too would abort whenever one is empty (cold
+            # start, or a run with no validation reports yet), even though
+            # CAT_INPUT_FILES handles them fine.
             INPUT_FILES      = nq/*.nq
-            CAT_INPUT_FILES  = find nq validation/nq provenance/nq -name '*.nq' -exec cat {} +
+            CAT_INPUT_FILES  = find . -name '*.nq' -exec cat {} +
             SETTINGS_JSON    = { "ascii-prefixes-only": false, "num-triples-per-batch": 100000 }
             TEXT_INDEX       = none
 
