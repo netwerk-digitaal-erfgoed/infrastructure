@@ -42,7 +42,7 @@ spec:
           # every push, so a vocabulary change auto-deploys within ~1 minute. The
           # chart auto-adds the `ghcr` imagePullSecret, so the package can stay
           # private.
-          tag: "20260617143927" # {"$imagepolicy": "nde:definitions:tag"}
+          tag: "20260622075354" # {"$imagepolicy": "nde:definitions:tag"}
         port: 80
         resources:
           # Static file serving with Apache; tiny footprint.
