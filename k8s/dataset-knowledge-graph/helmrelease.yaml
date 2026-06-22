@@ -46,13 +46,15 @@ spec:
           # Output store: the pipeline writes one n-quads file per dataset onto
           # the shared volume, then signals the read-only serving QLever
           # (qlever.yaml) to rebuild from them. No GraphDB; the KG is rebuilt from
-          # these files each run. OUTPUT_DIR is the single root: the pipeline
-          # derives /data/summaries, /data/validation, /data/provenance
+          # these files each run. OUTPUT_DIR is the single root, kept in its own
+          # subdirectory so the generated data stays separate from QLever's index
+          # files and logs (which live at the /data root): the pipeline derives
+          # /data/output/summaries, /data/output/validation, /data/output/provenance
           # (skip-gate records, read back from the served endpoint below) and
-          # /data/validity (RDF-validity verdicts) beneath it, and the QLever
-          # rebuild indexes every .nq under it (see qlever.yaml's Qleverfile).
+          # /data/output/validity (RDF-validity verdicts), and the QLever rebuild
+          # indexes every .nq under /data/output (see qlever.yaml's Qleverfile).
           - name: OUTPUT_DIR
-            value: /data
+            value: /data/output
           # The served (read-only) QLever the skip gate queries for the previous
           # run's records. Setting this activates dataset skipping; unset, every
           # dataset is reprocessed.
