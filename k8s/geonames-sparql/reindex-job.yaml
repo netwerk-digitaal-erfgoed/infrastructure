@@ -62,7 +62,7 @@ spec:
               # once inspected (or it self-exits after the sleep).
               fail() { echo "### prepare-tdb FAILED at: $1 (rc=$?) — holding pod 2h for log inspection ###"; sleep 7200; exit 1; }
               rm -rf /data/* || fail "rm staging"
-              # Do all bulk work (download, unzipped TTL, xloader temp files) on the
+              # Do all bulk work (download, unzipped RDF, xloader temp files) on the
               # node-local scratch emptyDir, so the 50Gi data PVC only has to hold the
               # live production index plus the freshly built staging index.
               cd /scratch || fail "cd scratch"
@@ -81,7 +81,12 @@ spec:
               cp /usr/bin/sort /usr/bin/sort.real || fail "cp sort"
               printf '%s\n' '#!/bin/sh' 'set -f' 'n=""' 'for a in "$@"; do' '  case "$a" in --buffer-size=*) ;; *) n="$n $a" ;; esac' 'done' 'exec /usr/bin/sort.real $n -S 1G' > /usr/bin/sort || fail "shadow sort"
               chmod +x /usr/bin/sort || fail "chmod sort"
-              tdb2.xloader --loc /data/tdb --tmpdir /scratch/tmp /scratch/geonames.ttl || fail "xloader"
+              # The published geonames.zip may contain N-Triples (geonames.nt) or, for older
+              # builds, Turtle (geonames.ttl). Load whichever is present; tdb2.xloader infers
+              # the RDF syntax from the file extension.
+              RDF_FILE=$(ls geonames.nt geonames.ttl 2>/dev/null | head -n1)
+              [ -n "$RDF_FILE" ] || fail "no geonames.nt or geonames.ttl in zip"
+              tdb2.xloader --loc /data/tdb --tmpdir /scratch/tmp "/scratch/$RDF_FILE" || fail "xloader"
               # Make the TDB2 store group-writable so the Fuseki server (group 100 via
               # fsGroup) can open it read-write after the swap. Done here because xloader
               # writes the files as root (this image's default user).
@@ -145,7 +150,7 @@ spec:
         - name: fuseki-config
           configMap:
             name: geonames-sparql-fuseki-config
-        # Node-local scratch for download + unzipped TTL + xloader sort files.
+        # Node-local scratch for download + unzipped RDF + xloader sort files.
         # sizeLimit bounds it so an overflow evicts only this pod, not the node.
         - name: scratch
           emptyDir:
