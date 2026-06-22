@@ -47,9 +47,9 @@ spec:
           # the shared volume, then signals the read-only serving QLever
           # (qlever.yaml) to rebuild from them. No GraphDB; the KG is rebuilt from
           # these files each run. OUTPUT_DIR is the single root: the pipeline
-          # derives /data/nq (summaries), /data/validation/nq, /data/provenance/nq
+          # derives /data/summaries, /data/validation, /data/provenance
           # (skip-gate records, read back from the served endpoint below) and
-          # /data/validity/nq (RDF-validity verdicts) beneath it, and the QLever
+          # /data/validity (RDF-validity verdicts) beneath it, and the QLever
           # rebuild indexes every .nq under it (see qlever.yaml's Qleverfile).
           - name: OUTPUT_DIR
             value: /data
