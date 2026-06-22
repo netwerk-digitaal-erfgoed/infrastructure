@@ -104,12 +104,32 @@ spec:
             # writes the index files (index.*) alongside it here.
             cp /config/Qleverfile Qleverfile
 
-            # The pipeline writes here. Only summaries/ must pre-exist: it holds
-            # the bootstrap seed and the rebuild sentinel. The other per-purpose
-            # directories (validation, provenance, validity) are created by the
-            # pipeline when it writes them, and the recursive index glob below
-            # finds whatever exists.
-            mkdir -p summaries
+            # Generated data lives under output/ (its own subdir, separate from
+            # QLever's index files and logs at the working-dir root). Only
+            # output/summaries/ must pre-exist: it holds the bootstrap seed and
+            # the rebuild sentinel. The other dirs (validation, provenance,
+            # validity) are created by the pipeline when it writes them, and the
+            # index glob below finds whatever exists under output/.
+            mkdir -p output/summaries
+
+            # One-time migration to the output/ layout: move generated data out
+            # of the working-dir root and drop the legacy `nq` segment. Idempotent
+            # (a no-op once the legacy dirs are gone). Remove in a later cleanup
+            # once every environment has migrated.
+            if [ -d nq ]; then
+              mv nq/*.nq output/summaries/ 2>/dev/null || true
+              mv nq/.rebuild output/summaries/.rebuild 2>/dev/null || true
+              rm -f nq/_bootstrap.nq
+              rmdir nq 2>/dev/null || true
+            fi
+            for legacy in validation provenance validity; do
+              if [ -d "$legacy/nq" ]; then
+                mkdir -p "output/$legacy"
+                mv "$legacy"/nq/*.nq "output/$legacy"/ 2>/dev/null || true
+                rmdir "$legacy/nq" "$legacy" 2>/dev/null || true
+              fi
+            done
+            rmdir summaries 2>/dev/null || true
 
             start_server() {
               qlever start
@@ -122,9 +142,9 @@ spec:
             # graph. The server can then start and serve (empty of datasets)
             # instead of failing on a missing index. It is removed again as soon
             # as real n-quads exist, so it never appears in a populated index.
-            BOOTSTRAP=summaries/_bootstrap.nq
+            BOOTSTRAP=output/summaries/_bootstrap.nq
             seed_if_empty() {
-              if find . -name '*.nq' ! -name '_bootstrap.nq' \
+              if find output -name '*.nq' ! -name '_bootstrap.nq' \
                    -print -quit 2>/dev/null | grep -q .; then
                 rm -f "$BOOTSTRAP"
               else
@@ -179,7 +199,7 @@ spec:
               start_server
             }
 
-            SENTINEL=/data/summaries/.rebuild
+            SENTINEL=/data/output/summaries/.rebuild
             last_scheduled_day=""
             echo "Watching $SENTINEL; daily fallback rebuild at 01:00 $TZ"
             while true; do
@@ -285,25 +305,26 @@ spec:
 
             [index]
             # CAT_INPUT_FILES is the actual data fed to the indexer: every .nq
-            # anywhere beneath the output root (cwd is the shared volume). The
-            # pipeline writes one named graph per analysed dataset under
-            # summaries/, validation/ (SHACL reports), provenance/ (the records
-            # the skip gate reads back) and validity/ (RDF-validity verdicts).
-            # A recursive `find` indexes every output type without enumerating
-            # directories here, so a new per-dataset output dir is picked up with
-            # no change to this file; matching on the `.nq` extension also means
-            # the Turtle inspection copies are skipped. It tolerates a cold or
-            # partial cache.
+            # under output/ (cwd is the shared volume; QLever's own index files
+            # live at the root, outside output/, so the glob never walks them).
+            # The pipeline writes one named graph per analysed dataset under
+            # output/summaries/, output/validation/ (SHACL reports),
+            # output/provenance/ (the records the skip gate reads back) and
+            # output/validity/ (RDF-validity verdicts). A recursive `find` over
+            # output/ indexes every output type without enumerating directories
+            # here, so a new per-dataset output dir is picked up with no change to
+            # this file; matching on the `.nq` extension also means the Turtle
+            # inspection copies are skipped. It tolerates a cold or partial cache.
             #
             # INPUT_FILES is only qlever-control's pre-flight existence check (run
             # BEFORE CAT_INPUT_FILES); if any of its globs matches zero files the
             # build aborts with "Did you call qlever get-data?". So it is a SINGLE
-            # pattern over summaries/, which the bootstrap seed keeps non-empty —
-            # listing the other dirs here too would abort whenever one is empty
-            # (cold start, or a run with no validation reports yet), even though
-            # CAT_INPUT_FILES handles them fine.
-            INPUT_FILES      = summaries/*.nq
-            CAT_INPUT_FILES  = find . -name '*.nq' -exec cat {} +
+            # pattern over output/summaries/, which the bootstrap seed keeps
+            # non-empty — listing the other dirs here too would abort whenever one
+            # is empty (cold start, or a run with no validation reports yet), even
+            # though CAT_INPUT_FILES handles them fine.
+            INPUT_FILES      = output/summaries/*.nq
+            CAT_INPUT_FILES  = find output -name '*.nq' -exec cat {} +
             SETTINGS_JSON    = { "ascii-prefixes-only": false, "num-triples-per-batch": 100000 }
             TEXT_INDEX       = none
 
