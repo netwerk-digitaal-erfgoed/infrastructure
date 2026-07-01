@@ -21,6 +21,18 @@ spec:
           repository: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-browser
           tag: 20260701185644-cdc139f # {"$imagepolicy": "nde:dataset-register-browser:tag"}
         port: 3000
+        # SSR is CPU-bound (ldkit RDF parse + Svelte render + devalue-serialize of
+        # the ~800 KB detail page). The SURF LimitRange default of 250m throttled
+        # the render bursts ~40–70% of active CFS periods, inflating TTFB; give it a
+        # full core to burst into. Memory peaks ~150 MiB / 256 over 7d with no OOM,
+        # so only CPU is raised (Typesense uses the same 250m→1 shape).
+        resources:
+          requests:
+            cpu: "250m"
+            memory: 128Mi
+          limits:
+            cpu: "1"
+            memory: 256Mi
         env:
           - name: PROTOCOL_HEADER
             value: "x-forwarded-proto"
