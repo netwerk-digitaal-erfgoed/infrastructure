@@ -25,7 +25,7 @@ spec:
       - name: app
         image:
           repository: valkey/valkey
-          tag: "8.1-alpine"
+          tag: "9.0-alpine"
         port: 6379
         # Bounded LRU cache: append-only persistence so it survives restarts, and
         # a maxmemory below the container limit with allkeys-lru so Valkey evicts
