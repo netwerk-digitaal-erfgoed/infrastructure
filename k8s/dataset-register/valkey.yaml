@@ -47,16 +47,12 @@ spec:
           limits:
             cpu: "250m"
             memory: 256Mi
-        readinessProbe:
-          exec:
-            command: ["valkey-cli", "ping"]
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          exec:
-            command: ["valkey-cli", "ping"]
-          timeoutSeconds: 5
-          failureThreshold: 3
+        # No probes: the nde-app chart injects an httpGet default and merges it
+        # with any probe we set, producing an invalid dual-handler (httpGet+exec)
+        # that Kubernetes rejects — and Valkey speaks RESP, not HTTP, so httpGet
+        # can't work anyway. Without a readiness probe the pod is Ready once
+        # running (Valkey accepts connections immediately); the browser fails
+        # fast and falls back to a direct fetch if the store is ever unreachable.
         volumeMounts:
           - name: data
             mountPath: /data
