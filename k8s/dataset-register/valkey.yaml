@@ -1,0 +1,69 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dataset-register-valkey
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    # Stateful so the cache survives pod restarts (the cross-deployment
+    # durability we want): the browser pods roll on each deploy, this does not.
+    workload:
+      type: statefulset
+
+    service:
+      port: 6379
+
+    containers:
+      - name: app
+        image:
+          repository: valkey/valkey
+          tag: "8.1-alpine"
+        port: 6379
+        # Bounded LRU cache: append-only persistence so it survives restarts, and
+        # a maxmemory below the container limit with allkeys-lru so Valkey evicts
+        # under pressure instead of the pod being OOM-killed (cf. the QLever
+        # soft-cap-below-cgroup lesson). Data is non-sensitive (public dataset
+        # analysis), so no auth on this internal-only service.
+        command:
+          - valkey-server
+          - "--appendonly"
+          - "yes"
+          - "--maxmemory"
+          - "200mb"
+          - "--maxmemory-policy"
+          - "allkeys-lru"
+        resources:
+          requests:
+            cpu: "50m"
+            memory: 64Mi
+          limits:
+            cpu: "250m"
+            memory: 256Mi
+        readinessProbe:
+          exec:
+            command: ["valkey-cli", "ping"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          exec:
+            command: ["valkey-cli", "ping"]
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+          - name: data
+            mountPath: /data
+
+    persistentVolumes:
+      - name: data
+        size: 1Gi
+
+    # No ingress: the store is internal only. The browser pods connect over the
+    # cluster service DNS at `redis://dataset-register-valkey:6379`.

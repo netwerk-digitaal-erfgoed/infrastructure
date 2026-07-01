@@ -41,6 +41,11 @@ spec:
               secretKeyRef:
                 name: dataset-register-typesense
                 key: search-only-api-key
+          # Enables the detail-page Knowledge Graph analysis cache (see the
+          # dataset-register app). The cache is opt-in: it is only active when
+          # VALKEY_URL is set, so it stays bypassed anywhere this is absent.
+          - name: VALKEY_URL
+            value: "redis://dataset-register-valkey:6379"
     ingresses:
       - hosts:
           - datasetregister.netwerkdigitaalerfgoed.nl
