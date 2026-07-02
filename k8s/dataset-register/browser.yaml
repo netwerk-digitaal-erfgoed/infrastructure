@@ -67,6 +67,8 @@ spec:
             pathType: Prefix
           - path: /datasets
             pathType: Prefix
+          - path: /changes
+            pathType: Prefix
           - path: /_app
             pathType: Prefix
           - path: /en
