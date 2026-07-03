@@ -14,10 +14,6 @@ spec:
         kind: GitRepository
         name: nde
   values:
-    workload:
-      type: statefulset
-    securityContext:
-      fsGroup: 2000
     containers:
       - name: app
         image:
@@ -87,12 +83,6 @@ spec:
               secretKeyRef:
                 name: s3
                 key: secret
-        volumeMounts:
-          - name: data
-            mountPath: /mattermost/data
-    persistentVolumes:
-      - name: data
-        size: 20Gi
     ingresses:
       - hosts:
           - chat.netwerkdigitaalerfgoed.nl
