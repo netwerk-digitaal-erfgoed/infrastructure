@@ -31,6 +31,16 @@ spec:
         env:
           - name: MM_SERVICESETTINGS_SITEURL
             value: https://chat.netwerkdigitaalerfgoed.nl
+          # Store configuration in Postgres so System Console changes survive
+          # pod restarts (config.json is not on a persistent volume). Env vars
+          # still override the database store, 12-factor style.
+          - name: MM_CONFIG
+            valueFrom:
+              secretKeyRef:
+                name: mattermost-postgres
+                key: datasource
+          - name: MM_SERVICESETTINGS_ENABLEEMAILINVITATIONS
+            value: "true"
           - name: MM_SQLSETTINGS_DRIVERNAME
             value: postgres
           - name: MM_SQLSETTINGS_DATASOURCE
