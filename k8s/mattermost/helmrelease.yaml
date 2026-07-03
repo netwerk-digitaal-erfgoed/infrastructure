@@ -69,6 +69,24 @@ spec:
             value: noreply@netwerkdigitaalerfgoed.nl
           - name: MM_EMAILSETTINGS_FEEDBACKNAME
             value: Mattermost
+          - name: MM_FILESETTINGS_DRIVERNAME
+            value: amazons3
+          - name: MM_FILESETTINGS_AMAZONS3ENDPOINT
+            value: objectstore.surf.nl
+          - name: MM_FILESETTINGS_AMAZONS3BUCKET
+            value: mattermost
+          - name: MM_FILESETTINGS_AMAZONS3REGION
+            value: default
+          - name: MM_FILESETTINGS_AMAZONS3ACCESSKEYID
+            valueFrom:
+              secretKeyRef:
+                name: s3
+                key: key
+          - name: MM_FILESETTINGS_AMAZONS3SECRETACCESSKEY
+            valueFrom:
+              secretKeyRef:
+                name: s3
+                key: secret
         volumeMounts:
           - name: data
             mountPath: /mattermost/data

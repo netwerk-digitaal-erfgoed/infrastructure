@@ -12,6 +12,11 @@ kind: Job
 metadata:
   name: mattermost-s3-mirror
   namespace: nde
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: Enabled
+    # Bump to re-run the mirror; deployed together with the S3 cutover so
+    # files uploaded between the first mirror and the cutover are caught.
+    reconcile.fluxcd.io/requestedAt: "2026-07-03T10:00:00Z"
 spec:
   template:
     spec:
