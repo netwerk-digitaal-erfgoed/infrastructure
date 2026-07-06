@@ -65,6 +65,15 @@ spec:
             value: noreply@netwerkdigitaalerfgoed.nl
           - name: MM_EMAILSETTINGS_FEEDBACKNAME
             value: Mattermost
+          # Mobile pushes are relayed through Mattermost’s US-hosted TPNS proxy
+          # (required for the official store apps), so strip the payload down
+          # to the sender name only; message contents stay on our server.
+          - name: MM_EMAILSETTINGS_SENDPUSHNOTIFICATIONS
+            value: "true"
+          - name: MM_EMAILSETTINGS_PUSHNOTIFICATIONSERVER
+            value: https://push-test.mattermost.com
+          - name: MM_EMAILSETTINGS_PUSHNOTIFICATIONCONTENTS
+            value: generic_no_channel
           - name: MM_FILESETTINGS_DRIVERNAME
             value: amazons3
           - name: MM_FILESETTINGS_AMAZONS3ENDPOINT
