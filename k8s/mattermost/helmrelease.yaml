@@ -18,7 +18,7 @@ spec:
       - name: app
         image:
           repository: mattermost/mattermost-team-edition
-          tag: "11.8.2" # {"$imagepolicy": "nde:mattermost:tag"}
+          tag: "11.8.3" # {"$imagepolicy": "nde:mattermost:tag"}
         port: 8065
         flux:
           policy:
