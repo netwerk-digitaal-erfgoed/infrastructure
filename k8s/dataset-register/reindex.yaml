@@ -1,0 +1,60 @@
+# Rebuilds the Typesense `datasets` search index on its own schedule, decoupled
+# from the crawl. The crawler otherwise only reindexes after a full crawl round
+# completes, so a slow or stalled crawl leaves the index stale — and new crawled
+# data isn’t searchable until the whole round finishes. An independent CronJob
+# bounds the crawl→searchable latency to the schedule interval and can’t be
+# starved by the crawler.
+#
+# Runs @dataset-register/search-indexer’s standalone entrypoint (a blue/green
+# rebuild, no crawl) from the crawler image, which already bundles the indexer.
+# The image tracks the crawler’s ImagePolicy so the reindex always runs the same
+# code version — and therefore writes the same collection schema — as the indexer.
+#
+# Reindex on demand: `kubectl -n nde create job --from=cronjob/dataset-register-reindex-app reindex-now`.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dataset-register-reindex
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    cronjobs:
+      - name: app
+        schedule: "*/15 * * * *"
+        # Never run two rebuilds at once (the indexer is single-flight anyway, but
+        # this avoids spawning a doomed second pod).
+        concurrencyPolicy: Forbid
+        backoffLimit: 1
+        image: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-crawler:20260709185245-2d035f8 # {"$imagepolicy": "nde:dataset-register-crawler:tag"}
+        command:
+          - node
+          - node_modules/@dataset-register/search-indexer/dist/main.js
+        env:
+          - name: SPARQL_URL
+            value: "http://dataset-register-qlever"
+          - name: TYPESENSE_HOST
+            value: "dataset-register-typesense"
+          - name: TYPESENSE_PORT
+            value: "8108"
+          - name: TYPESENSE_PROTOCOL
+            value: "http"
+          - name: TYPESENSE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: dataset-register-typesense
+                key: api-key
+        resources:
+          requests:
+            cpu: "500m"
+            memory: 1Gi
+          limits:
+            cpu: "1"
+            memory: 2Gi
