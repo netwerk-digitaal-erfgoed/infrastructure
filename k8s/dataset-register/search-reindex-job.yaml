@@ -27,7 +27,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: reindex
-          image: 20260709185245-2d035f8 # {"$imagepolicy": "nde:dataset-register-crawler:tag"}
+          image: 20260710053930-64879e1 # {"$imagepolicy": "nde:dataset-register-crawler:tag"}
           command:
             - node
             - node_modules/@dataset-register/search-indexer/dist/main.js
