@@ -6,7 +6,7 @@
 #
 # `concurrencyPolicy: Forbid` skips a tick while the previous round is still
 # running, and `activeDeadlineSeconds` reaps a wedged round (e.g. a distribution
-# probe stuck on a down provider) well before the next hourly tick — together
+# probe stuck on a down provider) well before the next hourly tick – together
 # these prevent the compounding meltdown where stacked rounds contend on QLever
 # and never drain.
 #
