@@ -115,6 +115,9 @@ cronjobs: []
   #   command: []
   #   args: []
   #   env: []
+  #   concurrencyPolicy: Forbid    # Optional: Allow (default) | Forbid | Replace
+  #   backoffLimit: 1              # Optional
+  #   activeDeadlineSeconds: 3000  # Optional: kill a Job that runs longer than this (watchdog)
   #   restartPolicy: OnFailure  # Optional, defaults to OnFailure
 
 # CNAME DNS records (via ExternalDNS)

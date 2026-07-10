@@ -19,6 +19,9 @@ spec:
       {{- with .backoffLimit }}
       backoffLimit: {{ . }}
       {{- end }}
+      {{- with .activeDeadlineSeconds }}
+      activeDeadlineSeconds: {{ . }}
+      {{- end }}
       template:
         metadata:
           labels:
