@@ -20,3 +20,32 @@ spec:
   {{- end }}
 {{- end }}
 {{- end }}
+{{- /*
+  CronJobs carry a flat `image: repo:tag` string (not the containers' structured
+  image.repository/tag), so derive the repository by trimming the trailing tag.
+  Without this a cronjob's `# {"$imagepolicy": …}` marker references a policy that
+  never gets generated, and its image freezes at whatever tag was committed.
+*/ -}}
+{{- range .Values.cronjobs }}
+{{- $fluxEnabled := ne ((.flux).enabled) false }}
+{{- if and $fluxEnabled .image }}
+{{- $fluxName := include "nde-app.fluxName" (list ((.flux).name) (include "nde-app.fullname" $) .name) }}
+{{- $repository := regexReplaceAll ":[^:/]+$" .image "" }}
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: {{ $fluxName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "nde-app.labels" $ | nindent 4 }}
+spec:
+  image: {{ $repository }}
+  {{- $defaultInterval := (hasPrefix "ghcr.io/netwerk-digitaal-erfgoed" $repository) | ternary "1m" "24h" }}
+  interval: {{ ((.flux).interval) | default $defaultInterval }}
+  {{- if or ((.flux).secretRef) (hasPrefix "ghcr.io" $repository) }}
+  secretRef:
+    name: {{ ((.flux).secretRef) | default "ghcr" }}
+  {{- end }}
+{{- end }}
+{{- end }}
