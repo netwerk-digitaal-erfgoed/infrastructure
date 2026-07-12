@@ -33,3 +33,43 @@ spec:
   {{- end }}
 {{- end }}
 {{- end }}
+{{- /*
+  CronJobs need the same ImagePolicy as containers so their `# {"$imagepolicy": …}`
+  markers resolve; see flux-image-repository.yaml. The spec mirrors the container
+  block above (it depends only on .flux and $fluxName, not on the workload kind).
+*/ -}}
+{{- range .Values.cronjobs }}
+{{- $fluxEnabled := ne ((.flux).enabled) false }}
+{{- if and $fluxEnabled .image }}
+{{- $fluxName := include "nde-app.fluxName" (list ((.flux).name) (include "nde-app.fullname" $) .name) }}
+{{- $policyType := (((.flux).policy).type) | default "numerical" }}
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: {{ $fluxName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "nde-app.labels" $ | nindent 4 }}
+spec:
+  imageRepositoryRef:
+    name: {{ $fluxName }}
+  {{- if eq $policyType "numerical" }}
+  filterTags:
+    pattern: {{ (((.flux).policy).pattern) | default "^(?P<timestamp>[0-9]{14}).*" | squote }}
+    extract: {{ (((.flux).policy).extract) | default "$timestamp" | squote }}
+  policy:
+    numerical:
+      order: {{ (((.flux).policy).order) | default "asc" }}
+  {{- else if eq $policyType "semver" }}
+  {{- if or (((.flux).policy).pattern) (((.flux).policy).extract) }}
+  filterTags:
+    pattern: {{ (((.flux).policy).pattern) | squote }}
+    extract: {{ (((.flux).policy).extract) | squote }}
+  {{- end }}
+  policy:
+    semver:
+      range: {{ (((.flux).policy).range) | squote }}
+  {{- end }}
+{{- end }}
+{{- end }}
