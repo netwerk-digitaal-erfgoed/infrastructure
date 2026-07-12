@@ -45,6 +45,9 @@ spec:
         schedule: "0 4 * * 6"
         image: alpine:latest
         imagePullPolicy: Always
+        # A pinned utility image, not tracked by Flux image automation.
+        flux:
+          enabled: false
         command:
           - bin/sh
           - -c
