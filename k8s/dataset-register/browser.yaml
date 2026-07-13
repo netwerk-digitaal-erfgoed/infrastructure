@@ -39,10 +39,15 @@ spec:
             value: "x-forwarded-proto"
           - name: HOST_HEADER
             value: "x-forwarded-host"
-          # Typesense search config for the browser. The #2119 browser image has no
-          # SPARQL listing, so these must be present before that image deploys – the
-          # browser stays pinned (see the tag above) until the index is built and
-          # verified, then unpinning deploys the new image onto a ready Typesense.
+          # Expand phase: both the old and new browser image configs are present so
+          # this env is safe under either image. The CURRENT image queries Typesense
+          # directly from the client with the public search-only key (below). The
+          # NEW image (GraphQL search migration) runs the Typesense engine server-side
+          # and reads the private TYPESENSE_* config; the client no longer sees a key.
+          # Contract (a later change) removes the PUBLIC_TYPESENSE_* block once the new
+          # image is live.
+          #
+          # Client-direct config for the current image (public search-only key).
           - name: PUBLIC_TYPESENSE_HOST
             value: "search.datasetregister.netwerkdigitaalerfgoed.nl"
           - name: PUBLIC_TYPESENSE_PROTOCOL
@@ -54,6 +59,21 @@ spec:
               secretKeyRef:
                 name: dataset-register-typesense
                 key: search-only-api-key
+          # Server-side engine config for the new image: the internal Typesense
+          # service (never exposed to the client). The admin key is used because the
+          # engine's in-memory label cache exports the label collections, which the
+          # search-only key cannot do; it stays server-side.
+          - name: TYPESENSE_HOST
+            value: "dataset-register-typesense"
+          - name: TYPESENSE_PROTOCOL
+            value: "http"
+          - name: TYPESENSE_PORT
+            value: "8108"
+          - name: TYPESENSE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: dataset-register-typesense
+                key: api-key
           # Enables the detail-page Knowledge Graph analysis cache (see the
           # dataset-register app). The cache is opt-in: it is only active when
           # VALKEY_URL is set, so it stays bypassed anywhere this is absent.
@@ -74,6 +94,10 @@ spec:
           - path: /en
             pathType: Prefix
           - path: /proxy
+            pathType: Prefix
+          # The GraphQL search API the browser queries same-origin (server-side
+          # engine); the SPA's search is dead in prod without this route.
+          - path: /graphql
             pathType: Prefix
           - path: /sitemap.xml
             pathType: Prefix
