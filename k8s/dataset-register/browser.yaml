@@ -75,6 +75,10 @@ spec:
             pathType: Prefix
           - path: /proxy
             pathType: Prefix
+          # The GraphQL search API the browser queries same-origin (server-side
+          # engine); the SPA's search is dead in prod without this route.
+          - path: /graphql
+            pathType: Prefix
           - path: /sitemap.xml
             pathType: Prefix
           - path: /robots.txt
