@@ -19,15 +19,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-browser
-          # PINNED for the GraphQL search migration (dataset-register#2232): the
-          # Flux image-policy auto-update marker (normally a trailing comment on the
-          # tag line below) is removed so that merging #2232 does not deploy the new
-          # server-side /graphql browser image before the typed Typesense collections
-          # exist – that would show bare-IRI labels and empty group facets until the
-          # crawler reindexes. To unpin, restore that trailing image-policy marker on
-          # the tag line (the other apps in this repo show the exact syntax) once the
-          # reindex has run and /graphql is verified; Flux then deploys the new image.
-          tag: 20260713115504-ad1b03f
+          tag: 20260713115504-ad1b03f # {"$imagepolicy": "nde:dataset-register-browser:tag"}
         port: 3000
         # SSR is CPU-bound (ldkit RDF parse + Svelte render + devalue-serialize of
         # the ~800 KB detail page). The SURF LimitRange default of 250m throttled
