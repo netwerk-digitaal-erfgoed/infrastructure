@@ -47,8 +47,6 @@ spec:
               secretKeyRef:
                 name: dataset-register-typesense
                 key: api-key
-          - name: TYPESENSE_ENABLE_CORS
-            value: "true"
         resources:
           requests:
             cpu: "250m"
@@ -76,16 +74,7 @@ spec:
       - name: data
         size: 10Gi
 
-    # The browser queries Typesense directly from the client with the
-    # search-only key, so it needs a publicly reachable HTTPS host. A dedicated
-    # subdomain is used because the Typesense client builds plain
-    # `protocol://host:port` URLs with no base path, so a path-prefix on the
-    # main host would not work. The first ingress gets TLS auto-configured by
-    # the chart. CORS is enabled on the server (TYPESENSE_ENABLE_CORS) so the
-    # browser app on datasetregister.netwerkdigitaalerfgoed.nl can call it.
-    ingresses:
-      - hosts:
-          - search.datasetregister.netwerkdigitaalerfgoed.nl
-        paths:
-          - path: /
-            pathType: Prefix
+    # Typesense is reached only in-cluster by the browser pod's server-side
+    # search engine (via the `dataset-register-typesense` service on 8108), so it
+    # has no ingress. The former public `search.datasetregister…` subdomain and
+    # its search-only key served the retired client-direct search path.

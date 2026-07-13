@@ -39,30 +39,11 @@ spec:
             value: "x-forwarded-proto"
           - name: HOST_HEADER
             value: "x-forwarded-host"
-          # Expand phase: both the old and new browser image configs are present so
-          # this env is safe under either image. The CURRENT image queries Typesense
-          # directly from the client with the public search-only key (below). The
-          # NEW image (GraphQL search migration) runs the Typesense engine server-side
-          # and reads the private TYPESENSE_* config; the client no longer sees a key.
-          # Contract (a later change) removes the PUBLIC_TYPESENSE_* block once the new
-          # image is live.
-          #
-          # Client-direct config for the current image (public search-only key).
-          - name: PUBLIC_TYPESENSE_HOST
-            value: "search.datasetregister.netwerkdigitaalerfgoed.nl"
-          - name: PUBLIC_TYPESENSE_PROTOCOL
-            value: "https"
-          - name: PUBLIC_TYPESENSE_PORT
-            value: "443"
-          - name: PUBLIC_TYPESENSE_SEARCH_ONLY_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: dataset-register-typesense
-                key: search-only-api-key
-          # Server-side engine config for the new image: the internal Typesense
-          # service (never exposed to the client). The admin key is used because the
-          # engine's in-memory label cache exports the label collections, which the
-          # search-only key cannot do; it stays server-side.
+          # Server-side search engine config: the browser runs the Typesense
+          # engine behind its /graphql endpoint and reads this internal Typesense
+          # service, which is never exposed to the client. The admin key is used
+          # because the engine's in-memory label cache exports the label
+          # collections, which a search-only key cannot do; it stays server-side.
           - name: TYPESENSE_HOST
             value: "dataset-register-typesense"
           - name: TYPESENSE_PROTOCOL
