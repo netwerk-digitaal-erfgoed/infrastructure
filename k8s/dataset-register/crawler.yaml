@@ -35,7 +35,7 @@ spec:
         # Watchdog: a healthy round is well under this; a round stuck past 50 min
         # is killed before the next hourly tick, so a wedge can never block forever.
         activeDeadlineSeconds: 3000
-        image: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-crawler:20260710184713-c3a9887 # {"$imagepolicy": "nde:dataset-register-crawler"}
+        image: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-crawler:20260713115504-ad1b03f # {"$imagepolicy": "nde:dataset-register-crawler"}
         env:
           - name: SPARQL_URL
             value: "http://dataset-register-qlever"
