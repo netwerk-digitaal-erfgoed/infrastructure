@@ -19,7 +19,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-browser
-          tag: 20260717084841-2793948 # {"$imagepolicy": "nde:dataset-register-browser:tag"}
+          tag: 20260717101329-19088ab # {"$imagepolicy": "nde:dataset-register-browser:tag"}
         port: 3000
         # SSR is CPU-bound (ldkit RDF parse + Svelte render + devalue-serialize of
         # the ~800 KB detail page). The SURF LimitRange default of 250m throttled
