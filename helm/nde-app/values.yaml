@@ -55,7 +55,7 @@ service:
 # Ingress - shared annotations for ingresses that have TLS enabled.
 ingress:
   annotations:
-    cert-manager.io/issuer: letsencrypt-nde
+    cert-manager.io/cluster-issuer: harica
     cert-manager.io/usages: server auth,digital signature,client auth
     acme.cert-manager.io/http01-edit-in-place: "true"
 
