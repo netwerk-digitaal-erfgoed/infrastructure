@@ -1,0 +1,241 @@
+---
+# Source: nde-app/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: geonames-sparql-fuseki-config
+  labels:
+    helm.sh/chart: nde-app-0.0.0
+    app.kubernetes.io/name: geonames-sparql
+    app: geonames-sparql
+    app.kubernetes.io/managed-by: Helm
+data:
+  config.ttl: |
+    @prefix :       <#> .
+    @prefix fuseki: <http://jena.apache.org/fuseki#> .
+    @prefix gn:     <https://www.geonames.org/ontology#> .
+    @prefix tdb2:   <http://jena.apache.org/2016/tdb#> .
+    @prefix text:   <http://jena.apache.org/text#> .
+  
+    [] a fuseki:Server ;
+       fuseki:services (:geonames) .
+  
+    :geonames a fuseki:Service ;
+              fuseki:name "" ;
+              fuseki:label "GeoNames" ;
+              fuseki:serviceQuery "sparql" ;
+              fuseki:serviceReadGraphStore "get" ;
+              fuseki:dataset :textDataset ;
+    .
+  
+    :textDataset a text:TextDataset ;
+      text:dataset :dataset ;
+      text:index :index ;
+    .
+  
+    :dataset a tdb2:DatasetTDB2 ;
+      tdb2:location "/data/tdb" ;
+    .
+  
+    :index a text:TextIndexLucene ;
+      text:directory <file:/data/index> ;
+      text:entityMap :entityMap ;
+  
+      # The default analyzer skips tokens < 3 chars, such as country codes ('NL', 'BE').
+      # Matching such short tokens is very slow, returning many irrelevant results.
+      # Country code matching is handled in the SPARQL query instead.
+      text:defineAnalyzers (
+        [ text:defineFilter :lengthFilter ;
+          text:filter [
+            a text:GenericFilter ;
+            text:class "org.apache.lucene.analysis.miscellaneous.LengthFilter" ;
+            text:params (
+              [ text:paramName "min" ; text:paramValue 3 ]
+              [ text:paramName "max" ; text:paramValue 2147483647 ]
+            ) ] ]
+      ) ;
+      text:analyzer [
+        a text:ConfigurableAnalyzer ;
+        text:tokenizer text:StandardTokenizer ;
+        text:filters ( text:ASCIIFoldingFilter text:LowerCaseFilter :lengthFilter ) ;
+      ] ;
+    .
+  
+    :entityMap a text:EntityMap ;
+      text:defaultField "name" ;
+      text:entityField "uri" ;
+      text:map (
+        [
+          text:field "name" ;
+          text:predicate gn:name ;
+          # text:boost is silently ignored (never implemented in Jena, removed from Lucene in 7.0).
+          # Boosting is done at query time using Lucene's ^N syntax in the SPARQL query instead.
+        ]
+        [
+          text:field "alternateName" ;
+          text:predicate gn:alternateName ;
+        ]
+        # countryCode is no longer in the text index;
+        # country code matching is handled in the SPARQL query instead.
+      ) ;
+    .
+---
+# Source: nde-app/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: geonames-sparql
+  labels:
+    helm.sh/chart: nde-app-0.0.0
+    app.kubernetes.io/name: geonames-sparql
+    app: geonames-sparql
+    app.kubernetes.io/managed-by: Helm
+spec:
+  ports:
+    - port: 80
+      targetPort: 3030
+  selector:
+    app.kubernetes.io/name: geonames-sparql
+---
+# Source: nde-app/templates/workload.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: geonames-sparql
+  labels:
+    helm.sh/chart: nde-app-0.0.0
+    app.kubernetes.io/name: geonames-sparql
+    app: geonames-sparql
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: geonames-sparql
+  serviceName: geonames-sparql
+  template:
+    metadata:
+      annotations:
+        # https://v3.helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
+        checksum/config: c2e03552f1d140c5f8772a4a6c50c30b19b10a16d1a053086e886c873683bc6e
+      labels:
+        app.kubernetes.io/name: geonames-sparql
+        app: geonames-sparql
+    spec:
+      securityContext:
+        fsGroup: 100
+      containers:
+        - name: app
+          image: "stain/jena-fuseki:5.1.0"
+          ports:
+            - containerPort: 3030
+          env:
+          - name: JVM_ARGS
+            value: -Xmx8g -Xlog:gc*:stdout:time,level,tags
+          resources:
+            requests:
+              memory: 8Gi
+          volumeMounts:
+          - mountPath: /fuseki
+            name: fuseki
+          - mountPath: /fuseki/config.ttl
+            name: config
+            subPath: config.ttl
+          - mountPath: /data
+            name: data
+            subPath: production
+          livenessProbe:
+            httpGet:
+              path: /$/ping
+              port: 3030
+          readinessProbe:
+            httpGet:
+              path: /$/ping
+              port: 3030
+      volumes:
+        - configMap:
+            name: geonames-sparql-fuseki-config
+          name: config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Gi
+        storageClassName: hdd
+    - metadata:
+        name: fuseki
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: hdd
+---
+# Source: nde-app/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: geonames-sparql
+  labels:
+    helm.sh/chart: nde-app-0.0.0
+    app.kubernetes.io/name: geonames-sparql
+    app: geonames-sparql
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    cert-manager.io/issuer: harica-nde
+    cert-manager.io/usages: server auth,digital signature,client auth
+spec:
+  tls:
+    - secretName: geonames-sparql-tls
+      hosts:
+        - geonames.netwerkdigitaalerfgoed.nl
+  rules:
+    - host: "geonames.netwerkdigitaalerfgoed.nl"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: geonames-sparql
+                port:
+                  number: 80
+---
+# Source: nde-app/templates/flux-image-policy.yaml
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: geonames-sparql
+  namespace: default
+  labels:
+    helm.sh/chart: nde-app-0.0.0
+    app.kubernetes.io/name: geonames-sparql
+    app: geonames-sparql
+    app.kubernetes.io/managed-by: Helm
+spec:
+  imageRepositoryRef:
+    name: geonames-sparql
+  policy:
+    semver:
+      range: '>=5.1.0'
+---
+# Source: nde-app/templates/flux-image-repository.yaml
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: geonames-sparql
+  namespace: default
+  labels:
+    helm.sh/chart: nde-app-0.0.0
+    app.kubernetes.io/name: geonames-sparql
+    app: geonames-sparql
+    app.kubernetes.io/managed-by: Helm
+spec:
+  image: stain/jena-fuseki
+  interval: 24h
