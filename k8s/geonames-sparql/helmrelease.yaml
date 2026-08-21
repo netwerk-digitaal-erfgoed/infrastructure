@@ -44,10 +44,17 @@ spec:
         port: 3030
         resources:
           requests:
-            cpu: 500m
+            # A 500m request told the scheduler this was a small workload, so it packed the
+            # server onto a node alongside two QLever stores. The request is also the CFS
+            # share weight once that node is busy, so ask for what a query actually costs.
+            cpu: 2
             memory: 8Gi
           limits:
-            cpu: 2
+            # At cpu: 2 the container was throttled in ~85% of its CFS periods whenever a few
+            # queries overlapped on a cold page cache: the quota was spent early in each 100ms
+            # period and every thread – including the one answering /$/ping – stalled for the
+            # rest of it. 4 leaves headroom for query threads plus G1 during warm-up.
+            cpu: 4
             memory: 14Gi
         env:
           # Apache's entrypoint reads JAVA_OPTIONS (not JVM_ARGS, which the old stain image used).
@@ -70,12 +77,26 @@ spec:
           - name: data
             mountPath: /data
             subPath: production
-        livenessProbe:
+        # No livenessProbe. This server’s only failure mode is slowness – a cold mmap cache
+        # after a restart or a reindex swap – and killing it for that empties the cache again,
+        # so the next start is slower and gets killed sooner. That is a crashloop, not a
+        # recovery: on 2026-08-21 the default 1s timeout took the endpoint down for hours.
+        # Readiness alone is the right response, and the StatefulSet still restarts the pod if
+        # the process actually exits.
+        startupProbe:
           httpGet:
             path: /$/ping
+          periodSeconds: 10
+          # Up to 5 minutes to open the TDB2 store and the Lucene index and answer, so a slow
+          # start never counts against readiness.
+          failureThreshold: 30
         readinessProbe:
           httpGet:
             path: /$/ping
+          periodSeconds: 15
+          # The 1s default is far too tight for a JVM in a G1 pause while it faults index
+          # pages in from the volume; 5s distinguishes “busy” from “gone”.
+          timeoutSeconds: 5
 
     securityContext:
       fsGroup: 100

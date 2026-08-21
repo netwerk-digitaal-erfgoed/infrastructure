@@ -80,7 +80,7 @@ spec:
             - containerPort: {{ . }}
           {{- end }}
           {{- /* Pass through all standard container fields dynamically */ -}}
-          {{- $passthrough := omit . "name" "image" "port" "flux" "livenessProbe" "readinessProbe" }}
+          {{- $passthrough := omit . "name" "image" "port" "flux" "livenessProbe" "readinessProbe" "startupProbe" }}
           {{- with $passthrough }}
           {{- toYaml . | nindent 10 }}
           {{- end }}
@@ -93,6 +93,11 @@ spec:
           {{- with .readinessProbe }}
           {{- $defaults := dict "httpGet" (dict "path" "/" "port" $containerPort) }}
           readinessProbe:
+            {{- toYaml (mergeOverwrite $defaults .) | nindent 12 }}
+          {{- end }}
+          {{- with .startupProbe }}
+          {{- $defaults := dict "httpGet" (dict "path" "/" "port" $containerPort) }}
+          startupProbe:
             {{- toYaml (mergeOverwrite $defaults .) | nindent 12 }}
           {{- end }}
         {{- end }}
