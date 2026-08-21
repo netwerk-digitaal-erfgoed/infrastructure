@@ -31,7 +31,7 @@ spec:
       - name: app
         image:
           repository: netwerkdigitaalerfgoed/fuseki
-          tag: "6.1.0" # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
+          tag: "6.1.0" # {"$imagepolicy": "nde:geonames-sparql:tag"}
         # Fuseki Main does not auto-load $FUSEKI_BASE/config.ttl – it must be
         # passed explicitly via --config. Without this, Fuseki starts admin-only
         # with no datasets and /sparql returns 404.
@@ -40,7 +40,9 @@ spec:
         flux:
           policy:
             type: semver
-            range: ">=6.1.0"
+            # Bounded to the major: Jena keeps breaking changes (Java baseline,
+            # Lucene major bumps that invalidate the text index) for majors.
+            range: ">=6.1.0 <7.0.0"
         port: 3030
         resources:
           requests:
