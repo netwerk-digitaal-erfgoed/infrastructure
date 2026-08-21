@@ -30,7 +30,7 @@ spec:
         #    geonames-sparql ImagePolicy (jena-tools and fuseki publish identical
         #    tags), so loader and server never drift.
         - name: prepare-tdb
-          image: netwerkdigitaalerfgoed/jena-tools:6.1.0 # {"$imagepolicy": "nde:geonames-sparql:tag"}
+          image: 6.2.0 # {"$imagepolicy": "nde:geonames-sparql:tag"}
           resources:
             requests:
               cpu: "1"
@@ -98,7 +98,7 @@ spec:
         #    user (UID 1000) — the same UID as the server — so the index it writes is
         #    already server-owned; no root needed.
         - name: build-text-index
-          image: netwerkdigitaalerfgoed/fuseki:6.1.0 # {"$imagepolicy": "nde:geonames-sparql:tag"}
+          image: 6.2.0 # {"$imagepolicy": "nde:geonames-sparql:tag"}
           resources:
             requests:
               cpu: "1"

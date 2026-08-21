@@ -26,12 +26,11 @@ spec:
   values:
     workload:
       type: statefulset
-
     containers:
       - name: app
         image:
           repository: netwerkdigitaalerfgoed/fuseki
-          tag: "6.1.0" # {"$imagepolicy": "nde:geonames-sparql:tag"}
+          tag: "6.2.0" # {"$imagepolicy": "nde:geonames-sparql:tag"}
         # Fuseki Main does not auto-load $FUSEKI_BASE/config.ttl – it must be
         # passed explicitly via --config. Without this, Fuseki starts admin-only
         # with no datasets and /sparql returns 404.
@@ -99,17 +98,14 @@ spec:
           # The 1s default is far too tight for a JVM in a G1 pause while it faults index
           # pages in from the volume; 5s distinguishes “busy” from “gone”.
           timeoutSeconds: 5
-
     securityContext:
       fsGroup: 100
-
     volumes:
       - name: config
         configMap:
           name: geonames-sparql-fuseki-config
       - name: fuseki-run
         emptyDir: {}
-
     persistentVolumes:
       - name: data
         size: 50Gi
@@ -118,11 +114,9 @@ spec:
       # nothing in /fuseki is needed.
       - name: fuseki
         size: 10Gi
-
     service:
       port: 80
       targetPort: 3030
-
     ingresses:
       - ingressClassName: nginx-shared
         hosts:
@@ -130,7 +124,6 @@ spec:
         paths:
           - path: /
             pathType: Prefix
-
     configMaps:
       - name: fuseki-config
         data:
@@ -164,7 +157,7 @@ spec:
             :index a text:TextIndexLucene ;
               text:directory <file:/data/index> ;
               text:entityMap :entityMap ;
-            
+
               # The default analyzer skips tokens < 3 chars, such as country codes ('NL', 'BE').
               # Matching such short tokens is very slow, returning many irrelevant results.
               # Country code matching is handled in the SPARQL query instead.
