@@ -13,7 +13,7 @@ spec:
       sourceRef:
         kind: GitRepository
         name: nde
-  # Don't block helm upgrade on pod readiness — let the StatefulSet controller
+  # Don't block helm upgrade on pod readiness – let the StatefulSet controller
   # roll the pod on its own schedule. Otherwise a CrashLoopBackOff pod stalls
   # Flux retries for 5 minutes per attempt.
   install:
@@ -32,7 +32,7 @@ spec:
         image:
           repository: netwerkdigitaalerfgoed/fuseki
           tag: "6.1.0" # {"$imagepolicy": "nde:geonames-sparql-fuseki:tag"}
-        # Fuseki Main does not auto-load $FUSEKI_BASE/config.ttl — it must be
+        # Fuseki Main does not auto-load $FUSEKI_BASE/config.ttl – it must be
         # passed explicitly via --config. Without this, Fuseki starts admin-only
         # with no datasets and /sparql returns 404.
         args:
@@ -51,8 +51,8 @@ spec:
             memory: 14Gi
         env:
           # Apache's entrypoint reads JAVA_OPTIONS (not JVM_ARGS, which the old stain image used).
-          # TDB2 and the Lucene index are memory-mapped — they live in the OS page cache,
-          # NOT the JVM heap — so a small heap plus a large page cache is fastest. The heap
+          # TDB2 and the Lucene index are memory-mapped – they live in the OS page cache,
+          # NOT the JVM heap – so a small heap plus a large page cache is fastest. The heap
           # is barely used (~0.3Gi idle), so cap it low and leave the rest of the 14Gi limit
           # for page cache to keep the index hot. Cold full-text queries were ~5s vs <100ms
           # warm; more resident index = fewer cold faults.
@@ -162,6 +162,17 @@ spec:
               ] ;
             .
 
+            # Several entries may share a text:field: EntityDefinitionAssembler collects them into a
+            # MultiValuedMap<String, Node> and EntityDefinition keeps a ListValuedMap per field, adding
+            # each predicate uniquely. Jena’s documentation does not mention this, so it is worth naming.
+            #
+            # The two fields mirror the two SKOS roles the GeoNames ontology assigns these properties:
+            # gn:officialName is rdfs:subPropertyOf skos:prefLabel, like gn:name, so it belongs in the
+            # field the search query boosts with ^3; gn:shortName, gn:colloquialName and
+            # gn:historicalName are all rdfs:subPropertyOf gn:alternateName. Since the dataset carries
+            # no reasoner, every subproperty has to be listed explicitly or its names are not indexed
+            # at all – which is how 565,670 names would silently drop out once geonames-rdf publishes
+            # them under the new predicates.
             :entityMap a text:EntityMap ;
               text:defaultField "name" ;
               text:entityField "uri" ;
@@ -173,8 +184,24 @@ spec:
                   # Boosting is done at query time using Lucene's ^N syntax in the SPARQL query instead.
                 ]
                 [
+                  text:field "name" ;
+                  text:predicate gn:officialName ;
+                ]
+                [
                   text:field "alternateName" ;
                   text:predicate gn:alternateName ;
+                ]
+                [
+                  text:field "alternateName" ;
+                  text:predicate gn:shortName ;
+                ]
+                [
+                  text:field "alternateName" ;
+                  text:predicate gn:colloquialName ;
+                ]
+                [
+                  text:field "alternateName" ;
+                  text:predicate gn:historicalName ;
                 ]
                 # countryCode is no longer in the text index;
                 # country code matching is handled in the SPARQL query instead.
