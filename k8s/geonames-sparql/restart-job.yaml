@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: geonames-sparql-restart-1
+  namespace: nde
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: Enabled
+spec:
+  # A StatefulSet rolling update is monotonic: the controller waits for pod-0 to be Running AND
+  # Ready before it will replace it. So when the JVM wedges – as it did on 2026-08-21, looping
+  # G1 Full GCs that freed 2 MB of a 4g heap – the pod stops being Ready and the very update
+  # that fixes the problem can never roll out. Flux applied the new spec (the StatefulSet
+  # generation went 541 -> 542, observed generation followed) and the wedged pod stayed put.
+  #
+  # Scaling to 0 is not subject to that wait: it deletes the pod outright, and scaling back to 1
+  # recreates it from the current spec. This scales rather than deleting the pod directly
+  # because the statefulset-manager role grants statefulsets/scale and no access to pods.
+  #
+  # Jobs are immutable, so a future restart needs a new name (-2, -3, …), as with the reindex
+  # Jobs. Leave the completed Job in place: deleting it here would have Flux recreate it on the
+  # next reconcile, restarting the server again.
+  backoffLimit: 2
+  template:
+    spec:
+      serviceAccountName: statefulset-manager
+      restartPolicy: OnFailure
+      containers:
+        - name: restart
+          image: bitnami/kubectl:latest
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 384Mi
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              kubectl scale statefulset/geonames-sparql --replicas=0
+              kubectl rollout status statefulset/geonames-sparql --watch
+              kubectl scale statefulset/geonames-sparql --replicas=1
