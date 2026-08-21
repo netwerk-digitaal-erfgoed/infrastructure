@@ -77,12 +77,19 @@ spec:
           - name: data
             mountPath: /data
             subPath: production
-        # No livenessProbe. This server’s only failure mode is slowness – a cold mmap cache
-        # after a restart or a reindex swap – and killing it for that empties the cache again,
-        # so the next start is slower and gets killed sooner. That is a crashloop, not a
-        # recovery: on 2026-08-21 the default 1s timeout took the endpoint down for hours.
-        # Readiness alone is the right response, and the StatefulSet still restarts the pod if
-        # the process actually exits.
+        # Liveness is deliberately slack, not absent. Its 1s default killed this server for
+        # being slow on 2026-08-21 – a cold mmap cache is not a fault, and each kill emptied
+        # the cache again – but removing it entirely left nothing to recover the JVM when a
+        # single query exhausted the 4g heap that afternoon and G1 spent 20 minutes running
+        # back-to-back Full GCs that freed 2 MB each. That is the failure a restart does fix.
+        # 30s x 5 at 30s intervals means ~2.5 minutes of a server answering nothing at all
+        # before it is restarted: far beyond any warm-up, well short of an unattended hang.
+        livenessProbe:
+          httpGet:
+            path: /$/ping
+          periodSeconds: 30
+          timeoutSeconds: 30
+          failureThreshold: 5
         startupProbe:
           httpGet:
             path: /$/ping
@@ -135,11 +142,18 @@ spec:
           config.ttl: |
             @prefix :       <#> .
             @prefix fuseki: <http://jena.apache.org/fuseki#> .
+            @prefix ja:     <http://jena.hpl.hp.com/2005/11/Assembler#> .
             @prefix gn:     <https://www.geonames.org/ontology#> .
             @prefix tdb2:   <http://jena.apache.org/2016/tdb#> .
             @prefix text:   <http://jena.apache.org/text#> .
 
+            # Without a timeout a single query can run until it exhausts the heap, which is what
+            # took the endpoint down on 2026-08-21: the Network of Terms search sorts every
+            # Lucene hit before LIMIT 100 applies, so a common term materialises millions of
+            # bindings in a 4g heap. 30s to the first result, 120s overall – an order of
+            # magnitude above the ~40ms a warm search takes, so only a runaway is cut off.
             [] a fuseki:Server ;
+               ja:context [ ja:cxtName "arq:queryTimeout" ; ja:cxtValue "30000,120000" ] ;
                fuseki:services (:geonames) .
 
             :geonames a fuseki:Service ;
