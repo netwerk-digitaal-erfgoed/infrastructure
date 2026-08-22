@@ -15,6 +15,12 @@ spec:
   jobTemplate:
     spec:
       backoffLimit: 0
+      # A Job that cannot start still reserves the shared ReadWriteOnce claim on whichever node it
+      # was scheduled to, and with backoffLimit 0 and no deadline it never fails and never lets go:
+      # on 2026-08-22 an ErrImagePull Job held the volume for hours and the server, recreated onto
+      # another node meanwhile, could not mount it. A full load takes about two hours (xloader ~1h,
+      # text index ~50m), so four hours bounds a wedged run without cutting a healthy one short.
+      activeDeadlineSeconds: 14400
       template:
         spec:
           affinity:
