@@ -1,0 +1,34 @@
+# The loader Jobs run tdb2.xloader from netwerkdigitaalerfgoed/jena-tools, a different repository
+# from the netwerkdigitaalerfgoed/fuseki image the server runs, so it needs its own ImagePolicy.
+#
+# They previously shared the server's policy through a `:tag` marker, which writes only the tag
+# into the annotated field. That is right in the HelmRelease, where the marker sits on a `tag:`
+# field, but these are plain manifests whose marker sits on a full `image:` value – so the first
+# automation run after the marker started resolving rewrote it to `image: 6.2.0`, with no
+# repository at all, and every reindex since failed with ErrImagePull.
+#
+# Both repositories publish identical tags and both policies use the same range, so loader and
+# server still move together. They are separate reconciliations, so if one repository publishes a
+# release before the other, the two can differ until the second is picked up.
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: geonames-sparql-jena-tools
+  namespace: nde
+spec:
+  image: netwerkdigitaalerfgoed/jena-tools
+  interval: 24h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: geonames-sparql-jena-tools
+  namespace: nde
+spec:
+  imageRepositoryRef:
+    name: geonames-sparql-jena-tools
+  policy:
+    semver:
+      # Bounded to the major, matching the server's policy: Jena keeps breaking changes
+      # (Java baseline, Lucene major bumps that invalidate the text index) for majors.
+      range: '>=6.1.0 <7.0.0'
