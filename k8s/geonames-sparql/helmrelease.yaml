@@ -105,6 +105,29 @@ spec:
           # The 1s default is far too tight for a JVM in a G1 pause while it faults index
           # pages in from the volume; 5s distinguishes “busy” from “gone”.
           timeoutSeconds: 5
+    # The loader Jobs pin themselves to this server's node with a required podAffinity, because
+    # both mount the same ReadWriteOnce claim and RWO means one node at a time. Nothing pinned the
+    # server itself, so a helm upgrade (force: true recreates the pod) could move it while a loader
+    # pod sat on the old node holding the volume – which is how the endpoint deadlocked in
+    # ContainerCreating on 2026-08-22, and why it landed next to two QLever stores on 2026-08-21.
+    #
+    # Preferred rather than required, and by hostname: a required match would leave the server
+    # unschedulable if both nodes were replaced, and an endpoint that cannot start is worse than one
+    # on a busy node. dataset-knowledge-graph pins by node class instead (nodeSelector
+    # surf.nl/nodesize: 8core32gb), which is tidier – switch to that once the 16-core pool's label
+    # value is known; node labels are not exposed through kube-state-metrics here.
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: In
+                  values:
+                    - ms4-k8s-prod-md-16core-cz47g-htxfv-zbzhr
+                    - ms4-k8s-prod-md-16core-cz47g-htxfv-6l7vq
+
     securityContext:
       fsGroup: 100
     volumes:

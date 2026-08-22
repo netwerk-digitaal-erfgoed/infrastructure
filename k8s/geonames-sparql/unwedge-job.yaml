@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: geonames-sparql-unwedge-1
+  namespace: nde
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: Enabled
+spec:
+  # One-shot recovery for the deadlock of 2026-08-22. The 04:00 loader Job could not pull its image
+  # (its `image:` had been rewritten to a bare tag – see #279), so it sat Pending on the node it was
+  # scheduled to, holding the shared ReadWriteOnce claim there. The server pod was meanwhile
+  # recreated onto another node by a helm upgrade and could not attach the volume, leaving it in
+  # ContainerCreating for hours with the endpoint down.
+  #
+  # Neither half frees itself: the loader Job has backoffLimit 0 and, until this change, no
+  # deadline, so it never fails; and a StatefulSet rolling update will not replace a pod that is not
+  # Ready, so no spec change can move the server either. Deleting the Job releases the claim, and
+  # scaling the server to 0 and back recreates its pod against the current spec.
+  #
+  # Jobs are immutable, so a future recovery needs a new name (-2, -3, …). Leave the completed Job
+  # in place: deleting the manifest would have Flux recreate the object and restart the server.
+  backoffLimit: 2
+  template:
+    spec:
+      serviceAccountName: statefulset-manager
+      restartPolicy: OnFailure
+      containers:
+        - name: unwedge
+          image: bitnami/kubectl:latest
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 384Mi
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              # Release the volume. --ignore-not-found so a rerun, or a Job the CronJob has since
+              # cleaned up, is not an error.
+              kubectl delete job geonames-sparql-indexer-29789520 --ignore-not-found
+              # Give the CSI driver time to detach before the server asks for the volume again.
+              sleep 60
+              kubectl scale statefulset/geonames-sparql --replicas=0
+              kubectl rollout status statefulset/geonames-sparql --watch
+              kubectl scale statefulset/geonames-sparql --replicas=1

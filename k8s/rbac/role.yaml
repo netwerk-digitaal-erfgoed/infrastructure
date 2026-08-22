@@ -7,3 +7,8 @@ rules:
   - apiGroups: ["apps"]
     resources: ["statefulsets", "statefulsets/scale"]
     verbs: ["get", "patch", "list", "watch"]
+  # Deleting a loader Job is the only way to release the shared ReadWriteOnce claim when the Job is
+  # stuck before its first container starts. Delete only: Jobs are created by Flux, never from here.
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "delete"]
