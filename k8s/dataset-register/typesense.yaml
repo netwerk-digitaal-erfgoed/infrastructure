@@ -15,6 +15,7 @@ spec:
   values:
     workload:
       type: statefulset
+      podManagementPolicy: Parallel
 
     service:
       port: 8108
