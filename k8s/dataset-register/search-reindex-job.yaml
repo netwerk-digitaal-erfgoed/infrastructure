@@ -27,7 +27,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: reindex
-          image: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-crawler:20260902054324-9bb4b08 # {"$imagepolicy": "nde:dataset-register-crawler"}
+          image: ghcr.io/netwerk-digitaal-erfgoed/dataset-register/apps-crawler:20260903172519-54bad0b # {"$imagepolicy": "nde:dataset-register-crawler"}
           command:
             - node
             - node_modules/@dataset-register/search-indexer/dist/main.js
