@@ -17,6 +17,7 @@ spec:
     # durability we want): the browser pods roll on each deploy, this does not.
     workload:
       type: statefulset
+      podManagementPolicy: OrderedReady
 
     service:
       port: 6379
