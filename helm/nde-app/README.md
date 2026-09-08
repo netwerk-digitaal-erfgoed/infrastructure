@@ -43,6 +43,20 @@ containers:
         range: "~10.11"  # Only patch updates
 ```
 
+## StatefulSets
+
+Set `workload.type: statefulset` to get a StatefulSet instead of a Deployment.
+
+The chart always renders `podManagementPolicy` (default `Parallel`), because Kubernetes forbids changing it on an existing StatefulSet and Helm’s three-way patch removes any field that disappears from the rendered manifest. `Parallel` lets the controller replace a pod that never became Ready, which `OrderedReady` refuses to do; that deadlock blocked two fixes to geonames-sparql in May 2026. Ordering only matters with several replicas, and every StatefulSet here runs a single one, so `Parallel` costs nothing.
+
+StatefulSets created before this default exist with `OrderedReady`. Their releases must pin that value until the StatefulSet is recreated:
+
+```yaml
+workload:
+  type: statefulset
+  podManagementPolicy: OrderedReady
+```
+
 ## CNAME DNS Records
 
 Create CNAME records via ExternalDNS without deploying any application:

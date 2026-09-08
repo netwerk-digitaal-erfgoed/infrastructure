@@ -2,6 +2,11 @@
 workload:
   type: deployment  # or "statefulset"
   replicas: 1
+  # StatefulSets only. Parallel lets the controller replace a pod that never
+  # became Ready, which OrderedReady refuses to do (CrashLoopBackOff deadlock).
+  # Immutable once the StatefulSet exists: set to OrderedReady for StatefulSets
+  # created with that policy.
+  podManagementPolicy: Parallel
 
 # External service (reverse proxy to external IP, no containers needed)
 externalService:
