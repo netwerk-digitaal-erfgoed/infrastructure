@@ -45,7 +45,12 @@ spec:
                 name: dataset-register-qlever
                 key: access-token
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
-            value: "http://nde-otel.monitoring.svc.cluster.local:4318"
+            value: "https://otel.netwerkdigitaalerfgoed.nl"
+          - name: OTEL_EXPORTER_OTLP_HEADERS
+            valueFrom:
+              secretKeyRef:
+                name: opentelemetry-collector-token
+                key: otlp-headers
           - name: TYPESENSE_HOST
             value: "dataset-register-typesense"
           - name: TYPESENSE_PORT

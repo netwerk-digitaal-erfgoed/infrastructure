@@ -5,12 +5,33 @@ metadata:
 spec:
   mode: deployment
   image: otel/opentelemetry-collector-contrib:0.126.0
+  # Bearer token that remote senders (the SURF cluster) must present.
+  # Create the secret by hand; it is not stored in this repository:
+  #   kubectl create secret generic opentelemetry-collector-token --from-literal=token=…
+  env:
+    - name: OTLP_BEARER_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: opentelemetry-collector-token
+          key: token
   config:
+    extensions:
+      bearertokenauth:
+        token: ${env:OTLP_BEARER_TOKEN}
+
     receivers:
+      # Apps in this cluster push here unauthenticated.
       otlp:
         protocols:
           grpc: {}
           http: {}
+      # Apps on the SURF cluster push here through the Ingress below.
+      otlp/external:
+        protocols:
+          http:
+            endpoint: 0.0.0.0:4319
+            auth:
+              authenticator: bearertokenauth
 
     processors:
       memory_limiter:
@@ -38,15 +59,46 @@ spec:
       debug: {}
 
     service:
+      extensions: [bearertokenauth]
       pipelines:
         traces:
-          receivers: [otlp]
+          receivers: [otlp, otlp/external]
           processors: [memory_limiter, batch]
           exporters: [debug]
         metrics:
-          receivers: [otlp]
+          receivers: [otlp, otlp/external]
           processors: [k8sattributes, memory_limiter, batch]
           exporters: [debug, prometheus]
+
+---
+# Exposes the OTLP/HTTP receiver so that apps on the SURF cluster can push
+# their metrics here, until SURF provides a metrics endpoint of its own.
+# Only the SURF cluster’s egress address may connect; senders must also
+# present the bearer token above.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: opentelemetry-collector
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/whitelist-source-range: 145.38.218.188/32
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - otel.netwerkdigitaalerfgoed.nl
+      secretName: opentelemetry-collector-tls
+  rules:
+    - host: otel.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: opentelemetry-collector
+                port:
+                  number: 4319
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1

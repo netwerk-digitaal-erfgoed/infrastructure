@@ -92,7 +92,10 @@ See [k8s/secrets/README.md](k8s/secrets/README.md) for encryption instructions.
 
 ## Telemetry
 
-- **Metrics**: Applications push [OpenTelemetry](https://opentelemetry.io) metrics to a collector, scraped by [VictoriaMetrics](https://victoriametrics.com)
+- **Metrics**: Applications push [OpenTelemetry](https://opentelemetry.io) metrics to a collector, scraped by [VictoriaMetrics](https://victoriametrics.com).
+  The collector still runs on the DigitalOcean cluster (`k8s-do/metrics/`), because SURF does not yet offer a metrics endpoint.
+  Apps on the SURF cluster push to it over HTTPS at `otel.netwerkdigitaalerfgoed.nl`, with the bearer token from the `opentelemetry-collector-token` secret in `OTEL_EXPORTER_OTLP_HEADERS`.
+  The collector’s Ingress only accepts the SURF cluster’s egress address.
 - **Logs**: Collected through [Loki](https://grafana.com/oss/loki/)
 - **Dashboard**: [Grafana](https://statistieken.netwerkdigitaalerfgoed.nl) (behind login)
 
