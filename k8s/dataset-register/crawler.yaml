@@ -45,7 +45,7 @@ spec:
                 name: dataset-register-qlever
                 key: access-token
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
-            value: "https://otel.netwerkdigitaalerfgoed.nl"
+            value: "https://otel-legacy.netwerkdigitaalerfgoed.nl"
           - name: OTLP_TOKEN
             valueFrom:
               secretKeyRef:

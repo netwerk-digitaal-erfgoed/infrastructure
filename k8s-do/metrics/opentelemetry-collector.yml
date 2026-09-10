@@ -100,10 +100,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - otel.netwerkdigitaalerfgoed.nl
+        - otel-legacy.netwerkdigitaalerfgoed.nl
       secretName: opentelemetry-collector-tls
   rules:
-    - host: otel.netwerkdigitaalerfgoed.nl
+    - host: otel-legacy.netwerkdigitaalerfgoed.nl
       http:
         paths:
           - path: /
