@@ -84,9 +84,8 @@ spec:
 # Only the SURF cluster’s egress address may connect; senders must also
 # present the bearer token above.
 #
-# This cluster has no ExternalDNS: create the A record for the hostname by
-# hand, pointing at the ingress-nginx load balancer (same address as
-# statistieken.netwerkdigitaalerfgoed.nl).
+# This cluster has no ExternalDNS: the SURF cluster creates the DNS record,
+# see k8s/metrics/helmrelease.yaml.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
