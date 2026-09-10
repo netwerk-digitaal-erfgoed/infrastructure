@@ -6,7 +6,9 @@ spec:
   mode: deployment
   image: otel/opentelemetry-collector-contrib:0.126.0
   # Bearer token that remote senders (the SURF cluster) must present.
-  # Create the secret by hand; it is not stored in this repository:
+  # This cluster is not managed by Flux, so create the secret by hand with the
+  # same token as the SURF copy in k8s/secrets/opentelemetry-collector-token.yaml
+  # (decrypt with sops), before applying this manifest:
   #   kubectl create secret generic opentelemetry-collector-token --from-literal=token=…
   env:
     - name: OTLP_BEARER_TOKEN
@@ -62,12 +64,18 @@ spec:
       extensions: [bearertokenauth]
       pipelines:
         traces:
-          receivers: [otlp, otlp/external]
+          receivers: [otlp]
           processors: [memory_limiter, batch]
           exporters: [debug]
         metrics:
-          receivers: [otlp, otlp/external]
+          receivers: [otlp]
           processors: [k8sattributes, memory_limiter, batch]
+          exporters: [debug, prometheus]
+        # No k8sattributes here: remote senders arrive from the ingress-nginx
+        # pod’s IP, so the processor would attach that pod’s labels instead.
+        metrics/external:
+          receivers: [otlp/external]
+          processors: [memory_limiter, batch]
           exporters: [debug, prometheus]
 
 ---
@@ -75,12 +83,18 @@ spec:
 # their metrics here, until SURF provides a metrics endpoint of its own.
 # Only the SURF cluster’s egress address may connect; senders must also
 # present the bearer token above.
+#
+# This cluster has no ExternalDNS: create the A record for the hostname by
+# hand, pointing at the ingress-nginx load balancer (same address as
+# statistieken.netwerkdigitaalerfgoed.nl).
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: opentelemetry-collector
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
+    # NAT address of the SURF cluster, observed as the source of outbound
+    # requests from pods there (September 2026). Not documented by SURF.
     nginx.ingress.kubernetes.io/whitelist-source-range: 145.38.218.188/32
 spec:
   ingressClassName: nginx

@@ -33,11 +33,13 @@ spec:
             value: "true"
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
             value: "https://otel.netwerkdigitaalerfgoed.nl"
-          - name: OTEL_EXPORTER_OTLP_HEADERS
+          - name: OTLP_TOKEN
             valueFrom:
               secretKeyRef:
                 name: opentelemetry-collector-token
-                key: otlp-headers
+                key: token
+          - name: OTEL_EXPORTER_OTLP_HEADERS
+            value: "Authorization=Bearer $(OTLP_TOKEN)"
           - name: OTEL_LOG_LEVEL
             value: "all"
           - name: API_ACCESS_TOKEN
