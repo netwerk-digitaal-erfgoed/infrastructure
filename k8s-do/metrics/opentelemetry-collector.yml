@@ -82,8 +82,7 @@ spec:
 ---
 # Exposes the OTLP/HTTP receiver so that apps on the SURF cluster can push
 # their metrics here, until SURF provides a metrics endpoint of its own.
-# Only the SURF cluster’s egress address may connect; senders must also
-# present the bearer token above.
+# Senders must present the bearer token above.
 #
 # This cluster has no ExternalDNS: the SURF cluster creates the DNS record,
 # see k8s/metrics/helmrelease.yaml.
@@ -93,9 +92,6 @@ metadata:
   name: opentelemetry-collector
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
-    # NAT address of the SURF cluster, observed as the source of outbound
-    # requests from pods there (September 2026). Not documented by SURF.
-    nginx.ingress.kubernetes.io/whitelist-source-range: 145.38.218.188/32
 spec:
   ingressClassName: nginx
   tls:

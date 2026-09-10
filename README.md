@@ -96,7 +96,7 @@ See [k8s/secrets/README.md](k8s/secrets/README.md) for encryption instructions.
   The collector still runs on the DigitalOcean cluster (`k8s-do/metrics/`), because SURF does not yet offer a metrics endpoint.
   Apps on the SURF cluster push to it over HTTPS at `otel-legacy.netwerkdigitaalerfgoed.nl`, sending `OTEL_EXPORTER_OTLP_HEADERS` as `Authorization=Bearer …` with the token from the `opentelemetry-collector-token` secret.
   The same token lives in a hand-made secret of the same name on the DigitalOcean cluster; rotate both together.
-  The collector’s Ingress only accepts the SURF cluster’s egress address; its DNS record is created from the SURF cluster (`k8s/metrics/`), since DigitalOcean has no ExternalDNS.
+  The collector’s DNS record is created from the SURF cluster (`k8s/metrics/`), since DigitalOcean has no ExternalDNS.
 - **Logs**: Collected through [Loki](https://grafana.com/oss/loki/)
 - **Dashboard**: [Grafana](https://statistieken.netwerkdigitaalerfgoed.nl) (behind login)
 
