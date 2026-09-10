@@ -8,7 +8,8 @@ spec:
   # Bearer token that remote senders (the SURF cluster) must present.
   # This cluster is not managed by Flux, so create the secret by hand with the
   # same token as the SURF copy in k8s/secrets/opentelemetry-collector-token.yaml
-  # (decrypt with sops), before applying this manifest:
+  # (kept in 1Password; the encrypted file can only be read by Flux), before
+  # applying this manifest:
   #   kubectl create secret generic opentelemetry-collector-token --from-literal=token=…
   env:
     - name: OTLP_BEARER_TOKEN
