@@ -125,7 +125,7 @@ cronjobs: []
   #   activeDeadlineSeconds: 3000  # Optional: kill a Job that runs longer than this (watchdog)
   #   restartPolicy: OnFailure  # Optional, defaults to OnFailure
 
-# CNAME DNS records (via ExternalDNS)
+# CNAME DNS records (via ExternalDNS); an IP address as target yields an A record
 cnames: []
   # - hostname: alias.example.com
   #   target: target.example.com

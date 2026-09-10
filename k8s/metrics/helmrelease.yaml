@@ -1,0 +1,23 @@
+# DNS record for the metrics collector that still runs on the DigitalOcean
+# cluster (k8s-do/metrics/), which has no ExternalDNS of its own. Apps on
+# this cluster push their metrics there until SURF offers a metrics endpoint.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: otel-legacy
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    cnames:
+      - hostname: otel-legacy.netwerkdigitaalerfgoed.nl
+        # The DigitalOcean ingress-nginx load balancer.
+        target: 178.128.143.225

@@ -32,7 +32,14 @@ spec:
           - name: TRUST_PROXY
             value: "true"
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
-            value: "http://nde-otel.monitoring.svc.cluster.local:4318"
+            value: "https://otel-legacy.netwerkdigitaalerfgoed.nl"
+          - name: OTLP_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: opentelemetry-collector-token
+                key: token
+          - name: OTEL_EXPORTER_OTLP_HEADERS
+            value: "Authorization=Bearer $(OTLP_TOKEN)"
           - name: OTEL_LOG_LEVEL
             value: "all"
           - name: API_ACCESS_TOKEN

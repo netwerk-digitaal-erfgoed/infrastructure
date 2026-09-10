@@ -68,6 +68,7 @@ cnames:
 ```
 
 This creates an Ingress with `external-dns.alpha.kubernetes.io/target` annotation.
+An IP address as target yields an A record instead of a CNAME.
 
 ## ConfigMap
 

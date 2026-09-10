@@ -5,12 +5,36 @@ metadata:
 spec:
   mode: deployment
   image: otel/opentelemetry-collector-contrib:0.126.0
+  # Bearer token that remote senders (the SURF cluster) must present.
+  # This cluster is not managed by Flux, so create the secret by hand with the
+  # same token as the SURF copy in k8s/secrets/opentelemetry-collector-token.yaml
+  # (kept in 1Password; the encrypted file can only be read by Flux), before
+  # applying this manifest:
+  #   kubectl create secret generic opentelemetry-collector-token --from-literal=token=…
+  env:
+    - name: OTLP_BEARER_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: opentelemetry-collector-token
+          key: token
   config:
+    extensions:
+      bearertokenauth:
+        token: ${env:OTLP_BEARER_TOKEN}
+
     receivers:
+      # Apps in this cluster push here unauthenticated.
       otlp:
         protocols:
           grpc: {}
           http: {}
+      # Apps on the SURF cluster push here through the Ingress below.
+      otlp/external:
+        protocols:
+          http:
+            endpoint: 0.0.0.0:4319
+            auth:
+              authenticator: bearertokenauth
 
     processors:
       memory_limiter:
@@ -38,6 +62,7 @@ spec:
       debug: {}
 
     service:
+      extensions: [bearertokenauth]
       pipelines:
         traces:
           receivers: [otlp]
@@ -47,6 +72,43 @@ spec:
           receivers: [otlp]
           processors: [k8sattributes, memory_limiter, batch]
           exporters: [debug, prometheus]
+        # No k8sattributes here: remote senders arrive from the ingress-nginx
+        # pod’s IP, so the processor would attach that pod’s labels instead.
+        metrics/external:
+          receivers: [otlp/external]
+          processors: [memory_limiter, batch]
+          exporters: [debug, prometheus]
+
+---
+# Exposes the OTLP/HTTP receiver so that apps on the SURF cluster can push
+# their metrics here, until SURF provides a metrics endpoint of its own.
+# Senders must present the bearer token above.
+#
+# This cluster has no ExternalDNS: the SURF cluster creates the DNS record,
+# see k8s/metrics/helmrelease.yaml.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: opentelemetry-collector
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - otel-legacy.netwerkdigitaalerfgoed.nl
+      secretName: opentelemetry-collector-tls
+  rules:
+    - host: otel-legacy.netwerkdigitaalerfgoed.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: opentelemetry-collector
+                port:
+                  number: 4319
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
