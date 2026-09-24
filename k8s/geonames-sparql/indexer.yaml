@@ -70,12 +70,13 @@ spec:
                 - |
                   set -e
                   rm -rf /data/*
-                  # Do all bulk work (download, unzipped RDF, xloader temp files) on the
-                  # node-local scratch emptyDir, so the 50Gi data PVC only has to hold the
-                  # live production index plus the freshly built staging index.
+                  # Do all bulk work (download, xloader temp files) on the node-local scratch
+                  # emptyDir, so the 50Gi data PVC only has to hold the live production index
+                  # plus the freshly built staging index.
                   cd /scratch
-                  curl -sS -O https://geonames.ams3.digitaloceanspaces.com/geonames.zip
-                  unzip geonames.zip
+                  # -f so an HTTP error fails here rather than writing S3’s error document to
+                  # the path, which surfaces much later as an unreadable RDF file.
+                  curl -fsS -O https://geonames.ams3.digitaloceanspaces.com/geonames.nt.gz
                   mkdir -p /scratch/tmp
                   # tdb2.xloader’s sort calls hard-code GNU sort --buffer-size=50% – of the
                   # HOST’s RAM, not the cgroup limit. The percentage is emitted by the Java
@@ -89,12 +90,12 @@ spec:
                   cp /usr/bin/sort /usr/bin/sort.real
                   printf '%s\n' '#!/bin/sh' 'set -f' 'n=""' 'for a in "$@"; do' '  case "$a" in --buffer-size=*) ;; *) n="$n $a" ;; esac' 'done' 'exec /usr/bin/sort.real $n -S 1G' > /usr/bin/sort
                   chmod +x /usr/bin/sort
-                  # The published geonames.zip may contain N-Triples (geonames.nt) or, for
-                  # older builds, Turtle (geonames.ttl). Load whichever is present; tdb2.xloader
-                  # infers the RDF syntax from the file extension.
-                  RDF_FILE=$(ls geonames.nt geonames.ttl 2>/dev/null | head -n1)
-                  [ -n "$RDF_FILE" ] || { echo "No geonames.nt or geonames.ttl found in zip"; exit 1; }
-                  tdb2.xloader --loc /data/tdb --tmpdir /scratch/tmp "/scratch/$RDF_FILE"
+                  # Load the gzip directly: tdb2.xloader infers both the RDF syntax and the
+                  # compression from the extension, so nothing has to unpack the ~14 GB of
+                  # N-Triples onto scratch first. The publisher also offers geonames.zip, which
+                  # is kept for consumers who cannot read gzip; we are not one of them.
+                  [ -s geonames.nt.gz ] || { echo "Downloaded geonames.nt.gz is empty"; exit 1; }
+                  tdb2.xloader --loc /data/tdb --tmpdir /scratch/tmp /scratch/geonames.nt.gz
                   # Make the TDB2 store group-writable so the Fuseki server (group 100 via
                   # fsGroup) can open it read-write after the swap. Done here because xloader
                   # writes the files as root (this image's default user).
@@ -164,7 +165,7 @@ spec:
             - name: fuseki-config
               configMap:
                 name: geonames-sparql-fuseki-config
-            # Node-local scratch for download + unzipped RDF + xloader sort files.
+            # Node-local scratch for the downloaded gzip + xloader sort files.
             # sizeLimit bounds it so an overflow evicts only this pod, not the node.
             - name: scratch
               emptyDir:
