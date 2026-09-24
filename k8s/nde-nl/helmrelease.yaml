@@ -1,0 +1,69 @@
+# Redirects the nde.nl apex and www to the NDE website, keeping the path.
+#
+# The redirect runs in nginx rather than as an ingress annotation because the
+# cluster's ingress controller rejects nginx variables (`$request_uri`) in
+# permanent-redirect and has snippets disabled.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: nde-nl
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: nginx
+          tag: "1.31.6-alpine" # {"$imagepolicy": "nde:nde-nl:tag"}
+        port: 80
+        flux:
+          policy:
+            type: semver
+            pattern: '^(?P<version>\d+\.\d+\.\d+)-alpine$'
+            extract: '$version'
+            range: "~1"
+        # Probe a path that does not redirect: the kubelet would otherwise
+        # follow the 301 to the external website.
+        livenessProbe:
+          httpGet:
+            path: /healthz
+        readinessProbe:
+          httpGet:
+            path: /healthz
+        volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/conf.d
+    volumes:
+      - name: nginx-config
+        configMap:
+          name: nde-nl-nginx
+    configMaps:
+      - name: nginx
+        data:
+          default.conf: |
+            server {
+              listen 80 default_server;
+
+              location = /healthz {
+                access_log off;
+                return 200;
+              }
+
+              location / {
+                return 301 https://www.netwerkdigitaalerfgoed.nl$request_uri;
+              }
+            }
+    ingresses:
+      - ingressClassName: nginx-shared
+        hosts:
+          - nde.nl
+          - www.nde.nl
