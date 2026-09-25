@@ -20,7 +20,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/copyright-tool
-          tag: 20260619103046-bb4520c # {"$imagepolicy": "nde:copyright-tool:tag"}
+          tag: 20260925113224-c23f24d # {"$imagepolicy": "nde:copyright-tool:tag"}
         port: 80
     ingresses:
       - hosts:
