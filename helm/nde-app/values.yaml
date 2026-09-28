@@ -59,6 +59,7 @@ service:
 
 # Ingress - shared annotations for ingresses that have TLS enabled.
 ingress:
+  className: traefik-shared
   annotations:
     cert-manager.io/cluster-issuer: harica
     cert-manager.io/usages: server auth,digital signature,client auth

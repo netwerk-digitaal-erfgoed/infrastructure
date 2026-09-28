@@ -25,7 +25,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  {{- with $ingress.ingressClassName }}
+  {{- with ($ingress.ingressClassName | default $.Values.ingress.className) }}
   ingressClassName: {{ . }}
   {{- end }}
   {{- if $ingress.hosts }}

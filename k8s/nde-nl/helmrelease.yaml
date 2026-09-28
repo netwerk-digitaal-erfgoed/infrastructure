@@ -63,7 +63,7 @@ spec:
               }
             }
     ingresses:
-      - ingressClassName: nginx-shared
+      - ingressClassName: traefik-shared
         hosts:
           - nde.nl
           - www.nde.nl

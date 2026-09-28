@@ -149,7 +149,7 @@ spec:
       port: 80
       targetPort: 3030
     ingresses:
-      - ingressClassName: nginx-shared
+      - ingressClassName: traefik-shared
         hosts:
           - geonames.netwerkdigitaalerfgoed.nl
         paths:
