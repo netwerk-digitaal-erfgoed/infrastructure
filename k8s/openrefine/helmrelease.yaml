@@ -40,6 +40,8 @@ spec:
     ingresses:
       - hosts:
           - openrefine.netwerkdigitaalerfgoed.nl
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-body-size: "100m"
     cronjobs:
       - name: clear-projects
         schedule: "0 4 * * 6"
