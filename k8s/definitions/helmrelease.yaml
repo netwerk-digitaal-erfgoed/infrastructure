@@ -79,8 +79,7 @@ spec:
       # The chart enables TLS by default and cert-manager issues a per-host
       # certificate (secret definitions-tls) once def.nde.nl resolves to the
       # cluster ingress, so DNS for def.nde.nl is a prerequisite for the cert.
-      - ingressClassName: nginx-shared
-        hosts:
+      - hosts:
           - def.nde.nl
         paths:
           - path: /
