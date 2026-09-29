@@ -40,3 +40,5 @@ spec:
     ingresses:
       - hosts:
           - termennetwerk-api.netwerkdigitaalerfgoed.nl
+        tls:
+          secretName: termennetwerk-api-graphql-tls
