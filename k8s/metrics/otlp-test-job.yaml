@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: otlp-metrics-test-1
+  namespace: nde
+spec:
+  # Pushes a few minutes of synthetic OTLP metrics to SURF’s shared collector, to check that
+  # they arrive in Grafana’s Prometheus as {job="nde-otlp-test"} before we move apps over.
+  # Remove this file once the test has passed; Flux then prunes the Job. No TTL: if the Job
+  # deleted itself, Flux would recreate it and run the test again.
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: telemetrygen
+          image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.126.0
+          args:
+            - metrics
+            - --otlp-endpoint=nde-otel.monitoring.svc.cluster.local:4318
+            - --otlp-http
+            - --otlp-insecure
+            - --service=nde-otlp-test
+            - --metric-type=Sum
+            - --rate=1
+            - --duration=5m
