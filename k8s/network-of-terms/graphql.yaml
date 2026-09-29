@@ -36,6 +36,15 @@ spec:
         readinessProbe:
           httpGet:
             path: /graphiql
+        # SURF’s default limit of 250m CPU throttled every query: each one parses RDF
+        # from many sources at once.
+        resources:
+          requests:
+            cpu: "250m"
+            memory: 256Mi
+          limits:
+            cpu: "2"
+            memory: 512Mi
     # The reconciliation release routes /reconcile, /preview and /extend on the same host.
     ingresses:
       - hosts:
