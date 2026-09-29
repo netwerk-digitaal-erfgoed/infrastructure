@@ -1,0 +1,74 @@
+# Redirects termennetwerk.nl and www to the Network of Terms, keeping the path.
+#
+# The redirect runs in nginx rather than as an ingress annotation because
+# cert-manager adds its HTTP-01 challenge path to this ingress, and a redirect
+# annotation would redirect the challenge too.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: termennetwerk-nl
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: nginx
+          tag: "1.31.6-alpine" # {"$imagepolicy": "nde:termennetwerk-nl:tag"}
+        port: 80
+        flux:
+          policy:
+            type: semver
+            pattern: '^(?P<version>\d+\.\d+\.\d+)-alpine$'
+            extract: '$version'
+            range: "~1"
+        # Probe a path that does not redirect: the kubelet would otherwise
+        # follow the 301 to the external website.
+        livenessProbe:
+          httpGet:
+            path: /healthz
+        readinessProbe:
+          httpGet:
+            path: /healthz
+        volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/conf.d
+    volumes:
+      - name: nginx-config
+        configMap:
+          name: termennetwerk-nl-nginx
+    configMaps:
+      - name: nginx
+        data:
+          default.conf: |
+            server {
+              listen 80 default_server;
+
+              location = /healthz {
+                access_log off;
+                return 200;
+              }
+
+              location / {
+                return 301 https://termennetwerk.netwerkdigitaalerfgoed.nl$request_uri;
+              }
+            }
+    ingresses:
+      - hosts:
+          - termennetwerk.nl
+          - www.termennetwerk.nl
+        annotations:
+          # HARICA only issues for domains SURF validated (nde.nl,
+          # netwerkdigitaalerfgoed.nl).
+          cert-manager.io/cluster-issuer: letsencrypt
+          # Let’s Encrypt no longer issues client auth certificates.
+          cert-manager.io/usages: server auth,digital signature
