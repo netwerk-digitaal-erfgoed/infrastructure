@@ -3,8 +3,11 @@ kind: VMSingle
 metadata:
   name: victoriametrics-single-persisted
 spec:
-  retentionPeriod: "12"
-  removePvcAfterDelete: true
+  # Holds the only metrics from before the move to SURF on 2026-09-29, which
+  # receives no new data: keep all of it, even if this resource is deleted.
+  # An export lives in s3://metrics-archive/digitalocean/ on the SURF object store.
+  retentionPeriod: "100y"
+  removePvcAfterDelete: false
   storage:
     accessModes:
       - ReadWriteOnce
