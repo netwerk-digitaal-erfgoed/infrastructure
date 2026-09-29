@@ -104,4 +104,8 @@ See [k8s/secrets/README.md](k8s/secrets/README.md) for encryption instructions.
 
 * UptimeRobot monitors our services. The status page can be found at https://status.netwerkdigitaalerfgoed.nl.
   To configure the status page, log in at the [dashboard](https://dashboard.uptimerobot.com).
+  Start an announcement’s title with the service it concerns, so that service’s website can show it as a banner:
+  `[DR]` Dataset Register, `[TN]` Termennetwerk, `[DKG]` Dataset Knowledge Graph, `[GN]` GeoNames.
+  For now only the Dataset Register shows banners. A banner appears once the announcement is published and its start
+  date has passed, and disappears at its end date or when the announcement is archived.
 * Lettermint.co sends our transactional e-mail.

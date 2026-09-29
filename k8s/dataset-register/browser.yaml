@@ -60,6 +60,16 @@ spec:
           # VALKEY_URL is set, so it stays bypassed anywhere this is absent.
           - name: VALKEY_URL
             value: "redis://dataset-register-valkey:6379"
+          # Shows announcements titled “[DR] …” from the status page
+          # (status.netwerkdigitaalerfgoed.nl) as a banner at the top of every
+          # page. Opt-in: no banner when these are absent.
+          - name: UPTIMEROBOT_STATUS_PAGE_ID
+            value: "891828"
+          - name: UPTIMEROBOT_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: uptimerobot
+                key: read-only-api-key
     ingresses:
       - hosts:
           - datasetregister.netwerkdigitaalerfgoed.nl
