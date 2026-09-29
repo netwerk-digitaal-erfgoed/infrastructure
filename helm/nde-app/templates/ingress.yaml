@@ -11,17 +11,18 @@ metadata:
   name: {{ $name }}
   labels:
     {{- include "nde-app.labels" $ | nindent 4 }}
+  {{- $annotations := dict }}
+  {{- if and (ne (($ingress.tls).enabled) false) (or $isFirst (($ingress.tls).enabled)) }}
+  {{- $annotations = deepCopy ($.Values.ingress.annotations | default dict) }}
+  {{- $firstHost := index $ingress.hosts 0 }}
+  {{- if gt (len $firstHost) 64 }}
+  {{- $_ := set $annotations "cert-manager.io/common-name" ($firstHost | trunc 64) }}
+  {{- end }}
+  {{- end }}
+  {{- /* Per-ingress annotations override the shared ones, e.g. a different cert-manager issuer. */}}
+  {{- $annotations = mustMergeOverwrite $annotations ($ingress.annotations | default dict) }}
   annotations:
-    {{- if and (ne (($ingress.tls).enabled) false) (or $isFirst (($ingress.tls).enabled)) }}
-    {{- with $.Values.ingress.annotations }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-    {{- $firstHost := index $ingress.hosts 0 }}
-    {{- if gt (len $firstHost) 64 }}
-    cert-manager.io/common-name: {{ $firstHost | trunc 64 | quote }}
-    {{- end }}
-    {{- end }}
-    {{- with $ingress.annotations }}
+    {{- with $annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
