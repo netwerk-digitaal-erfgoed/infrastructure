@@ -1,0 +1,47 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: network-of-terms-reconciliation
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    workload:
+      replicas: 2
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-reconciliation
+          tag: 20260929135754-2a5513e # {"$imagepolicy": "nde:network-of-terms-reconciliation:tag"}
+        port: 3123
+        env:
+          - name: GTAA_CREDENTIALS
+            valueFrom:
+              secretKeyRef:
+                name: network-of-terms-gtaa-credentials
+                key: credentials
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://nde-otel.monitoring.svc.cluster.local:4318
+          - name: TRUST_PROXY
+            value: 'true'
+        readinessProbe:
+          httpGet:
+            path: /reconcile
+    # Shares its host with the graphql release, which serves every other path.
+    ingresses:
+      - hosts:
+          - termennetwerk-api.netwerkdigitaalerfgoed.nl
+        paths:
+          - path: /reconcile
+            pathType: Prefix
+          - path: /preview
+            pathType: Prefix
+          - path: /extend
+            pathType: Prefix
