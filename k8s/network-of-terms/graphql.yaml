@@ -40,5 +40,8 @@ spec:
     ingresses:
       - hosts:
           - termennetwerk-api.netwerkdigitaalerfgoed.nl
-        tls:
-          secretName: termennetwerk-api-graphql-tls
+        annotations:
+          # HARICA rejects new netwerkdigitaalerfgoed.nl orders without validating them.
+          cert-manager.io/cluster-issuer: letsencrypt
+          # Let’s Encrypt no longer issues client auth certificates.
+          cert-manager.io/usages: server auth,digital signature
