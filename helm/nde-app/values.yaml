@@ -57,7 +57,7 @@ service:
   port: 80
   targetPort: ""  # Defaults to first container's port
 
-# Ingress - shared annotations for ingresses that have TLS enabled.
+# Ingress - class for all ingresses, and shared annotations for ingresses that have TLS enabled.
 ingress:
   className: traefik-shared
   annotations:
