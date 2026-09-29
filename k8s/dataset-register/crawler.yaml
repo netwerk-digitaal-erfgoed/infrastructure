@@ -45,14 +45,11 @@ spec:
                 name: dataset-register-qlever
                 key: access-token
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
-            value: "https://otel-legacy.netwerkdigitaalerfgoed.nl"
-          - name: OTLP_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: opentelemetry-collector-token
-                key: token
-          - name: OTEL_EXPORTER_OTLP_HEADERS
-            value: "Authorization=Bearer $(OTLP_TOKEN)"
+            value: "http://nde-otel.monitoring.svc.cluster.local:4318"
+          # One stable instance for all runs: Forbid keeps runs from overlapping, and the pod
+          # name would otherwise start a new metric series every hour.
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: "service.instance.id=crawler"
           - name: TYPESENSE_HOST
             value: "dataset-register-typesense"
           - name: TYPESENSE_PORT
