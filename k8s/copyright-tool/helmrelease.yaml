@@ -28,3 +28,8 @@ spec:
           - www.regeljerechten.nl
         annotations:
           nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+          # HARICA only issues for domains SURF validated (nde.nl,
+          # netwerkdigitaalerfgoed.nl); we don’t manage regeljerechten.nl DNS.
+          cert-manager.io/cluster-issuer: letsencrypt
+          # Let’s Encrypt no longer issues client auth certificates.
+          cert-manager.io/usages: server auth,digital signature
