@@ -38,6 +38,8 @@ spec:
     ingresses:
       - hosts:
           - termennetwerk-api.netwerkdigitaalerfgoed.nl
+        tls:
+          secretName: termennetwerk-api-reconciliation-tls
         paths:
           - path: /reconcile
             pathType: Prefix
