@@ -12,8 +12,12 @@ metadata:
   labels:
     {{- include "nde-app.labels" $ | nindent 4 }}
   {{- $annotations := dict }}
+  {{- if $.Values.ingress.forceSslRedirect }}
+  {{- /* Traefik redirects to HTTPS per ingress, not per host like nginx did, so also redirect ingresses without their own TLS block. */}}
+  {{- $_ := set $annotations "nginx.ingress.kubernetes.io/force-ssl-redirect" "true" }}
+  {{- end }}
   {{- if and (ne (($ingress.tls).enabled) false) (or $isFirst (($ingress.tls).enabled)) }}
-  {{- $annotations = deepCopy ($.Values.ingress.annotations | default dict) }}
+  {{- $annotations = mustMergeOverwrite $annotations (deepCopy ($.Values.ingress.annotations | default dict)) }}
   {{- $firstHost := index $ingress.hosts 0 }}
   {{- if gt (len $firstHost) 64 }}
   {{- $_ := set $annotations "cert-manager.io/common-name" ($firstHost | trunc 64) }}

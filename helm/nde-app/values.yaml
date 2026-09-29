@@ -60,6 +60,8 @@ service:
 # Ingress - class for all ingresses, and shared annotations for ingresses that have TLS enabled.
 ingress:
   className: traefik-shared
+  # Redirect HTTP to HTTPS on every ingress, including those without their own TLS block.
+  forceSslRedirect: true
   annotations:
     cert-manager.io/cluster-issuer: harica
     cert-manager.io/usages: server auth,digital signature,client auth

@@ -4,7 +4,7 @@ Generic Helm chart for deploying NDE applications. It supports:
 
 - Deployments and StatefulSets
 - Multi-container pods
-- Ingress with automatic TLS certificates
+- Ingress with automatic TLS certificates and HTTP-to-HTTPS redirects
 - Persistent volumes
 - [ConfigMaps](#configmap)
 - CronJobs
