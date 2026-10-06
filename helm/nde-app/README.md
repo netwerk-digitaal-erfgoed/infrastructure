@@ -9,6 +9,7 @@ Generic Helm chart for deploying NDE applications. It supports:
 - [ConfigMaps](#configmap)
 - CronJobs
 - [CNAME DNS records](#cname-dns-records)
+- [LoadBalancer Services](#loadbalancer) for non-HTTP traffic
 
 ## Flux Image Automation
 
@@ -69,6 +70,22 @@ cnames:
 
 This creates an Ingress with `external-dns.alpha.kubernetes.io/target` annotation.
 An IP address as target yields an A record instead of a CNAME.
+
+## LoadBalancer
+
+The ingress only carries HTTP. For UDP or raw TCP traffic, add a LoadBalancer Service that gets its own external IP:
+
+```yaml
+loadBalancer:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: calls.netwerkdigitaalerfgoed.nl
+  ports:
+    - name: rtc-udp
+      port: 8443
+      protocol: UDP
+```
+
+This creates a Service named `<release>-lb` next to the regular ClusterIP Service, so the HTTP port stays reachable through the ingress only.
 
 ## ConfigMap
 

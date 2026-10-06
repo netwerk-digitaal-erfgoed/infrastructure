@@ -1,0 +1,23 @@
+{{- if .Values.loadBalancer.ports }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nde-app.fullname" . }}-lb
+  labels:
+    {{- include "nde-app.labels" . | nindent 4 }}
+  {{- with .Values.loadBalancer.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: LoadBalancer
+  ports:
+    {{- range .Values.loadBalancer.ports }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort | default .port }}
+      protocol: {{ .protocol | default "TCP" }}
+    {{- end }}
+  selector:
+    {{- include "nde-app.selectorLabels" . | nindent 4 }}
+{{- end }}
