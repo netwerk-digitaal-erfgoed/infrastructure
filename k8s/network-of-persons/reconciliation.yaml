@@ -1,0 +1,60 @@
+# Proof of concept: the Network of Terms reconciliation service with a catalogue of person datasets.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: network-of-persons-reconciliation
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-persons-reconciliation
+          tag: latest # {"$imagepolicy": "nde:network-of-persons-reconciliation:tag"}
+        port: 3123
+        env:
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://nde-otel.monitoring.svc.cluster.local:4318
+          # The image is the Network of Terms’ and reports under that name by default.
+          - name: OTEL_SERVICE_NAME
+            value: network-of-persons
+          - name: TRUST_PROXY
+            value: 'true'
+          # The preview links to the person’s own IRI: there is no lookup page for persons.
+          - name: VIEW_URL_TEMPLATE
+            value: '{uri}'
+        readinessProbe:
+          httpGet:
+            path: /reconcile
+        # SURF’s default limit of 250m CPU throttles every query: each one parses RDF.
+        resources:
+          requests:
+            cpu: "250m"
+            memory: 256Mi
+          limits:
+            cpu: "2"
+            memory: 512Mi
+    # Shares its host with the graphql release, which serves every other path.
+    ingresses:
+      - hosts:
+          - personennetwerk.netwerkdigitaalerfgoed.nl
+        annotations:
+          # HARICA rejects new netwerkdigitaalerfgoed.nl orders without validating them.
+          cert-manager.io/cluster-issuer: letsencrypt
+          # Let’s Encrypt no longer issues client auth certificates.
+          cert-manager.io/usages: server auth,digital signature
+        paths:
+          - path: /reconcile
+            pathType: Prefix
+          - path: /preview
+            pathType: Prefix
+          - path: /extend
+            pathType: Prefix
