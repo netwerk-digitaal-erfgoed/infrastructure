@@ -60,7 +60,6 @@ service:
 # LoadBalancer - separate Service with its own external IP, for non-HTTP
 # traffic (UDP, raw TCP) that cannot go through the ingress.
 loadBalancer:
-  annotations: {}
   ports: []
   # - name: rtc-udp
   #   port: 8443

@@ -77,8 +77,6 @@ The ingress only carries HTTP. For UDP or raw TCP traffic, add a LoadBalancer Se
 
 ```yaml
 loadBalancer:
-  annotations:
-    external-dns.alpha.kubernetes.io/hostname: calls.netwerkdigitaalerfgoed.nl
   ports:
     - name: rtc-udp
       port: 8443
@@ -86,6 +84,7 @@ loadBalancer:
 ```
 
 This creates a Service named `<release>-lb` next to the regular ClusterIP Service, so the HTTP port stays reachable through the ingress only.
+ExternalDNS does not watch Services, so the external IP gets no DNS record by itself.
 
 ## ConfigMap
 
