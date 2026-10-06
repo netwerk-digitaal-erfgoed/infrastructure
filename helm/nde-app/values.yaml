@@ -57,6 +57,15 @@ service:
   port: 80
   targetPort: ""  # Defaults to first container's port
 
+# LoadBalancer - separate Service with its own external IP, for non-HTTP
+# traffic (UDP, raw TCP) that cannot go through the ingress.
+loadBalancer:
+  ports: []
+  # - name: rtc-udp
+  #   port: 8443
+  #   targetPort: 8443  # Optional, defaults to port
+  #   protocol: UDP     # Optional, defaults to TCP
+
 # Ingress - class for all ingresses, and shared annotations for ingresses that have TLS enabled.
 ingress:
   className: traefik-shared

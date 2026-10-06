@@ -13,6 +13,10 @@ spec:
       sourceRef:
         kind: GitRepository
         name: nde
+  # Helm’s wait counts a LoadBalancer Service as not ready until it has an
+  # external IP. Don’t let a pending IP fail the whole release.
+  upgrade:
+    disableWait: true
   values:
     containers:
       - name: app
@@ -92,6 +96,16 @@ spec:
               secretKeyRef:
                 name: s3
                 key: secret
+    # Calls media (WebRTC) bypasses the ingress and reaches the pod through
+    # this LoadBalancer.
+    loadBalancer:
+      ports:
+        - name: rtc-udp
+          port: 8443
+          protocol: UDP
+        # Fallback for clients behind firewalls that block UDP.
+        - name: rtc-tcp
+          port: 8443
     ingresses:
       - hosts:
           - chat.netwerkdigitaalerfgoed.nl
