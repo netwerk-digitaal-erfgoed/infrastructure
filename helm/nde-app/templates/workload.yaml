@@ -127,6 +127,9 @@ spec:
               cpu: 10m
               memory: 32Mi
             limits:
+              # Set explicitly: the namespace default of 250m per container would
+              # use up what is left of the CPU limit quota.
+              cpu: 100m
               memory: 512Mi
           volumeMounts:
             - name: dump
