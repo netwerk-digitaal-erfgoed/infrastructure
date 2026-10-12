@@ -33,6 +33,11 @@ spec:
         paths:
           - path: /termennetwerk
             pathType: Prefix
+          # The retired autocompletion demo and its server.
+          - path: /autocomplete
+            pathType: Prefix
+          - path: /fragments
+            pathType: Prefix
         annotations:
           nginx.ingress.kubernetes.io/permanent-redirect: https://termennetwerk.netwerkdigitaalerfgoed.nl
 #      - name: geonames-redirect
