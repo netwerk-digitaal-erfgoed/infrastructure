@@ -95,16 +95,20 @@ See [k8s/secrets/README.md](k8s/secrets/README.md) for encryption instructions.
 Files are stored in [SURF’s S3 object store](https://servicedesk.surf.nl/wiki/spaces/WIKI/pages/29557216/Object+Store) at `https://objectstore.surf.nl` (region `default`, path-style addressing).
 Applications in the cluster read the credentials from the `s3` secret.
 
-To use it from your own machine, add a profile to `~/.aws/config` and put the access key and secret in `~/.aws/credentials`:
+To use it from your own machine with the [AWS CLI](https://aws.amazon.com/cli/) (version 2.13 or later), add a profile to `~/.aws/config`:
 
 ```ini
 [profile nde]
 endpoint_url = https://objectstore.surf.nl
 region = default
-s3 =
-  addressing_style = path
-request_checksum_calculation = when_required
-response_checksum_validation = when_required
+```
+
+and the key to `~/.aws/credentials`:
+
+```ini
+[nde]
+aws_access_key_id = …
+aws_secret_access_key = …
 ```
 
 There is no web interface; a desktop client such as [Cyberduck](https://servicedesk.surf.nl/wiki/spaces/WIKI/pages/112591465/Cyberduck) works with the same key.
