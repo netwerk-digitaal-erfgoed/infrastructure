@@ -21,7 +21,7 @@ jobs:
 
       - name: Validate HelmReleases
         run: |
-          for hr in k8s/*/helmrelease.yaml; do
+          for hr in $(grep -rl 'chart: helm/nde-app' k8s); do
             echo "=== Validating $hr ==="
             name=$(yq '.metadata.name' "$hr")
             yq '.spec.values' "$hr" | helm template "$name" helm/nde-app -f - | \
