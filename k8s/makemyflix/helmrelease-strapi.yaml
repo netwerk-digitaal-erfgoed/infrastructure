@@ -61,23 +61,26 @@ spec:
               secretKeyRef:
                 name: makemyflix-postgres
                 key: password
+          # Media is stored in the makemyflix bucket of the SURF object store and
+          # served as https://files.nde.nl/makemyflix/<file>; Strapi appends the
+          # bucket name to S3_PUBLIC_URL.
           - name: S3_ENDPOINT
-            value: "https://nde-makemyflix-strapi.ams3.digitaloceanspaces.com"
+            value: "https://objectstore.surf.nl"
           - name: S3_PUBLIC_URL
-            value: "https://nde-makemyflix-strapi.ams3.cdn.digitaloceanspaces.com"
+            value: "https://files.nde.nl"
           - name: S3_REGION
-            value: ams3
+            value: default
           - name: S3_BUCKET
-            value: nde-makemyflix-strapi
+            value: makemyflix
           - name: S3_KEY
             valueFrom:
               secretKeyRef:
-                name: makemyflix-strapi-s3
+                name: s3
                 key: key
           - name: S3_SECRET
             valueFrom:
               secretKeyRef:
-                name: makemyflix-strapi-s3
+                name: s3
                 key: secret
     ingresses:
       - hosts:

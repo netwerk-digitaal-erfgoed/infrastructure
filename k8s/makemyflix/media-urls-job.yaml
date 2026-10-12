@@ -1,0 +1,62 @@
+# One-off: point the media URLs that Strapi stored in its database at the SURF
+# object store. Strapi saves the full URL of every upload, so changing
+# S3_PUBLIC_URL only affects new files.
+#
+# Safe to run more than once: rows that no longer contain a DigitalOcean URL
+# are left alone. The files table is copied to files_before_surf_migration
+# first; drop that table once the site has been checked.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: makemyflix-media-urls
+  namespace: nde
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+        - name: rewrite
+          image: postgres:16-alpine
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: makemyflix-postgres
+                  key: password
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              psql -h makemyflix-postgres -U postgres -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+              \set old_cdn 'https://nde-makemyflix-strapi.ams3.cdn.digitaloceanspaces.com/nde-makemyflix-strapi/'
+              \set old_origin 'https://nde-makemyflix-strapi.ams3.digitaloceanspaces.com/nde-makemyflix-strapi/'
+              \set new 'https://files.nde.nl/makemyflix/'
+
+              BEGIN;
+
+              CREATE TABLE IF NOT EXISTS files_before_surf_migration AS TABLE files;
+
+              \echo 'Before: files per URL host'
+              SELECT substring(url from '^https?://[^/]+') AS host, count(*) FROM files GROUP BY 1 ORDER BY 2 DESC;
+
+              UPDATE files
+              SET url = replace(replace(url, :'old_cdn', :'new'), :'old_origin', :'new'),
+                  preview_url = replace(replace(preview_url, :'old_cdn', :'new'), :'old_origin', :'new'),
+                  formats = replace(replace(formats::text, :'old_cdn', :'new'), :'old_origin', :'new')::jsonb
+              WHERE url LIKE '%digitaloceanspaces.com%'
+                 OR preview_url LIKE '%digitaloceanspaces.com%'
+                 OR formats::text LIKE '%digitaloceanspaces.com%';
+
+              \echo 'After: files per URL host'
+              SELECT substring(url from '^https?://[^/]+') AS host, count(*) FROM files GROUP BY 1 ORDER BY 2 DESC;
+
+              \echo 'After: rows that still mention DigitalOcean (expect 0)'
+              SELECT count(*) FROM files
+              WHERE url LIKE '%digitaloceanspaces.com%'
+                 OR preview_url LIKE '%digitaloceanspaces.com%'
+                 OR formats::text LIKE '%digitaloceanspaces.com%';
+
+              COMMIT;
+              SQL
+      restartPolicy: Never
