@@ -1,0 +1,86 @@
+# Gives the public files in NDE’s SURF object store a stable address:
+# https://files.nde.nl/<bucket>/<key> redirects to the object in that bucket.
+#
+# Publish only files.nde.nl URLs, never the object store’s own. The redirect is
+# temporary (302) on purpose: clients must not cache it, so the files can move
+# to another store or behind a CDN without any published URL changing.
+#
+# Only objects with a public-read ACL can be fetched; for anything else the
+# object store answers 403.
+#
+# The redirect runs in nginx rather than as an ingress annotation because
+# cert-manager adds its HTTP-01 challenge path to this ingress, and a redirect
+# annotation would redirect the challenge too.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: files
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: nginx
+          tag: "1.31.6-alpine" # {"$imagepolicy": "nde:files:tag"}
+        port: 80
+        flux:
+          policy:
+            type: semver
+            pattern: '^(?P<version>\d+\.\d+\.\d+)-alpine$'
+            extract: '$version'
+            range: "~1"
+        # Probe a path that answers 200 itself: / returns 404, and every other
+        # path redirects away, which says nothing about this pod’s health.
+        livenessProbe:
+          httpGet:
+            path: /healthz
+        readinessProbe:
+          httpGet:
+            path: /healthz
+        volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/conf.d
+    volumes:
+      - name: nginx-config
+        configMap:
+          name: files-nginx
+    configMaps:
+      - name: nginx
+        data:
+          default.conf: |
+            server {
+              listen 80 default_server;
+
+              location = /healthz {
+                access_log off;
+                return 200;
+              }
+
+              # There is no listing: only full object paths resolve.
+              location = / {
+                return 404;
+              }
+
+              location / {
+                # The object store addresses a public bucket as
+                # <tenant>:<bucket>; the tenant is NDE’s account there.
+                # $request_uri keeps the path and query string as the client
+                # sent them, so encoded characters survive the redirect.
+                if ($request_uri ~ ^/(.+)$) {
+                  return 302 https://objectstore.surf.nl/8cb3d6bf7f53479183d9f64c6c80a82f:$1;
+                }
+              }
+            }
+    ingresses:
+      - hosts:
+          - files.nde.nl
