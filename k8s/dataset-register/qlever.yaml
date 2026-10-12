@@ -101,7 +101,7 @@ spec:
               sleep $sleep_seconds
 
               echo "Starting index rebuild at $(date)"
-              qlever rebuild-index --access-token "$ACCESS_TOKEN" --keep-old-index-dirs all
+              qlever rebuild-index --access-token "$ACCESS_TOKEN" --keep-old-index-dirs newest
 
               # rebuild-index may silently fail (https://github.com/ad-freiburg/qlever/issues/2806)
               # but still move the old index to previous.*. Check and revert if needed.
@@ -119,49 +119,20 @@ spec:
                 echo "Rebuild complete at $(date), restarting server..."
                 qlever stop
 
-                # Archive update-triples file with timestamp because QLever doesn’t remove it.
+                # Move the update-triples file out of the way because QLever doesn’t remove it.
+                # It goes with the index it applies to, so both are pruned together.
+                latest_prev=$(ls -dt previous.* 2>/dev/null | head -1)
                 for f in *.update-triples; do
-                  if [ -f "$f" ]; then
-                    mv "$f" "$f.$(date +%Y-%m-%dT%H:%M:%S)"
+                  if [ -f "$f" ] && [ -n "$latest_prev" ]; then
+                    mv "$f" "$latest_prev"/
                   fi
                 done
 
+                # Remove the timestamped archives that earlier versions of this script left behind.
+                rm -f ./*.update-triples.*
+
                 start_server
               fi
-            done
-      - name: s3-sync
-        image:
-          repository: d3fk/s3cmd
-          tag: latest
-        flux:
-          enabled: false
-        env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: dataset-register-s3
-                key: key
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: dataset-register-s3
-                key: secret
-        volumeMounts:
-          - name: data
-            mountPath: /data
-            readOnly: true
-        command:
-          - sh
-          - -c
-          - |
-            while true; do
-              if [ -f /data/dataset-register.update-triples ]; then
-                echo "$(date): Uploading update-triples to S3..."
-                s3cmd --host=ams3.digitaloceanspaces.com \
-                  --host-bucket="%(bucket)s.ams3.digitaloceanspaces.com" \
-                  put /data/dataset-register.update-triples s3://dataset-register/
-              fi
-              sleep 3600
             done
     securityContext:
       fsGroup: 100
@@ -190,7 +161,6 @@ spec:
           Qleverfile: |
             [data]
             NAME              = dataset-register
-            GET_DATA_CMD      = curl -sS -O https://dataset-register.ams3.digitaloceanspaces.com/data.nq
             TEXT_DESCRIPTION  = All literals, search with FILTER CONTAINS(?var, "...")
             DESCRIPTION       = NDE Dataset Register
             FORMAT            = nq
