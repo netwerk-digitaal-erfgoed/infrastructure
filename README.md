@@ -161,9 +161,9 @@ aws --profile nde s3api put-bucket-cors --bucket my-bucket --cors-configuration 
 - **Metrics**: Applications push [OpenTelemetry](https://opentelemetry.io) metrics to SURF’s shared collector at `OTEL_EXPORTER_OTLP_ENDPOINT=http://nde-otel.monitoring.svc.cluster.local:4318`, which feeds the Prometheus datasource in SURF’s Grafana.
   `service.name` becomes the `job` label and `service.instance.id` the `instance` label, so give every replica its own instance ID, or its series overwrite the others’.
   Keep attribute values bounded: the Prometheus is shared with other tenants.
-  Metrics from before the move to SURF live in VictoriaMetrics on the DigitalOcean cluster (`k8s-do/metrics/`).
+  Metrics from before the move to SURF on 29 September 2026 are archived in the private `metrics-archive` bucket of the [object store](#object-storage), whose README explains how to restore them. Daily totals of the application metrics are public at https://files.nde.nl/metrics/README.md.
 - **Logs**: Collected through [Loki](https://grafana.com/oss/loki/)
-- **Dashboard**: [Grafana](https://statistieken.netwerkdigitaalerfgoed.nl) (behind login)
+- **Dashboard**: [Grafana](https://nde.monitoring.k8s.ms4.surfsara.nl) (behind login)
 
 ## Additional services
 
