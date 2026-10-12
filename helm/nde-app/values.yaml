@@ -91,6 +91,14 @@ backup:
   # Optional explicit volume names for backup.velero.io/backup-volumes.
   # If empty, the chart auto-detects PVC-backed volume names from values.
   volumes: []
+  # Back up a dump instead of the live files; use this for databases.
+  # Velero runs the command just before each backup and backs up only the volume
+  # holding its output, at /backup/dump. The command runs in a `dump` container
+  # that has the first container’s image and environment, and reaches the
+  # database at 127.0.0.1.
+  dump:
+    command: ""  # Shell command that prints a consistent dump to stdout
+    size: 1Gi    # Size of the dump volume; it must hold two dumps
 
 # Persistence (StatefulSet only) - single volume
 persistence:

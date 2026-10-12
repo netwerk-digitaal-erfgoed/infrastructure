@@ -56,19 +56,33 @@ Args: (fluxNameOverride, fullname, containerName)
 {{- end }}
 
 {{/*
+Return the Velero pre-backup hook command, as a JSON array, that writes the dump.
+The dump goes to a temporary file first, so a failed dump leaves the previous one in place.
+*/}}
+{{- define "nde-app.backupDumpHookCommand" -}}
+{{- $script := printf "set -e; { %s; } > /backup/dump.tmp; mv /backup/dump.tmp /backup/dump" (trim .Values.backup.dump.command) -}}
+{{- list "/bin/sh" "-c" $script | toRawJson -}}
+{{- end }}
+
+{{/*
 Return comma-separated volume names for Velero backup annotation on workload pods.
 Priority:
 1) backup.volumes (manual override)
 2) Auto-detect from statefulset volumes and PVC-backed pod volumes
+With backup.dump.command set, the dump volume replaces the auto-detected ones.
 */}}
 {{- define "nde-app.backupVolumeNames.workload" -}}
 {{- $vols := list -}}
+
+{{- if .Values.backup.dump.command }}
+	{{- $vols = append $vols "dump" -}}
+{{- end }}
 
 {{- if .Values.backup.volumes }}
 	{{- range .Values.backup.volumes }}
 		{{- $vols = append $vols . -}}
 	{{- end }}
-{{- else }}
+{{- else if not .Values.backup.dump.command }}
 	{{- if and (eq .Values.workload.type "statefulset") .Values.persistence.enabled .Values.persistence.name }}
 		{{- $vols = append $vols .Values.persistence.name -}}
 	{{- end }}

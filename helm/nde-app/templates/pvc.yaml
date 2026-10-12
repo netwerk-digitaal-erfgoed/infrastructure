@@ -14,3 +14,21 @@ spec:
     requests:
       storage: {{ required "pvcs[].size is required" .size }}
 {{- end }}
+{{- if and .Values.backup.enabled .Values.backup.dump.command }}
+---
+# A claim of its own rather than a volumeClaimTemplate, which cannot be added
+# to an existing StatefulSet.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "nde-app.fullname" . }}-dump
+  labels:
+    {{- include "nde-app.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: hdd
+  resources:
+    requests:
+      storage: {{ .Values.backup.dump.size }}
+{{- end }}
