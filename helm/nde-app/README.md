@@ -123,14 +123,16 @@ Velero selects whole volumes by name. It cannot include or exclude paths inside 
 backup:
   enabled: true
   volumes:
-    - backup
+    - uploads
 
 persistentVolumes:
-  - name: data
+  - name: cache
     size: 10Gi
-  - name: backup
+  - name: uploads
     size: 5Gi
 ```
+
+Plan this when you create a StatefulSet: Kubernetes does not allow adding a volume to `persistentVolumes` afterwards.
 
 ### When a file-level backup is safe
 
@@ -142,29 +144,36 @@ It is not safe for the data directory of a running database. Postgres and MariaD
 
 ### Databases: back up a dump
 
-Back up a dump instead of the data directory:
+Back up a dump instead of the data directory. Give the release a command that writes a consistent dump to standard output:
 
-1. Add a second volume, as in the example above, and list only that volume under `backup.volumes`.
-2. Have Velero write a dump to that volume just before it copies it, with a [pre-backup hook](https://velero.io/docs/v1.17/backup-hooks/) on the pod:
+```yaml
+backup:
+  enabled: true
+  dump:
+    command: PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -h 127.0.0.1 -U "${POSTGRES_USER:-postgres}" -Fc "${POSTGRES_DB:-${POSTGRES_USER:-postgres}}"
+    size: 1Gi
+```
 
-   ```yaml
-   pre.hook.backup.velero.io/container: app
-   pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "pg_dump -Fc -f /backup/db.dump.tmp mydb && mv /backup/db.dump.tmp /backup/db.dump"]'
-   pre.hook.backup.velero.io/on-error: Fail
-   ```
+The chart then:
 
-   Writing to a temporary file and renaming it keeps a failed dump from replacing the previous good one.
+- adds a `dump` container to the pod, with the image and environment of the first container. The dump runs there, so its memory does not count against the database’s limit; the command reaches the database at `127.0.0.1`.
+- has Velero run the command in that container just before each backup, with a [pre-backup hook](https://velero.io/docs/v1.17/backup-hooks/). The output goes to a temporary file that replaces `/backup/dump` only when the command succeeds, so a failed dump leaves the previous one in place and fails the backup.
+- stores the dump on a volume of its own, `<release>-dump`, and backs up only that volume. `size` must fit two dumps.
 
-The chart cannot set these hook annotations yet.
+The other dump commands in use are `mariadb-dump -h 127.0.0.1 -u "$MARIADB_USER" -p"$MARIADB_PASSWORD" --single-transaction "$MARIADB_DATABASE"` and `mongodump --archive --gzip --quiet`.
+
+Do not pipe the command into another program, such as `gzip`: the shell would report the last program’s success, and a failed dump would replace the good one. Use the dump tool’s own compression option.
 
 ### Restoring
 
-A dump is imported into the running database, so no Kubernetes object changes and Flux is not involved. Stop the application from writing first, then run the import in the database container:
+A dump is imported into the running database, so no Kubernetes object changes and Flux is not involved. Stop the application from writing first, then run the import in the `dump` container:
 
 ```shell
-pg_restore --clean --if-exists -d mydb /backup/db.dump
+kubectl -n nde exec <release>-0 -c dump -- sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_restore -h 127.0.0.1 -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-${POSTGRES_USER:-postgres}}" --clean --if-exists /backup/dump'
 ```
 
-As long as the dump you need is still on the `backup` volume, this needs neither Velero nor SURF. That covers a bad migration or an accidental delete.
+For MariaDB, pipe `/backup/dump` into `mariadb` with the same connection options; for MongoDB, run `mongorestore --gzip --archive=/backup/dump --drop`, where `--drop` makes it replace the collections that exist.
+
+As long as the dump you need is still on the dump volume, this needs neither Velero nor SURF. That covers a bad migration or an accidental delete.
 
 Restoring a volume itself is different: Velero recreates the pod and its claim, which Flux also manages. Only a lost volume, or a dump older than the one on the volume, needs that, and SURF has to run it.

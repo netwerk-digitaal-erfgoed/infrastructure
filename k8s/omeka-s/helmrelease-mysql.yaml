@@ -17,6 +17,12 @@ spec:
     workload:
       type: statefulset
       podManagementPolicy: OrderedReady
+
+    backup:
+      enabled: true
+      dump:
+        command: mariadb-dump -h 127.0.0.1 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" --single-transaction "$MYSQL_DATABASE"
+        size: 1Gi
     containers:
       - name: mariadb
         image:

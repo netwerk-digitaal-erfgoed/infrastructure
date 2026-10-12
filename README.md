@@ -13,6 +13,7 @@ Software running in this infrastructure must meet the [NDE Software Requirements
 * Automatic TLS certificates via [cert-manager](https://cert-manager.io).
 * A shared [Helm chart](helm/nde-app) for deploying applications consistently, supporting Deployments, StatefulSets,
   CronJobs, ConfigMaps, and multi-container pods.
+* Daily off-site [backups](helm/nde-app/README.md#velero-volume-backups) of databases and file volumes.
 
 ## Repository structure
 

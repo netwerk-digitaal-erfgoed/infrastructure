@@ -1,5 +1,6 @@
 {{- if .Values.containers }}
 {{- $kind := eq .Values.workload.type "statefulset" | ternary "StatefulSet" "Deployment" }}
+{{- $dump := and .Values.backup.enabled .Values.backup.dump.command }}
 apiVersion: apps/v1
 kind: {{ $kind }}
 metadata:
@@ -31,6 +32,12 @@ spec:
         {{- $backupVols := include "nde-app.backupVolumeNames.workload" . }}
         {{- if $backupVols }}
         backup.velero.io/backup-volumes: {{ $backupVols | quote }}
+        {{- end }}
+        {{- if $dump }}
+        pre.hook.backup.velero.io/container: dump
+        pre.hook.backup.velero.io/command: {{ include "nde-app.backupDumpHookCommand" . | quote }}
+        pre.hook.backup.velero.io/timeout: 30m
+        pre.hook.backup.velero.io/on-error: Fail
         {{- end }}
       {{- end }}
       labels:
@@ -104,7 +111,36 @@ spec:
             {{- toYaml (mergeOverwrite $defaults .) | nindent 12 }}
           {{- end }}
         {{- end }}
-      {{- with .Values.volumes }}
+        {{- if $dump }}
+        {{- $database := first .Values.containers }}
+        # The dump runs in a container of its own, with the database’s image and
+        # environment, so that its memory does not count against the database’s limit.
+        - name: dump
+          image: "{{ $database.image.repository }}:{{ $database.image.tag }}"
+          command: ["sh", "-c", "trap 'exit 0' TERM; sleep infinity & wait"]
+          {{- with $database.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              # Set explicitly: the namespace default of 250m per container would
+              # use up what is left of the CPU limit quota.
+              cpu: 100m
+              memory: 512Mi
+          volumeMounts:
+            - name: dump
+              mountPath: /backup
+        {{- end }}
+      {{- $volumes := .Values.volumes | default list }}
+      {{- if $dump }}
+      {{- $dumpClaim := dict "claimName" (printf "%s-dump" (include "nde-app.fullname" .)) }}
+      {{- $volumes = append $volumes (dict "name" "dump" "persistentVolumeClaim" $dumpClaim) }}
+      {{- end }}
+      {{- with $volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}

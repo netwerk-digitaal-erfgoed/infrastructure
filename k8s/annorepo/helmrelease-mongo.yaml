@@ -17,6 +17,12 @@ spec:
     workload:
       type: statefulset
       podManagementPolicy: OrderedReady
+
+    backup:
+      enabled: true
+      dump:
+        command: mongodump --archive --gzip --quiet
+        size: 2Gi
     containers:
       - name: annorepo-mongo
         image:
