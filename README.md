@@ -90,6 +90,15 @@ See [helm/nde-app/README.md](helm/nde-app/README.md) for configuration options.
 Secrets are encrypted using [SOPS with age](https://fluxcd.io/flux/guides/mozilla-sops/) and stored in `k8s/secrets/`.
 See [k8s/secrets/README.md](k8s/secrets/README.md) for encryption instructions.
 
+## Object storage
+
+Files are stored in [SURF’s S3 object store](https://servicedesk.surf.nl/wiki/spaces/WIKI/pages/29557216/Object+Store) at `https://objectstore.surf.nl` (region `default`, path-style addressing).
+Applications in the cluster read the credentials from the `s3` secret.
+
+Public files get a stable address at `https://files.nde.nl/<bucket>/<key>` ([k8s/files](k8s/files/helmrelease.yaml)), which redirects to the object store.
+Publish only `files.nde.nl` URLs, so the files can move without breaking links.
+To make an object public, upload it with the `public-read` ACL; clients must follow redirects (`curl -L`).
+
 ## Telemetry
 
 - **Metrics**: Applications push [OpenTelemetry](https://opentelemetry.io) metrics to SURF’s shared collector at `OTEL_EXPORTER_OTLP_ENDPOINT=http://nde-otel.monitoring.svc.cluster.local:4318`, which feeds the Prometheus datasource in SURF’s Grafana.
