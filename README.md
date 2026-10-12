@@ -95,9 +95,62 @@ See [k8s/secrets/README.md](k8s/secrets/README.md) for encryption instructions.
 Files are stored in [SURF’s S3 object store](https://servicedesk.surf.nl/wiki/spaces/WIKI/pages/29557216/Object+Store) at `https://objectstore.surf.nl` (region `default`, path-style addressing).
 Applications in the cluster read the credentials from the `s3` secret.
 
+To use it from your own machine, add a profile to `~/.aws/config` and put the access key and secret in `~/.aws/credentials`:
+
+```ini
+[profile nde]
+endpoint_url = https://objectstore.surf.nl
+region = default
+s3 =
+  addressing_style = path
+request_checksum_calculation = when_required
+response_checksum_validation = when_required
+```
+
+There is no web interface; a desktop client such as [Cyberduck](https://servicedesk.surf.nl/wiki/spaces/WIKI/pages/112591465/Cyberduck) works with the same key.
+We have one key for the whole account and cannot create more ourselves: SURF issues them.
+
+### Public files
+
+Everything is private by default: without the key, a download returns 403.
+
 Public files get a stable address at `https://files.nde.nl/<bucket>/<key>` ([k8s/files](k8s/files/helmrelease.yaml)), which redirects to the object store.
 Publish only `files.nde.nl` URLs, so the files can move without breaking links.
-To make an object public, upload it with the `public-read` ACL; clients must follow redirects (`curl -L`).
+Clients must follow redirects (`curl -L`).
+
+To make files public, set a bucket policy that allows anonymous reads, for the whole bucket or for one prefix:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::my-bucket/public/*"
+    }
+  ]
+}
+```
+
+```shell
+aws --profile nde s3api put-bucket-policy --bucket my-bucket --policy file://policy.json
+```
+
+Objects under that prefix are then readable by anyone, however they were uploaded; the rest of the bucket stays private.
+Listing and writing always need the key.
+A single object can also be made public by uploading it with `--acl public-read`, but a later upload without that flag makes it private again.
+
+The object store’s own URL for a public object includes NDE’s tenant ID: `https://objectstore.surf.nl/8cb3d6bf7f53479183d9f64c6c80a82f:<bucket>/<key>`.
+Without the tenant ID it returns 403, even for a public object.
+
+For web applications that fetch files with JavaScript, give the bucket a CORS rule:
+
+```shell
+aws --profile nde s3api put-bucket-cors --bucket my-bucket --cors-configuration \
+  '{"CORSRules": [{"AllowedOrigins": ["*"], "AllowedMethods": ["GET", "HEAD"], "AllowedHeaders": ["*"]}]}'
+```
 
 ## Telemetry
 
