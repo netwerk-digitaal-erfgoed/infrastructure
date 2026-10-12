@@ -39,8 +39,8 @@ spec:
             pattern: '^(?P<version>\d+\.\d+\.\d+)-alpine$'
             extract: '$version'
             range: "~1"
-        # Probe a path that does not redirect: the kubelet would otherwise
-        # follow the 302 to the object store.
+        # Probe a path that answers 200 itself: / returns 404, and every other
+        # path redirects away, which says nothing about this pod’s health.
         livenessProbe:
           httpGet:
             path: /healthz
