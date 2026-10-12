@@ -27,6 +27,12 @@ spec:
           policy:
             type: semver
             range: "~11.4"
+        # The SURF default limit of 256Mi is too low: the container peaks at it and was OOM-killed.
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 512Mi
         env:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:

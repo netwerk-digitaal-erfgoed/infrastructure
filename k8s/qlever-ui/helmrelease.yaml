@@ -25,6 +25,12 @@ spec:
         flux:
           enabled: false
         port: 7000
+        # The SURF default limit of 256Mi is too low: the container peaks at 92% of it.
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 512Mi
         env:
           - name: RESTART_TRIGGER
             value: "1"
