@@ -9,6 +9,7 @@ Generic Helm chart for deploying NDE applications. It supports:
 - [ConfigMaps](#configmap)
 - CronJobs
 - [CNAME DNS records](#cname-dns-records)
+- [Volume backups](#velero-volume-backups)
 
 ## Flux Image Automation
 
@@ -111,3 +112,59 @@ backup:
 ```
 
 For CronJobs, you can also set `cronjobs[].backupVolumes` to override per job.
+
+### What gets backed up
+
+SURF runs Velero on the cluster. Once a day it copies every annotated volume to the SURF object store, which is replicated across datacentres. NDE cannot see Velero’s state or run it: ask SURF whether a backup succeeded, and for every restore.
+
+Velero selects whole volumes by name. It cannot include or exclude paths inside a volume ([velero#4129](https://github.com/vmware-tanzu/velero/issues/4129)), so everything on a named volume is uploaded. To back up only part of an application’s data, give that part its own volume and list only that volume:
+
+```yaml
+backup:
+  enabled: true
+  volumes:
+    - backup
+
+persistentVolumes:
+  - name: data
+    size: 10Gi
+  - name: backup
+    size: 5Gi
+```
+
+### When a file-level backup is safe
+
+This is a file-system backup, not a volume snapshot. Velero reads the volume file by file while the application keeps writing, so a file can change while it is being read and the copy mixes moments.
+
+That is safe for volumes whose files are written once and then left alone, such as uploads or a search index that is rebuilt as a whole. The Dataset Register’s QLever volume is an example: its index files only change during the nightly rebuild.
+
+It is not safe for the data directory of a running database. Postgres and MariaDB rewrite many files continuously, and a copy that mixes moments may fail to start or be silently inconsistent. Do not enable `backup` on such a volume as it is.
+
+### Databases: back up a dump
+
+Back up a dump instead of the data directory:
+
+1. Add a second volume, as in the example above, and list only that volume under `backup.volumes`.
+2. Have Velero write a dump to that volume just before it copies it, with a [pre-backup hook](https://velero.io/docs/v1.17/backup-hooks/) on the pod:
+
+   ```yaml
+   pre.hook.backup.velero.io/container: app
+   pre.hook.backup.velero.io/command: '["/bin/sh", "-c", "pg_dump -Fc -f /backup/db.dump.tmp mydb && mv /backup/db.dump.tmp /backup/db.dump"]'
+   pre.hook.backup.velero.io/on-error: Fail
+   ```
+
+   Writing to a temporary file and renaming it keeps a failed dump from replacing the previous good one.
+
+The chart cannot set these hook annotations yet.
+
+### Restoring
+
+A dump is imported into the running database, so no Kubernetes object changes and Flux is not involved. Stop the application from writing first, then run the import in the database container:
+
+```shell
+pg_restore --clean --if-exists -d mydb /backup/db.dump
+```
+
+As long as the dump you need is still on the `backup` volume, this needs neither Velero nor SURF. That covers a bad migration or an accidental delete.
+
+Restoring a volume itself is different: Velero recreates the pod and its claim, which Flux also manages. Only a lost volume, or a dump older than the one on the volume, needs that, and SURF has to run it.
