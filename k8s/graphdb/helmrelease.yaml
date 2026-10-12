@@ -27,13 +27,15 @@ spec:
             type: semver
             range: "~11"
         port: 7200
+        # GraphDB is a legacy store that is nearly idle, so it gets little CPU; that
+        # leaves room in the namespace’s CPU quota.
         resources:
           requests:
             memory: 4Gi
-            cpu: "2"
+            cpu: 250m
           limits:
             memory: 10Gi
-            cpu: "3"
+            cpu: "1"
         env:
           - name: GDB_JAVA_OPTS
             value: |
@@ -42,6 +44,15 @@ spec:
               -Dhealth.max.query.time.seconds=60
           - name: GDB_HEAP_SIZE
             value: 8g
+        # Starting took up to 82 seconds with three CPUs; with one it may take longer
+        # than the liveness probe allows, so give it up to ten minutes.
+        startupProbe:
+          httpGet:
+            path: /repositories/registry-backup/health?passive
+            port: 7200
+          periodSeconds: 10
+          timeoutSeconds: 60
+          failureThreshold: 60
         livenessProbe:
           httpGet:
             path: /repositories/registry-backup/health?passive

@@ -21,6 +21,12 @@ spec:
           repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-status
           tag: 20261006092330-5e88447 # {"$imagepolicy": "nde:network-of-terms-status:tag"}
         port: 3000
+        # Polling all sources at once briefly needs more than SURF’s default limit of 250m.
+        resources:
+          requests:
+            cpu: 50m
+          limits:
+            cpu: 500m
         env:
           - name: DATABASE_URL
             valueFrom:
