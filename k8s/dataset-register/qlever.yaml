@@ -101,67 +101,41 @@ spec:
               sleep $sleep_seconds
 
               echo "Starting index rebuild at $(date)"
-              qlever rebuild-index --access-token "$ACCESS_TOKEN" --keep-old-index-dirs all
+              old_index_dir="previous.$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+              qlever rebuild-index --access-token "$ACCESS_TOKEN" --keep-old-index-dirs newest --old-index-dir "$old_index_dir"
 
               # rebuild-index may silently fail (https://github.com/ad-freiburg/qlever/issues/2806)
-              # but still move the old index to previous.*. Check and revert if needed.
+              # but still move the old index to $old_index_dir. Check and revert if needed.
               if [ ! -f dataset-register.meta-data.json ]; then
                 echo "ERROR: index missing after rebuild at $(date), restoring from previous..."
-                latest_prev=$(ls -dt previous.* 2>/dev/null | head -1)
-                if [ -n "$latest_prev" ]; then
-                  mv "$latest_prev"/dataset-register.* . 2>/dev/null || true
-                  mv "$latest_prev"/Qleverfile . 2>/dev/null || true
-                  echo "Restored index from $latest_prev at $(date)"
+                if [ -d "$old_index_dir" ]; then
+                  mv "$old_index_dir"/dataset-register.* . 2>/dev/null || true
+                  mv "$old_index_dir"/Qleverfile . 2>/dev/null || true
+                  echo "Restored index from $old_index_dir at $(date)"
                 else
                   echo "FATAL: no previous index to restore from at $(date)"
                 fi
+              elif [ ! -d "$old_index_dir" ]; then
+                # The rebuild failed before replacing the index: the server keeps running on the
+                # current index, which still needs its update-triples file.
+                echo "ERROR: rebuild failed at $(date), keeping the current index"
               else
                 echo "Rebuild complete at $(date), restarting server..."
                 qlever stop
 
-                # Archive update-triples file with timestamp because QLever doesn’t remove it.
+                # Move the update-triples file out of the way because QLever doesn’t remove it.
+                # It goes with the index it applies to, so both are pruned together.
                 for f in *.update-triples; do
                   if [ -f "$f" ]; then
-                    mv "$f" "$f.$(date +%Y-%m-%dT%H:%M:%S)"
+                    mv "$f" "$old_index_dir"/
                   fi
                 done
 
+                # Remove the timestamped archives that earlier versions of this script left behind.
+                rm -f ./*.update-triples.*
+
                 start_server
               fi
-            done
-      - name: s3-sync
-        image:
-          repository: d3fk/s3cmd
-          tag: latest
-        flux:
-          enabled: false
-        env:
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: dataset-register-s3
-                key: key
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: dataset-register-s3
-                key: secret
-        volumeMounts:
-          - name: data
-            mountPath: /data
-            readOnly: true
-        command:
-          - sh
-          - -c
-          - |
-            while true; do
-              if [ -f /data/dataset-register.update-triples ]; then
-                echo "$(date): Uploading update-triples to S3..."
-                s3cmd --host=ams3.digitaloceanspaces.com \
-                  --host-bucket="%(bucket)s.ams3.digitaloceanspaces.com" \
-                  put /data/dataset-register.update-triples s3://dataset-register/
-              fi
-              sleep 3600
             done
     securityContext:
       fsGroup: 100
@@ -190,7 +164,6 @@ spec:
           Qleverfile: |
             [data]
             NAME              = dataset-register
-            GET_DATA_CMD      = curl -sS -O https://dataset-register.ams3.digitaloceanspaces.com/data.nq
             TEXT_DESCRIPTION  = All literals, search with FILTER CONTAINS(?var, "...")
             DESCRIPTION       = NDE Dataset Register
             FORMAT            = nq
