@@ -24,6 +24,12 @@ spec:
             type: semver
             range: ">=0.8.0"
         port: 8080
+        # The SURF default limit of 256Mi is too low: the container peaks at it and was OOM-killed.
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 512Mi
         env:
           - name: AR_EXTERNAL_BASE_URL
             value: "https://annorepo.demo.netwerkdigitaalerfgoed.nl"

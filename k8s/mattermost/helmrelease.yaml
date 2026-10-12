@@ -24,6 +24,12 @@ spec:
           policy:
             type: semver
             range: "~11"
+        # The SURF default limit of 256Mi is too low: the container peaks at it and was OOM-killed.
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 1Gi
         env:
           - name: MM_SERVICESETTINGS_SITEURL
             value: https://chat.netwerkdigitaalerfgoed.nl

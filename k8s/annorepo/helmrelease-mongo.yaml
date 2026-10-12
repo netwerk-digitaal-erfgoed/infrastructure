@@ -27,6 +27,12 @@ spec:
             type: semver
             range: "~8.0"
         port: 27017
+        # The SURF default limit of 256Mi is too low: MongoDB’s cache alone takes at least 256MB.
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 512Mi
         volumeMounts:
           - mountPath: /data/db
             name: data
