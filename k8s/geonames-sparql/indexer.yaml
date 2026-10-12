@@ -75,8 +75,9 @@ spec:
                   # plus the freshly built staging index.
                   cd /scratch
                   # -f so an HTTP error fails here rather than writing S3’s error document to
-                  # the path, which surfaces much later as an unreadable RDF file.
-                  curl -fsS -O https://geonames.ams3.digitaloceanspaces.com/geonames.nt.gz
+                  # the path, which surfaces much later as an unreadable RDF file. -L because
+                  # files.nde.nl redirects to the object store.
+                  curl -fsSL -O https://files.nde.nl/geonames/geonames.nt.gz
                   mkdir -p /scratch/tmp
                   # tdb2.xloader’s sort calls hard-code GNU sort --buffer-size=50% – of the
                   # HOST’s RAM, not the cgroup limit. The percentage is emitted by the Java
@@ -102,9 +103,9 @@ spec:
                   chmod -R g+w /data
             # 2) Build the Lucene text index. jena.textindexer ships only in the Fuseki
             #    server jar (jena-text is not in the apache-jena CLI distribution), so run
-            #    it from the Fuseki image — Apache's documented method
+            #    it from the Fuseki image – Apache's documented method
             #    (java -cp fuseki-server.jar jena.textindexer). Runs as the image's default
-            #    user (UID 1000) — the same UID as the server — so the index it writes is
+            #    user (UID 1000) – the same UID as the server – so the index it writes is
             #    already server-owned; no root needed.
             - name: build-text-index
               image: netwerkdigitaalerfgoed/fuseki:6.2.0 # {"$imagepolicy": "nde:geonames-sparql"}
