@@ -82,6 +82,16 @@ spec:
               secretKeyRef:
                 name: s3
                 key: secret
+        # SURF’s default limit of 256M is too low for Strapi to start: on
+        # 2026-10-12 a new pod was OOM-killed on every start and crash-looped.
+        # Once running it uses about 165 MiB.
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: "1"
+            memory: 768Mi
     ingresses:
       - hosts:
           - makemyflix.netwerkdigitaalerfgoed.nl
