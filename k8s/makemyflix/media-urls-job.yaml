@@ -5,10 +5,12 @@
 # Safe to run more than once: rows that no longer contain a DigitalOcean URL
 # are left alone. The files table is copied to files_before_surf_migration
 # first; drop that table once the site has been checked.
+#
+# To run it again, change the number in the name: a Job only runs once.
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: makemyflix-media-urls
+  name: makemyflix-media-urls-2
   namespace: nde
 spec:
   backoffLimit: 0
