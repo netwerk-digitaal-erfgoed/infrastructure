@@ -144,7 +144,7 @@ It is not safe for the data directory of a running database. Postgres and MariaD
 
 ### Databases: back up a dump
 
-Back up a dump instead of the data directory. Give the release a command that prints a consistent dump to stdout:
+Back up a dump instead of the data directory. Give the release a command that writes a consistent dump to standard output:
 
 ```yaml
 backup:
@@ -160,7 +160,9 @@ The chart then:
 - has Velero run the command in that container just before each backup, with a [pre-backup hook](https://velero.io/docs/v1.17/backup-hooks/). The output goes to a temporary file that replaces `/backup/dump` only when the command succeeds, so a failed dump leaves the previous one in place and fails the backup.
 - stores the dump on a volume of its own, `<release>-dump`, and backs up only that volume. `size` must fit two dumps.
 
-The other dump commands in use are `mariadb-dump -h 127.0.0.1 -u "$MARIADB_USER" -p"$MARIADB_PASSWORD" --single-transaction "$MARIADB_DATABASE"` and `mongodump --archive --quiet`.
+The other dump commands in use are `mariadb-dump -h 127.0.0.1 -u "$MARIADB_USER" -p"$MARIADB_PASSWORD" --single-transaction "$MARIADB_DATABASE"` and `mongodump --archive --gzip --quiet`.
+
+Do not pipe the command into another program, such as `gzip`: the shell would report the last program’s success, and a failed dump would replace the good one. Use the dump tool’s own compression option.
 
 ### Restoring
 
@@ -170,7 +172,7 @@ A dump is imported into the running database, so no Kubernetes object changes an
 kubectl -n nde exec <release>-0 -c dump -- sh -c 'PGPASSWORD="$POSTGRES_PASSWORD" pg_restore -h 127.0.0.1 -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-${POSTGRES_USER:-postgres}}" --clean --if-exists /backup/dump'
 ```
 
-For MariaDB, pipe `/backup/dump` into `mariadb` with the same connection options; for MongoDB, run `mongorestore --archive=/backup/dump`.
+For MariaDB, pipe `/backup/dump` into `mariadb` with the same connection options; for MongoDB, run `mongorestore --gzip --archive=/backup/dump --drop`, where `--drop` makes it replace the collections that exist.
 
 As long as the dump you need is still on the dump volume, this needs neither Velero nor SURF. That covers a bad migration or an accidental delete.
 

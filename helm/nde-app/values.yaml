@@ -97,7 +97,7 @@ backup:
   # that has the first container’s image and environment, and reaches the
   # database at 127.0.0.1.
   dump:
-    command: ""  # Shell command that prints a consistent dump to stdout
+    command: ""  # Shell command that writes a consistent dump to standard output
     size: 1Gi    # Size of the dump volume; it must hold two dumps
 
 # Persistence (StatefulSet only) - single volume

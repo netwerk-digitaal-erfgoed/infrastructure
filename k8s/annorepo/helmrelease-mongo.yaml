@@ -21,7 +21,7 @@ spec:
     backup:
       enabled: true
       dump:
-        command: mongodump --archive --quiet
+        command: mongodump --archive --gzip --quiet
         size: 2Gi
     containers:
       - name: annorepo-mongo
