@@ -17,6 +17,9 @@ spec:
       type: statefulset
       podManagementPolicy: OrderedReady
 
+    backup:
+      enabled: true
+
     containers:
       - name: app
         image:

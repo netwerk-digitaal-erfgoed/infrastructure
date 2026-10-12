@@ -17,6 +17,12 @@ spec:
     workload:
       type: statefulset
       podManagementPolicy: OrderedReady
+
+    backup:
+      enabled: true
+      dump:
+        command: mariadb-dump -h 127.0.0.1 -u "$MARIADB_USER" -p"$MARIADB_PASSWORD" --single-transaction "$MARIADB_DATABASE"
+        size: 2Gi
     containers:
       - name: mariadb
         image:

@@ -17,6 +17,9 @@ spec:
     workload:
       type: statefulset
       podManagementPolicy: OrderedReady
+
+    backup:
+      enabled: true
     containers:
       - name: nginx
         image:

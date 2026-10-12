@@ -17,6 +17,12 @@ spec:
     workload:
       type: statefulset
       podManagementPolicy: OrderedReady
+
+    backup:
+      enabled: true
+      dump:
+        command: PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -h 127.0.0.1 -U "${POSTGRES_USER:-postgres}" -Fc "${POSTGRES_DB:-${POSTGRES_USER:-postgres}}"
+        size: 5Gi
     containers:
       - name: app
         image:
