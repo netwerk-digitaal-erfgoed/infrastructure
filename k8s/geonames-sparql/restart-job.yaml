@@ -16,9 +16,9 @@ spec:
   # recreates it from the current spec. This scales rather than deleting the pod directly
   # because the statefulset-manager role grants statefulsets/scale and no access to pods.
   #
-  # Jobs are immutable, so a future restart needs a new name (-2, -3, …), as with the reindex
-  # Jobs. Leave the completed Job in place: deleting it here would have Flux recreate it on the
-  # next reconcile, restarting the server again.
+  # Jobs are immutable, so a future restart needs a new name (-2, -3, …). Leave the completed
+  # Job in place: deleting it here would have Flux recreate it on the next reconcile,
+  # restarting the server again.
   backoffLimit: 2
   template:
     spec:
