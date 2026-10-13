@@ -67,8 +67,9 @@ spec:
               # plus the freshly built staging index.
               cd /scratch || fail "cd scratch"
               # -f so an HTTP error fails here rather than writing S3’s error document to the
-              # path, which surfaces much later as an unreadable RDF file.
-              curl -fsS -O https://geonames.ams3.digitaloceanspaces.com/geonames.nt.gz || fail "download"
+              # path, which surfaces much later as an unreadable RDF file. -L because
+              # files.nde.nl redirects to the object store.
+              curl -fsSL -O https://files.nde.nl/geonames/geonames.nt.gz || fail "download"
               mkdir -p /scratch/tmp
               # tdb2.xloader’s sort calls hard-code GNU sort --buffer-size=50% – of the
               # HOST’s RAM, not the cgroup limit. The percentage is emitted by the Java
