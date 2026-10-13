@@ -34,7 +34,7 @@ spec:
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
             value: "http://nde-otel.monitoring.svc.cluster.local:4318"
           - name: OTEL_LOG_LEVEL
-            value: "all"
+            value: "warn"
           - name: API_ACCESS_TOKEN
             valueFrom:
               secretKeyRef:

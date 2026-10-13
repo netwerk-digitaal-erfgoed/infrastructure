@@ -46,6 +46,8 @@ spec:
                 key: access-token
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
             value: "http://nde-otel.monitoring.svc.cluster.local:4318"
+          - name: OTEL_LOG_LEVEL
+            value: "warn"
           # One stable instance for all runs: Forbid keeps runs from overlapping, and the pod
           # name would otherwise start a new metric series every hour.
           - name: OTEL_RESOURCE_ATTRIBUTES
