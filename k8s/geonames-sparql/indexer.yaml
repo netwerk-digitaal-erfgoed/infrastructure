@@ -4,11 +4,15 @@ metadata:
   name: geonames-sparql-indexer
   namespace: nde
 spec:
-  # Staggered to 04:00 so it does not collide with the dataset-knowledge-graph
-  # CronJob (02:00) on the shared, near-full node. Two 12Gi-class jobs running at
-  # once caused node memory pressure that got the reindex pod killed; the 2h gap
-  # lets dkg finish (and release its memory) before the reindex starts.
-  schedule: "0 4 * * *"
+  # Runs in the evening so it is done before the dataset-knowledge-graph CronJob
+  # starts at 02:00. The two cannot overlap: dkg has a CPU limit of 6 and this
+  # Job one of 3, which together exceed the nde namespace’s limits.cpu quota of
+  # 45. While dkg runs, Kubernetes refuses to create this Job’s pod, and the Job
+  # fails at its deadline without ever starting. At 04:00 UTC that happened on
+  # every night dkg ran, because dkg takes more than eight hours. Not overlapping
+  # also avoids the node memory pressure that once got the reindex pod killed.
+  schedule: "0 20 * * *"
+  timeZone: Europe/Amsterdam
   concurrencyPolicy: Replace
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 3
