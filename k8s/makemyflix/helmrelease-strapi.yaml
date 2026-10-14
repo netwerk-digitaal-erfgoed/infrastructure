@@ -85,7 +85,7 @@ spec:
         # SURF’s default limit of 256M is too low for Strapi to start: on
         # 2026-10-12 a new pod was OOM-killed on every start and crash-looped.
         # Once running it uses about 165 MiB. CPU is left at SURF’s default of
-        # 250m: the namespace’s limits.cpu quota is nearly used up.
+        # 250m: CPU limits count against the namespace’s limits.cpu quota.
         resources:
           requests:
             memory: 256Mi
