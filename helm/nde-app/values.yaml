@@ -7,6 +7,10 @@ workload:
   # Immutable once the StatefulSet exists: set to OrderedReady for StatefulSets
   # created with that policy.
   podManagementPolicy: Parallel
+  # Deployments only. Empty keeps Kubernetes’ RollingUpdate, which starts the
+  # new pod before stopping the old one. Recreate stops the old pod first, for a
+  # release that the namespace’s resource quota has no room to run twice.
+  strategy: ""
 
 # External service (reverse proxy to external IP, no containers needed)
 externalService:
