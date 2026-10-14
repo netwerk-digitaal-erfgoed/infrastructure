@@ -14,6 +14,11 @@ spec:
         kind: GitRepository
         name: nde
   values:
+    # The nde namespace’s CPU limit quota has no room for a second pod during a rolling update, so
+    # every rollout since 13 October left the old pod running. A proof of concept can be down for
+    # the few seconds Recreate takes.
+    workload:
+      strategy: Recreate
     containers:
       - name: app
         image:

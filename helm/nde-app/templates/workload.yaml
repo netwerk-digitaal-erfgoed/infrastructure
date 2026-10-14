@@ -9,6 +9,15 @@ metadata:
     {{- include "nde-app.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.workload.replicas }}
+  {{- if and (ne .Values.workload.type "statefulset") .Values.workload.strategy }}
+  strategy:
+    type: {{ .Values.workload.strategy }}
+    {{- if eq .Values.workload.strategy "Recreate" }}
+    # The API server fills in rollingUpdate on a live Deployment and rejects it
+    # beside Recreate, so the patch has to remove it.
+    rollingUpdate: null
+    {{- end }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "nde-app.selectorLabels" . | nindent 6 }}

@@ -58,6 +58,15 @@ workload:
   podManagementPolicy: OrderedReady
 ```
 
+## Deployment strategy
+
+A Deployment rolls out with Kubernetes’ `RollingUpdate`: the new pod starts before the old one stops, so for a moment the release needs its resources twice. Where the namespace’s resource quota has no room for that, the new pod is never created, and the old one keeps serving the previous image without any error showing. Set `Recreate` to stop the old pod first, at the cost of a few seconds of downtime per rollout:
+
+```yaml
+workload:
+  strategy: Recreate
+```
+
 ## CNAME DNS Records
 
 Create CNAME records via ExternalDNS without deploying any application:
