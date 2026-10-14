@@ -1,0 +1,50 @@
+# Proof of concept: the Network of Terms GraphQL API with a catalogue of person datasets.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: network-of-persons-graphql
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-persons-graphql
+          tag: latest # {"$imagepolicy": "nde:network-of-persons-graphql:tag"}
+        port: 3123
+        env:
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://nde-otel.monitoring.svc.cluster.local:4318
+          # The image is the Network of Terms’ and reports under that name by default.
+          - name: OTEL_SERVICE_NAME
+            value: network-of-persons
+          - name: TRUST_PROXY
+            value: 'true'
+        readinessProbe:
+          httpGet:
+            path: /graphiql
+        # SURF’s default limit of 250m CPU throttles every query: each one parses RDF.
+        resources:
+          requests:
+            cpu: "250m"
+            memory: 256Mi
+          limits:
+            cpu: "2"
+            memory: 512Mi
+    # The reconciliation release routes /reconcile, /preview and /extend on the same host.
+    ingresses:
+      - hosts:
+          - personennetwerk.netwerkdigitaalerfgoed.nl
+        annotations:
+          # HARICA rejects new netwerkdigitaalerfgoed.nl orders without validating them.
+          cert-manager.io/cluster-issuer: letsencrypt
+          # Let’s Encrypt no longer issues client auth certificates.
+          cert-manager.io/usages: server auth,digital signature
