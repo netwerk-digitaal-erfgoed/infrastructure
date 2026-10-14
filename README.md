@@ -8,6 +8,7 @@ Software running in this infrastructure must meet the [NDE Software Requirements
 ## Features
 
 * GitOps using [Flux](https://fluxcd.io) to automatically roll out infrastructure and application changes.
+  SURF installs and runs Flux on the cluster. The `GitRepository` named `nde`, which every HelmRelease here refers to, points at this repository’s `master` branch and is defined on SURF’s side, not in this repository; Flux applies the manifests in `k8s/` from it.
 * Declarative configuration using [Flux HelmRelease](https://fluxcd.io/flux/components/helm/helmreleases/). Everything is version-controlled, including [secrets](#secrets).
 * DNS automation using [ExternalDNS](https://kubernetes-sigs.github.io/external-dns/latest/).
 * Automatic TLS certificates via [cert-manager](https://cert-manager.io).
