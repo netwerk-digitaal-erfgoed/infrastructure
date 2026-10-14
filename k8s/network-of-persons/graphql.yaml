@@ -32,12 +32,14 @@ spec:
           httpGet:
             path: /graphiql
         # SURF’s default limit of 250m CPU throttles every query: each one parses RDF.
+        # One core, not more: the nde namespace’s CPU limit quota leaves little room, and the nightly
+        # dataset-knowledge-graph job needs 6.
         resources:
           requests:
             cpu: "250m"
             memory: 256Mi
           limits:
-            cpu: "2"
+            cpu: "1"
             memory: 512Mi
     # The reconciliation release routes /reconcile, /preview and /extend on the same host.
     ingresses:
