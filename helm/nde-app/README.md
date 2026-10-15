@@ -123,7 +123,7 @@ For CronJobs, you can also set `cronjobs[].backupVolumes` to override per job.
 
 ### What gets backed up
 
-SURF runs Velero on the cluster. Once a day it copies every annotated volume to the SURF object store, which is replicated across datacentres. NDE cannot see Velero’s state or run it: ask SURF whether a backup succeeded, and for every restore.
+SURF runs Velero on the cluster. Once a day, at 02:00 UTC, it copies every annotated volume to the SURF object store, which is replicated across datacentres, and keeps each backup for 30 days. NDE cannot run Velero: ask SURF for every restore. To see whether a backup succeeded, read the [`velero-status` ConfigMap](#checking-backups).
 
 Velero selects whole volumes by name. It cannot include or exclude paths inside a volume ([velero#4129](https://github.com/vmware-tanzu/velero/issues/4129)), so everything on a named volume is uploaded. To back up only part of an application’s data, give that part its own volume and list only that volume:
 
@@ -141,6 +141,20 @@ persistentVolumes:
 ```
 
 Plan this when you create a StatefulSet: Kubernetes does not allow adding a volume to `persistentVolumes` afterwards.
+
+### Checking backups
+
+Every hour SURF writes the state of Velero’s backups for our namespace to the `velero-status` ConfigMap in `nde`. Open it in the [Kubernetes dashboard](https://nde-dashboard.ms4.surfsara.nl/c/main/configmaps/nde/velero-status). Its keys:
+
+| Key | Contents |
+|---|---|
+| `summary` | One line on the latest backup, e.g. `OK, all 12 volume(s) backed up (3.4 GiB)`. |
+| `last-backup` | The latest backup’s name, start and end time and expiry, with status and size per volume. |
+| `restore-points` | One line per backup still kept, with how many volumes it holds. |
+| `restores` | Restores SURF has run in our namespace, or `none`. |
+| `updated` | When the ConfigMap was last written. |
+
+A volume you annotated but that is missing from `last-backup` is not being backed up. SURF is alerted when a backup fails, but check the ConfigMap after adding `backup` to a release.
 
 ### When a file-level backup is safe
 
