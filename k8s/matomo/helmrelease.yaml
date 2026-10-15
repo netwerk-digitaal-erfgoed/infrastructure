@@ -17,14 +17,13 @@ spec:
     workload:
       type: statefulset
       podManagementPolicy: OrderedReady
-
     backup:
       enabled: true
     containers:
       - name: nginx
         image:
           repository: nginx
-          tag: "1.31.6-alpine" # {"$imagepolicy": "nde:matomo-nginx:tag"}
+          tag: "1.31.7-alpine" # {"$imagepolicy": "nde:matomo-nginx:tag"}
         port: 80
         flux:
           policy:
