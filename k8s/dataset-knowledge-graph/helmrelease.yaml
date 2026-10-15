@@ -33,12 +33,12 @@ spec:
         restartPolicy: Never
         # Neither container talks to the Kubernetes API.
         automountServiceAccountToken: false
-        image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph
-        imagePullPolicy: Always
-        # Deliberately pulls :latest each run (imagePullPolicy: Always) rather than
-        # a pinned tag, so it is not tracked by Flux image automation.
-        flux:
-          enabled: false
+        # A pinned tag, so a change spanning the image and this release (such as
+        # QLEVER_ENV and the sidecar) lands in one commit here. Flux image
+        # automation moves the tag to every new build of the DKG main branch
+        # within minutes; to hold or roll back a version, remove the marker or
+        # suspend the ImagePolicy first, or Flux overwrites a hand-edited tag.
+        image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph:20261015191244-b63b400 # {"$imagepolicy": "nde:dataset-knowledge-graph"}
         env:
           # QLever runs in the qlever sidecar below, with a memory limit of its
           # own: a dump that runs it out of memory restarts only the sidecar and
@@ -86,8 +86,10 @@ spec:
           - name: copy-task-agent
             # Keep in step with the @lde/task-runner-http in the DKG lockfile:
             # the pipeline’s client and this agent must speak the same protocol.
-            # A caret range on 0.x pins the minor, so the client only changes
-            # with a deliberate DKG dependency bump.
+            # A caret range on 0.x pins the minor, but a Dependabot bump of
+            # @lde/sparql-qlever can still raise it, and Flux deploys that image
+            # without a change here. Check this tag when DKG’s @lde packages move
+            # to a new minor.
             image: ghcr.io/ldelements/task-runner-http:0.1.0
             command: ['cp', '/task-agent', '/agent/task-agent']
             volumeMounts:
