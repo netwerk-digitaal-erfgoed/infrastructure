@@ -5,12 +5,10 @@ metadata:
   namespace: nde
 spec:
   # Runs in the evening so it is done before the dataset-knowledge-graph CronJob
-  # starts at 02:00. The two cannot overlap: dkg has a CPU limit of 6 and this
-  # Job one of 3, which together exceed the nde namespace’s limits.cpu quota of
-  # 45. While dkg runs, Kubernetes refuses to create this Job’s pod, and the Job
-  # fails at its deadline without ever starting. At 04:00 UTC that happened on
-  # every night dkg ran, because dkg takes more than eight hours. Not overlapping
-  # also avoids the node memory pressure that once got the reindex pod killed.
+  # starts at 02:00. Overlapping the two once caused node memory pressure that
+  # got the reindex pod killed. Under the nde namespace’s former limits.cpu
+  # quota of 45, dkg (CPU limit 6) also left no room for this Job (3), so
+  # Kubernetes never created its pod; the quota is 60 since October 2026.
   schedule: "0 20 * * *"
   timeZone: Europe/Amsterdam
   concurrencyPolicy: Replace

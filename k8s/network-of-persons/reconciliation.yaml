@@ -14,11 +14,6 @@ spec:
         kind: GitRepository
         name: nde
   values:
-    # The nde namespace’s CPU limit quota has no room for a second pod during a rolling update, so
-    # every rollout since 13 October left the old pod running. A proof of concept can be down for
-    # the few seconds Recreate takes.
-    workload:
-      strategy: Recreate
     containers:
       - name: app
         image:
@@ -40,8 +35,8 @@ spec:
           httpGet:
             path: /reconcile
         # SURF’s default limit of 250m CPU throttles every query: each one parses RDF.
-        # One core, not more: the nde namespace’s CPU limit quota leaves little room, and the nightly
-        # dataset-knowledge-graph job needs 6.
+        # One core, not more: CPU limits count against the nde namespace’s quota of 60, and the
+        # nightly dataset-knowledge-graph job needs 6.
         resources:
           requests:
             cpu: "250m"
