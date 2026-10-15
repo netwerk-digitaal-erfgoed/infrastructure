@@ -137,6 +137,7 @@ cronjobs: []
   #   args: []
   #   env: []
   #   concurrencyPolicy: Forbid    # Optional: Allow (default) | Forbid | Replace
+  #   suspend: true                # Optional: schedule no new Jobs; a running Job continues
   #   backoffLimit: 1              # Optional
   #   activeDeadlineSeconds: 3000  # Optional: kill a Job that runs longer than this (watchdog)
   #   restartPolicy: OnFailure  # Optional, defaults to OnFailure

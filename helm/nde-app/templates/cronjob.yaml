@@ -14,6 +14,9 @@ spec:
   {{- with .concurrencyPolicy }}
   concurrencyPolicy: {{ . }}
   {{- end }}
+  {{- if .suspend }}
+  suspend: true
+  {{- end }}
   jobTemplate:
     spec:
       {{- with .backoffLimit }}
