@@ -26,25 +26,32 @@ spec:
         # wins; this also avoids two pipelines racing on the shared RWO volume.
         concurrencyPolicy: Replace
         backoffLimit: 1
-        image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph
-        imagePullPolicy: Always
-        # Deliberately pulls :latest each run (imagePullPolicy: Always) rather than
-        # a pinned tag, so it is not tracked by Flux image automation.
-        flux:
-          enabled: false
+        # Never, not the chart’s OnFailure: a failed pipeline container must end
+        # the pod, sidecar included. Restarted in place, it would find the
+        # sidecar still running the qlever-server the failed one started. A
+        # failed run gets a fresh pod instead (backoffLimit).
+        restartPolicy: Never
+        # Neither container talks to the Kubernetes API.
+        automountServiceAccountToken: false
+        # A pinned tag, so a change spanning the image and this release (such as
+        # QLEVER_ENV and the sidecar) lands in one commit here. Flux image
+        # automation moves the tag to every new build of the DKG main branch
+        # within minutes; to hold or roll back a version, remove the marker or
+        # suspend the ImagePolicy first, or Flux overwrites a hand-edited tag.
+        image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph:20261015191244-b63b400 # {"$imagepolicy": "nde:dataset-knowledge-graph"}
         env:
+          # QLever runs in the qlever sidecar below, with a memory limit of its
+          # own: a dump that runs it out of memory restarts only the sidecar and
+          # fails that one dataset, instead of OOM-killing the whole run.
           - name: QLEVER_ENV
-            value: native
+            value: remote
           - name: QLEVER_PORT
             value: "7100"
-          # QLever query-memory budget, kept WELL BELOW the container memory limit
+          # QLever query-memory budget, kept below the qlever sidecar’s 22Gi limit
           # so an over-budget query on a huge dataset aborts gracefully (HTTP 500,
-          # caught per stage) instead of OOM-killing the pod and aborting the whole
-          # run. Raised 8G -> 12G together with the container limit 16Gi -> 22Gi so
-          # the graceful-degradation gap is preserved (~10Gi), letting heavier
-          # per-dataset analysis queries on large dumps complete. History: 12G
-          # under the old 16Gi limit OOM-killed the run; 12G under 22Gi does not.
-          # See netwerk-digitaal-erfgoed/dataset-knowledge-graph#340.
+          # caught per stage) instead of OOM-killing the sidecar and failing the
+          # dataset. History: 12G under the old 16Gi shared limit OOM-killed the
+          # run; see netwerk-digitaal-erfgoed/dataset-knowledge-graph#340.
           - name: QLEVER_MEMORY_MAX_SIZE
             value: "12G"
           # Output store: the pipeline writes one n-quads file per dataset onto
@@ -69,7 +76,61 @@ spec:
             name: imports
           - mountPath: /data
             name: nq
+        # QLever runs in a native sidecar (an init container with restartPolicy
+        # Always), controlled by the pipeline through the task agent of
+        # @lde/task-runner-http on 127.0.0.1:7070. The agent ships as a single
+        # executable that the first init container copies into a shared
+        # emptyDir, so the sidecar runs the unmodified upstream QLever image.
+        # See https://ldelements.org/reference/task-runner-http#kubernetes.
+        initContainers:
+          - name: copy-task-agent
+            # Flux moves this tag to new patch releases of the agent; see
+            # task-agent-image.yaml for why only patches. Its minor must match
+            # the @lde/task-runner-http in the DKG lockfile: a Dependabot bump of
+            # @lde/sparql-qlever can raise that, and Flux deploys the DKG image
+            # without a change here, so check this when DKG’s @lde packages move
+            # to a new minor.
+            image: ghcr.io/ldelements/task-runner-http:0.1.0 # {"$imagepolicy": "nde:dataset-knowledge-graph-task-agent"}
+            command: ['cp', '/task-agent', '/agent/task-agent']
+            volumeMounts:
+              - { name: task-agent, mountPath: /agent }
+          - name: qlever
+            # The QLever version @lde/sparql-qlever is tested against. This,
+            # not QLEVER_IMAGE in the DKG repository’s .env (local Docker-mode
+            # runs only), is the QLever production runs.
+            image: adfreiburg/qlever:commit-a14e0a0
+            restartPolicy: Always
+            command: ['/agent/task-agent']
+            # Kubelet’s own probes connect to the pod IP, and the agent only
+            # listens on 127.0.0.1, so the probe runs inside the container.
+            startupProbe:
+              exec:
+                command: ['/agent/task-agent', '--probe']
+              periodSeconds: 1
+              failureThreshold: 30
+            resources:
+              requests:
+                cpu: "1500m"
+                memory: 10Gi
+              # The analysis qlever-index import is the slow phase and is
+              # parallel, CPU-bound: it uses ~6 cores at peak (p95 5.9) but was
+              # throttled at 3. See
+              # netwerk-digitaal-erfgoed/dataset-knowledge-graph#337.
+              # 22Gi, as when QLever shared the pipeline’s container: runs peaked
+              # at 19–22GiB working set (page cache of the mapped index included)
+              # in the 30 days before the move. Keeps a ~10Gi gap above
+              # QLEVER_MEMORY_MAX_SIZE=12G. See #340.
+              limits:
+                cpu: "6"
+                memory: 22Gi
+            volumeMounts:
+              - { name: task-agent, mountPath: /agent }
+              # The same path as in the pipeline container: the importer refers
+              # to downloaded files by path.
+              - { name: imports, mountPath: /app/imports }
         volumes:
+          - name: task-agent
+            emptyDir: {}
           - name: imports
             persistentVolumeClaim:
               claimName: dataset-knowledge-graph-imports
@@ -90,20 +151,22 @@ spec:
                   matchLabels:
                     app: dataset-knowledge-graph-qlever
                 topologyKey: kubernetes.io/hostname
+        # The pipeline itself; QLever has its own resources in the sidecar. The
+        # requests keep the old 12Gi in total, as the node’s memory requests are
+        # ~95% committed. The limits add 6Gi for Node on top of QLever’s 22Gi,
+        # which overcommits the 32GiB node; under real pressure the kernel kills
+        # the largest process, QLever in its own container. Node sizes its heap
+        # from this limit. See #340.
         resources:
           requests:
-            cpu: "2"
-            memory: 12Gi
-          # The analysis qlever-index import is the slow phase and is parallel,
-          # CPU-bound: it uses ~6 cores at peak (p95 5.9) but was throttled at 3.
-          # See netwerk-digitaal-erfgoed/dataset-knowledge-graph#337.
+            cpu: "500m"
+            memory: 2Gi
           limits:
-            cpu: "6"
-            # 22Gi (raised from 16Gi) draws on the 8-core/32GiB node's real free
-            # RAM (~17GiB actually free; node memory requests are ~95% committed,
-            # so we raise the LIMIT, not the request). Keeps a ~10Gi gap above
-            # QLEVER_MEMORY_MAX_SIZE=12G so over-budget queries fail gracefully
-            # (HTTP 500 per stage) rather than OOM-killing the pod. See #340.
-            memory: 22Gi
+            cpu: "2"
+            memory: 6Gi
+        # One user for both containers (the pipeline image’s node user), so
+        # each can overwrite the index files the other wrote in earlier runs.
         securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
           fsGroup: 100
