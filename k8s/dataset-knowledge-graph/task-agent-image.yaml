@@ -1,0 +1,30 @@
+# The task agent the QLever sidecar runs, copied in by the copy-task-agent init container
+# (helmrelease.yaml). The chart creates image policies only for containers and a CronJob’s own
+# image, not for init containers, so this one is declared here, as for geonames-sparql’s
+# jena-tools.
+#
+# Bounded to patch releases: the agent must speak the same protocol as the HttpTaskRunner client
+# in the DKG lockfile (@lde/task-runner-http ^0.1.0, so 0.1.x). LDE versions its 0.x packages
+# with minor = breaking, so a protocol change arrives as 0.2.0, and the agent may only move to it
+# together with a DKG dependency bump to the same minor. Raise the range with that bump.
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: dataset-knowledge-graph-task-agent
+  namespace: nde
+spec:
+  image: ghcr.io/ldelements/task-runner-http
+  interval: 24h
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: dataset-knowledge-graph-task-agent
+  namespace: nde
+spec:
+  imageRepositoryRef:
+    name: dataset-knowledge-graph-task-agent
+  policy:
+    semver:
+      # Also skips the per-architecture tags (0.1.0-amd64), which semver reads as prereleases.
+      range: '>=0.1.0 <0.2.0'

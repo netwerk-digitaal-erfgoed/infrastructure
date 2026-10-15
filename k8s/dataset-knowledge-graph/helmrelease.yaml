@@ -84,13 +84,13 @@ spec:
         # See https://ldelements.org/reference/task-runner-http#kubernetes.
         initContainers:
           - name: copy-task-agent
-            # Keep in step with the @lde/task-runner-http in the DKG lockfile:
-            # the pipeline’s client and this agent must speak the same protocol.
-            # A caret range on 0.x pins the minor, but a Dependabot bump of
-            # @lde/sparql-qlever can still raise it, and Flux deploys that image
-            # without a change here. Check this tag when DKG’s @lde packages move
+            # Flux moves this tag to new patch releases of the agent; see
+            # task-agent-image.yaml for why only patches. Its minor must match
+            # the @lde/task-runner-http in the DKG lockfile: a Dependabot bump of
+            # @lde/sparql-qlever can raise that, and Flux deploys the DKG image
+            # without a change here, so check this when DKG’s @lde packages move
             # to a new minor.
-            image: ghcr.io/ldelements/task-runner-http:0.1.0
+            image: ghcr.io/ldelements/task-runner-http:0.1.0 # {"$imagepolicy": "nde:dataset-knowledge-graph-task-agent"}
             command: ['cp', '/task-agent', '/agent/task-agent']
             volumeMounts:
               - { name: task-agent, mountPath: /agent }
