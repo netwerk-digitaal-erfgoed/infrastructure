@@ -43,9 +43,6 @@ spec:
             name: data
     service:
       port: 27017
-    persistence:
-      enabled: true
-      name: data
-      mountPath: /data/db
-      size: 8Gi
-      storageClass: hdd
+    persistentVolumes:
+      - name: data
+        size: 8Gi

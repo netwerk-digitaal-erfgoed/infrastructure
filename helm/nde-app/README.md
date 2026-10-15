@@ -106,8 +106,7 @@ backup:
 
 When enabled, the chart sets `backup.velero.io/backup-volumes` automatically using PVC-backed volume names from:
 
-- `persistence.name` (StatefulSet single volume)
-- `persistentVolumes[].name` (StatefulSet multiple volumeClaimTemplates)
+- `persistentVolumes[].name` (StatefulSet volumeClaimTemplates)
 - `volumes[].name` where `volumes[].persistentVolumeClaim` is set
 
 You can override auto-detection with explicit names:

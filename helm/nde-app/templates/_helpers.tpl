@@ -83,10 +83,6 @@ With backup.dump.command set, the dump volume replaces the auto-detected ones.
 		{{- $vols = append $vols . -}}
 	{{- end }}
 {{- else if not .Values.backup.dump.command }}
-	{{- if and (eq .Values.workload.type "statefulset") .Values.persistence.enabled .Values.persistence.name }}
-		{{- $vols = append $vols .Values.persistence.name -}}
-	{{- end }}
-
 	{{- range .Values.persistentVolumes }}
 		{{- if .name }}
 			{{- $vols = append $vols .name -}}
