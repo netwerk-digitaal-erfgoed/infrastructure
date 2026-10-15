@@ -7,10 +7,8 @@
 # This runs @dataset-register/search-indexer’s standalone entrypoint (a blue/green
 # rebuild, no crawl) from the crawler image, which already bundles the indexer.
 #
-# Jobs are immutable: to re-run, bump `reindex-requested-at` in the pod template
-# (and `reconcile.fluxcd.io/requestedAt` to match); the `force` annotation lets
-# Flux replace the completed Job in place. The Job-level annotation alone is
-# mutable, so changing only that patches the Job without running it again.
+# Jobs are immutable: to re-run, bump `reindex-requested-at` in the pod template;
+# the `force` annotation lets Flux replace the completed Job in place.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -18,7 +16,6 @@ metadata:
   namespace: nde
   annotations:
     kustomize.toolkit.fluxcd.io/force: Enabled
-    reconcile.fluxcd.io/requestedAt: "2026-10-15T09:23:35Z"
 spec:
   backoffLimit: 1
   template:
