@@ -158,6 +158,13 @@ aws --profile nde s3api put-bucket-cors --bucket my-bucket --cors-configuration 
   '{"CORSRules": [{"AllowedOrigins": ["*"], "AllowedMethods": ["GET", "HEAD"], "AllowedHeaders": ["*"]}]}'
 ```
 
+## Outbound IP address
+
+Traffic from the cluster to the internet leaves from **145.38.218.188**, a NAT address shared by all nodes (measured on 15 October 2026).
+Institutions that rate-limit or block crawlers can allowlist this address to let our harvesters through.
+Don’t use it to grant access to anything private: other tenants of SURF’s cluster may share it.
+SURF manages the network, so the address can change; check it again before relying on it.
+
 ## Telemetry
 
 - **Metrics**: Applications push [OpenTelemetry](https://opentelemetry.io) metrics to SURF’s shared collector at `OTEL_EXPORTER_OTLP_ENDPOINT=http://nde-otel.monitoring.svc.cluster.local:4318`, which feeds the Prometheus datasource in SURF’s Grafana.
