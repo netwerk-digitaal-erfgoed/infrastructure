@@ -18,15 +18,13 @@ spec:
     workload:
       type: statefulset
       podManagementPolicy: OrderedReady
-
     service:
       port: 6379
-
     containers:
       - name: app
         image:
           repository: valkey/valkey
-          tag: "9.0.6-alpine" # {"$imagepolicy": "nde:dataset-register-valkey:tag"}
+          tag: "9.1.2-alpine" # {"$imagepolicy": "nde:dataset-register-valkey:tag"}
         flux:
           policy:
             type: semver
@@ -65,10 +63,9 @@ spec:
         volumeMounts:
           - name: data
             mountPath: /data
-
     persistentVolumes:
       - name: data
         size: 1Gi
 
-    # No ingress: the store is internal only. The browser pods connect over the
-    # cluster service DNS at `redis://dataset-register-valkey:6379`.
+# No ingress: the store is internal only. The browser pods connect over the
+# cluster service DNS at `redis://dataset-register-valkey:6379`.
