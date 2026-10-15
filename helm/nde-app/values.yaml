@@ -104,21 +104,16 @@ backup:
     command: ""  # Shell command that writes a consistent dump to standard output
     size: 1Gi    # Size of the dump volume; it must hold two dumps
 
-# Persistence (StatefulSet only) - single volume
-persistence:
-  enabled: false
-  storageClass: hdd
-  size: 1Gi
-  name: data
-  mountPath: /data
-
-# Multiple persistent volumes (StatefulSet only)
+# Persistent volumes (StatefulSet only), rendered as volumeClaimTemplates: one
+# claim per pod. Mount them through the container’s volumeMounts.
 persistentVolumes: []
   # - name: data
   #   size: 50Gi
   #   storageClass: hdd  # optional, defaults to hdd
 
-# PersistentVolumeClaims
+# Standalone PersistentVolumeClaims, for Deployments and CronJobs, or for a claim
+# that pods in another release mount too. Reference them in volumes as
+# <fullname>-<name>.
 pvcs: []
   # - name: data            # Required, used in PVC name (fullname-name)
   #   size: 1Gi             # Required
