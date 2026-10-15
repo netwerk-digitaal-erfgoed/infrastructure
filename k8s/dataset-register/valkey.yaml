@@ -26,7 +26,15 @@ spec:
       - name: app
         image:
           repository: valkey/valkey
-          tag: "9.0-alpine"
+          tag: "9.0.6-alpine" # {"$imagepolicy": "nde:dataset-register-valkey:tag"}
+        flux:
+          policy:
+            type: semver
+            # Bounded to the major: the append-only file must stay readable, so
+            # a major upgrade is a deliberate manual bump.
+            pattern: '^(?P<version>\d+\.\d+\.\d+)-alpine$'
+            extract: '$version'
+            range: "~9"
         port: 6379
         # Bounded LRU cache: append-only persistence so it survives restarts, and
         # a maxmemory below the container limit with allkeys-lru so Valkey evicts
@@ -50,7 +58,7 @@ spec:
             memory: 256Mi
         # No probes: the nde-app chart injects an httpGet default and merges it
         # with any probe we set, producing an invalid dual-handler (httpGet+exec)
-        # that Kubernetes rejects — and Valkey speaks RESP, not HTTP, so httpGet
+        # that Kubernetes rejects – and Valkey speaks RESP, not HTTP, so httpGet
         # can't work anyway. Without a readiness probe the pod is Ready once
         # running (Valkey accepts connections immediately); the browser fails
         # fast and falls back to a direct fetch if the store is ever unreachable.
