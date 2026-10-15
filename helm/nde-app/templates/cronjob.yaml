@@ -57,6 +57,13 @@ spec:
           affinity:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- if hasKey . "automountServiceAccountToken" }}
+          automountServiceAccountToken: {{ .automountServiceAccountToken }}
+          {{- end }}
+          {{- with .initContainers }}
+          initContainers:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           containers:
             - name: {{ .name }}
               image: {{ required "cronjobs[].image is required" .image }}

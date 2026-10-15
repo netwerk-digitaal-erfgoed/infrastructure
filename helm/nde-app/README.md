@@ -7,7 +7,7 @@ Generic Helm chart for deploying NDE applications. It supports:
 - Ingress with automatic TLS certificates and HTTP-to-HTTPS redirects
 - Persistent volumes
 - [ConfigMaps](#configmap)
-- CronJobs
+- [CronJobs](#cronjobs), with init containers and sidecars
 - [CNAME DNS records](#cname-dns-records)
 - [Volume backups](#velero-volume-backups)
 
@@ -43,6 +43,15 @@ containers:
         type: semver
         range: "~10.11"  # Only patch updates
 ```
+
+## CronJobs
+
+`cronjobs[].initContainers` is passed to the pod as is, so it takes init containers and [native sidecars](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/) (an init container with `restartPolicy: Always`, which runs beside the job’s container and stops when it ends). Native sidecars need Kubernetes 1.29 or newer: before that, an init container with `restartPolicy: Always` is rejected or runs as an ordinary init container that never exits, so the job never starts. The dataset-knowledge-graph runs QLever in such a sidecar; see `k8s/dataset-knowledge-graph/helmrelease.yaml`.
+
+Two related settings:
+
+- `cronjobs[].restartPolicy` defaults to `OnFailure`, which restarts a failed container in the same pod. Set `Never` when the job controls a sidecar: a restarted job container would find the sidecar still running what the failed one started.
+- `cronjobs[].automountServiceAccountToken: false` leaves the pod without a Kubernetes API token, for jobs that never call the API.
 
 ## StatefulSets
 
