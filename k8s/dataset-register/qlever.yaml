@@ -75,15 +75,19 @@ spec:
           - sh
           - -c
           - |
+            # The qlever CLI echoes the commands it runs, access token included, and this
+            # output ends up in Loki. Pipe every qlever command through redact.
+            redact() { sed -u "s/$ACCESS_TOKEN/[redacted]/g"; }
+
             # Trap SIGTERM so kubelet (and kill 1) can terminate PID 1 cleanly.
-            trap 'echo "SIGTERM received, stopping qlever-server"; qlever stop --access-token "$ACCESS_TOKEN" 2>/dev/null || true; exit 0' TERM INT
+            trap 'echo "SIGTERM received, stopping qlever-server"; qlever stop --access-token "$ACCESS_TOKEN" 2>/dev/null | redact; exit 0' TERM INT
 
             # Copy Qleverfile so it's not mounted in /data (avoids issues with rebuild-index moving files)
             cp /config/Qleverfile Qleverfile
 
             start_server() {
-              qlever start --access-token "$ACCESS_TOKEN"
-              qlever log &
+              qlever start --access-token "$ACCESS_TOKEN" 2>&1 | redact
+              qlever log 2>&1 | redact &
             }
 
             start_server
@@ -105,7 +109,7 @@ spec:
 
               echo "Starting index rebuild at $(date)"
               old_index_dir="previous.$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-              qlever rebuild-index --access-token "$ACCESS_TOKEN" --keep-old-index-dirs newest --old-index-dir "$old_index_dir"
+              qlever rebuild-index --access-token "$ACCESS_TOKEN" --keep-old-index-dirs newest --old-index-dir "$old_index_dir" 2>&1 | redact
 
               # rebuild-index may silently fail (https://github.com/ad-freiburg/qlever/issues/2806)
               # but still move the old index to $old_index_dir. Check and revert if needed.
