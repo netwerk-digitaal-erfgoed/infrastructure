@@ -34,10 +34,14 @@ spec:
             type: semver
             range: "~11.4"
         # The SURF default limit of 256Mi is too low: the container peaks at it and was OOM-killed.
+        # The default CPU limit of 250m is too low as well: crawler load kept it fully throttled,
+        # so the nightly dump overran the 30-minute Velero hook timeout.
         resources:
           requests:
+            cpu: 250m
             memory: 256Mi
           limits:
+            cpu: "1"
             memory: 512Mi
         env:
           - name: MYSQL_ROOT_PASSWORD
