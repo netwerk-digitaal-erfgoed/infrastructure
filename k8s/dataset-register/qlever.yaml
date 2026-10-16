@@ -131,7 +131,7 @@ spec:
                 echo "ERROR: rebuild failed at $(date), keeping the current index"
               else
                 echo "Rebuild complete at $(date), restarting server..."
-                qlever stop
+                qlever stop 2>&1 | redact
 
                 # Move the update-triples file out of the way because QLever doesn’t remove it.
                 # It goes with the index it applies to, so both are pruned together.
