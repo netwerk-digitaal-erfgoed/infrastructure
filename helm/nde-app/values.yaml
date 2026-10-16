@@ -11,6 +11,9 @@ workload:
   # new pod before stopping the old one. Recreate stops the old pod first, for a
   # release that the namespace’s resource quota has no room to run twice.
   strategy: ""
+  # Annotations on the pod template. Changing one restarts the pods, for example
+  # to pick up a rotated secret, which Kubernetes does not do by itself.
+  podAnnotations: {}
 
 # External service (reverse proxy to external IP, no containers needed)
 externalService:
