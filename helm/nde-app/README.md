@@ -157,13 +157,13 @@ Every hour SURF writes the state of Velero’s backups for our namespace to the 
 
 | Key | Contents |
 |---|---|
-| `summary` | One line on the latest backup, e.g. `OK, all 12 volume(s) backed up (3.4 GiB)`. |
-| `last-backup` | The latest backup’s name, start and end time and expiry, with status and size per volume. |
-| `restore-points` | One line per backup still kept, with how many volumes it holds. |
+| `summary` | One line on the latest backup, e.g. `OK, all 12 volume(s) backed up (3.4 GiB)` or `FAILED, 1 of 12 volume(s) not backed up`. |
+| `last-backup` | The latest backup’s name, start and end time and expiry, with status and size per volume. A volume Velero skipped is listed as `NOT BACKED UP`. |
+| `restore-points` | One line per backup still kept, `OK` or `FAILED`, with how many volumes it holds, e.g. `11/12`. |
 | `restores` | Restores SURF has run in our namespace, or `none`. |
 | `updated` | When the ConfigMap was last written. |
 
-A volume you annotated but that is missing from `last-backup` is not being backed up. SURF is alerted when a backup fails, but check the ConfigMap after adding `backup` to a release.
+A volume marked `NOT BACKED UP` was skipped, usually because its [dump](#databases-back-up-a-dump) failed or timed out; SURF can tell you which. The previous backup of that volume is still kept. SURF is alerted when a backup fails, but check the ConfigMap after adding `backup` to a release.
 
 ### When a file-level backup is safe
 
@@ -188,7 +188,7 @@ backup:
 The chart then:
 
 - adds a `dump` container to the pod, with the image and environment of the first container. The dump runs there, so its memory does not count against the database’s limit; the command reaches the database at `127.0.0.1`.
-- has Velero run the command in that container just before each backup, with a [pre-backup hook](https://velero.io/docs/v1.17/backup-hooks/). The output goes to a temporary file that replaces `/backup/dump` only when the command succeeds, so a failed dump leaves the previous one in place and fails the backup.
+- has Velero run the command in that container just before each backup, with a [pre-backup hook](https://velero.io/docs/v1.17/backup-hooks/). The output goes to a temporary file that replaces `/backup/dump` only when the command succeeds, so a failed dump leaves the previous one in place and fails the backup. The hook times out after 30 minutes. A database that is short on CPU can slowly creep past that limit, so a dump that keeps getting slower calls for a higher CPU limit on the database container.
 - stores the dump on a volume of its own, `<release>-dump`, and backs up only that volume. `size` must fit two dumps.
 
 The other dump commands in use are `mariadb-dump -h 127.0.0.1 -u "$MARIADB_USER" -p"$MARIADB_PASSWORD" --single-transaction "$MARIADB_DATABASE"` and `mongodump --archive --gzip --quiet`.
