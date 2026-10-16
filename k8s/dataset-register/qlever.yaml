@@ -19,6 +19,9 @@ spec:
     workload:
       type: statefulset
       podManagementPolicy: OrderedReady
+      # Bump to restart the pods after rotating the dataset-register-qlever secret.
+      podAnnotations:
+        secret-rotated-at: "2026-10-16"
 
     backup:
       enabled: true
