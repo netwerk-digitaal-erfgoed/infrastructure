@@ -38,7 +38,7 @@ spec:
         # automation moves the tag to every new build of the DKG main branch
         # within minutes; to hold or roll back a version, remove the marker or
         # suspend the ImagePolicy first, or Flux overwrites a hand-edited tag.
-        image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph:20261015191244-b63b400 # {"$imagepolicy": "nde:dataset-knowledge-graph"}
+        image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph:20261016044421-e9a1a69 # {"$imagepolicy": "nde:dataset-knowledge-graph"}
         env:
           # QLever runs in the qlever sidecar below, with a memory limit of its
           # own: a dump that runs it out of memory restarts only the sidecar and
@@ -93,7 +93,7 @@ spec:
             image: ghcr.io/ldelements/task-runner-http:0.1.0 # {"$imagepolicy": "nde:dataset-knowledge-graph-task-agent"}
             command: ['cp', '/task-agent', '/agent/task-agent']
             volumeMounts:
-              - { name: task-agent, mountPath: /agent }
+              - {name: task-agent, mountPath: /agent}
           - name: qlever
             # The QLever version @lde/sparql-qlever is tested against. This,
             # not QLEVER_IMAGE in the DKG repository’s .env (local Docker-mode
@@ -124,10 +124,10 @@ spec:
                 cpu: "6"
                 memory: 22Gi
             volumeMounts:
-              - { name: task-agent, mountPath: /agent }
+              - {name: task-agent, mountPath: /agent}
               # The same path as in the pipeline container: the importer refers
               # to downloaded files by path.
-              - { name: imports, mountPath: /app/imports }
+              - {name: imports, mountPath: /app/imports}
         volumes:
           - name: task-agent
             emptyDir: {}
