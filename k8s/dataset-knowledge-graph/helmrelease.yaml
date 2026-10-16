@@ -38,7 +38,7 @@ spec:
         # automation moves the tag to every new build of the DKG main branch
         # within minutes; to hold or roll back a version, remove the marker or
         # suspend the ImagePolicy first, or Flux overwrites a hand-edited tag.
-        image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph:20261016044421-e9a1a69 # {"$imagepolicy": "nde:dataset-knowledge-graph"}
+        image: ghcr.io/netwerk-digitaal-erfgoed/dataset-knowledge-graph:20261016044740-8317af4 # {"$imagepolicy": "nde:dataset-knowledge-graph"}
         env:
           # QLever runs in the qlever sidecar below, with a memory limit of its
           # own: a dump that runs it out of memory restarts only the sidecar and
