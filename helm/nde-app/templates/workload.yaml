@@ -33,6 +33,9 @@ spec:
   template:
     metadata:
       annotations:
+      {{- with .Values.workload.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- if .Values.configMaps }}
         # https://v3.helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments
         checksum/config: {{ toYaml .Values.configMaps | sha256sum }}

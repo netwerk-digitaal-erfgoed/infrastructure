@@ -15,6 +15,9 @@ spec:
   values:
     workload:
       replicas: 2
+      # Bump to restart the pods after rotating the dataset-register-qlever secret.
+      podAnnotations:
+        secret-rotated-at: "2026-10-16"
     containers:
       - name: app
         image:
