@@ -19,7 +19,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-status
-          tag: 20261014135610-c2546c8 # {"$imagepolicy": "nde:network-of-terms-status:tag"}
+          tag: 20261019102812-f8a68c3 # {"$imagepolicy": "nde:network-of-terms-status:tag"}
         port: 3000
         # Polling all sources at once briefly needs more than SURF’s default limit of 250m.
         resources:
