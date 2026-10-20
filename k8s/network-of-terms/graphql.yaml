@@ -19,7 +19,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-graphql
-          tag: 20261019102812-f8a68c3 # {"$imagepolicy": "nde:network-of-terms-graphql:tag"}
+          tag: 20261020222307-40b561f # {"$imagepolicy": "nde:network-of-terms-graphql:tag"}
         port: 3123
         env:
           - name: GTAA_CREDENTIALS
