@@ -16,6 +16,9 @@ spec:
     workload:
       type: statefulset
       podManagementPolicy: OrderedReady
+      # Temporarily disabled because of the PHP RCEs CVE-2026-109618 and CVE-2026-109619;
+      # meanwhile dataset-register-browser redirects / to the search page.
+      replicas: 0
     containers:
       - name: nginx
         image:
@@ -25,59 +28,14 @@ spec:
         volumeMounts:
           - mountPath: /datasetdescriptions
             name: data
-          - name: nginx-config
-            mountPath: /etc/nginx/conf.d
-      # The PHP-FPM container is temporarily removed because of the PHP RCEs
-      # CVE-2026-109618 and CVE-2026-109619. Restore it together with the image’s
-      # own nginx config (drop the nginx-config mount above).
-      # - name: php
-      #   image:
-      #     repository: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php-fpm
-      #     tag: 20261007113126-c98f83e # {"$imagepolicy": "nde:dataset-register-demo-php:tag"}
-      #   port: 9000
-      #   volumeMounts:
-      #     - mountPath: /datasetdescriptions
-      #       name: data
-    volumes:
-      - name: nginx-config
-        configMap:
-          name: dataset-register-demo-nginx
-    configMaps:
-      # Replaces the image’s default.conf while PHP is disabled: the home page
-      # redirects to the search page in the dataset register browser, static
-      # assets are still served, and PHP pages return 503.
-      - name: nginx
-        data:
-          default.conf: |
-            server {
-              listen 80;
-              root /web;
-              server_tokens off;
-              absolute_redirect off;
-
-              add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-              add_header X-Content-Type-Options "nosniff" always;
-              add_header X-Frame-Options "SAMEORIGIN" always;
-              add_header Content-Security-Policy "frame-ancestors 'self'" always;
-              add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-
-              location = / {
-                return 302 /datasets;
-              }
-
-              location = /index.php {
-                return 302 /datasets;
-              }
-
-              location ~ \.php$ {
-                return 503;
-              }
-
-              location /.well-known/api-catalog {
-                types { } default_type "application/linkset+json";
-                try_files $uri/linkset.json =404;
-              }
-            }
+      - name: php
+        image:
+          repository: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php-fpm
+          tag: 20261007113126-c98f83e # {"$imagepolicy": "nde:dataset-register-demo-php:tag"}
+        port: 9000
+        volumeMounts:
+          - mountPath: /datasetdescriptions
+            name: data
     ingresses:
       - hosts:
           - datasetregister.netwerkdigitaalerfgoed.nl

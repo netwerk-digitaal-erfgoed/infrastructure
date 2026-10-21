@@ -96,3 +96,15 @@ spec:
             pathType: Prefix
           - path: /validate(/|$)(.*)
             pathType: ImplementationSpecific
+      # Temporary while dataset-register-demo (PHP) is scaled to 0 because of the
+      # PHP RCEs CVE-2026-109618 and CVE-2026-109619: redirect the home page to the
+      # search page. The priority beats the demo’s catch-all PathPrefix(`/`) rule.
+      - name: root-redirect
+        hosts:
+          - datasetregister.netwerkdigitaalerfgoed.nl
+        annotations:
+          traefik.ingress.kubernetes.io/router.middlewares: nde-dataset-register-root-redirect@kubernetescrd
+          traefik.ingress.kubernetes.io/router.priority: "1000"
+        paths:
+          - path: /
+            pathType: Exact
