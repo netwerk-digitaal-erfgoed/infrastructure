@@ -17,8 +17,7 @@ spec:
     workload:
       type: statefulset
       podManagementPolicy: OrderedReady
-      # Temporarily disabled because of the PHP RCEs CVE-2026-109618 and CVE-2026-109619.
-      replicas: 0
+
     backup:
       enabled: true
     containers:

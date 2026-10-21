@@ -96,14 +96,3 @@ spec:
             pathType: Prefix
           - path: /validate(/|$)(.*)
             pathType: ImplementationSpecific
-      # Temporary while dataset-register-demo (PHP) is scaled to 0 because of the
-      # PHP RCEs CVE-2026-109618 and CVE-2026-109619: redirect the home page to the
-      # search page. The cluster’s Traefik reads NGINX annotations, not traefik.* ones.
-      - name: root-redirect
-        hosts:
-          - datasetregister.netwerkdigitaalerfgoed.nl
-        annotations:
-          nginx.ingress.kubernetes.io/temporal-redirect: https://datasetregister.netwerkdigitaalerfgoed.nl/datasets
-        paths:
-          - path: /
-            pathType: Exact
