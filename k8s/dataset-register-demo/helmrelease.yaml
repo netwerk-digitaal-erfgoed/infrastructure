@@ -16,6 +16,9 @@ spec:
     workload:
       type: statefulset
       podManagementPolicy: OrderedReady
+      # Temporarily disabled because of the PHP RCEs CVE-2026-109618 and CVE-2026-109619;
+      # meanwhile dataset-register-browser redirects / to the search page.
+      replicas: 0
     containers:
       - name: nginx
         image:
