@@ -17,14 +17,13 @@ spec:
     workload:
       type: statefulset
       podManagementPolicy: OrderedReady
-
     backup:
       enabled: true
     containers:
       - name: nginx
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-nginx
-          tag: 20261021184035-c57a79d # {"$imagepolicy": "nde:omeka-s-nginx:tag"}
+          tag: 20261021190214-cfcc0fa # {"$imagepolicy": "nde:omeka-s-nginx:tag"}
         port: 80
         env:
           - name: RESTART_TRIGGER
