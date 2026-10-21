@@ -37,11 +37,16 @@ spec:
           - mountPath: /datasetdescriptions
             name: data
     ingresses:
-      - hosts:
-          - datasetregister.netwerkdigitaalerfgoed.nl
+      # Temporarily removed while the demo is scaled to 0: its catch-all route
+      # shadows the home page redirect in dataset-register-browser. When restoring,
+      # also rename the next ingress back to “redirect” and drop its tls block.
+      # - hosts:
+      #     - datasetregister.netwerkdigitaalerfgoed.nl
+      #   tls:
+      #     enabled: false
+      - name: dataset-register-demo-redirect
         tls:
           enabled: false
-      - name: redirect
         hosts:
           - demo.netwerkdigitaalerfgoed.nl
         annotations:
