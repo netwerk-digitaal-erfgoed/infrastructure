@@ -31,7 +31,7 @@ spec:
       - name: app
         image:
           repository: nginx
-          tag: "1.31.7-alpine" # {"$imagepolicy": "nde:files:tag"}
+          tag: "1.31.8-alpine" # {"$imagepolicy": "nde:files:tag"}
         port: 80
         flux:
           policy:
