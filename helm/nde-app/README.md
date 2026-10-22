@@ -8,6 +8,7 @@ Generic Helm chart for deploying NDE applications. It supports:
 - Persistent volumes
 - [ConfigMaps](#configmap)
 - [CronJobs](#cronjobs), with init containers and sidecars
+- [Jobs](#jobs) that run before a release goes live
 - [CNAME DNS records](#cname-dns-records)
 - [Volume backups](#velero-volume-backups)
 
@@ -52,6 +53,35 @@ Two related settings:
 
 - `cronjobs[].restartPolicy` defaults to `OnFailure`, which restarts a failed container in the same pod. Set `Never` when the job controls a sidecar: a restarted job container would find the sidecar still running what the failed one started.
 - `cronjobs[].automountServiceAccountToken: false` leaves the pod without a Kubernetes API token, for jobs that never call the API.
+
+## Jobs
+
+`jobs[]` runs a Job before the rest of the release is installed or upgraded, the way a database migration runs before the new application version starts. Each entry is a [Helm hook](https://helm.sh/docs/topics/charts_hooks/): Helm creates the Job, waits for it to succeed, and only then applies the release’s other resources. If the Job fails, the upgrade fails and everything else stays at the previous version.
+
+```yaml
+jobs:
+  - name: index
+    image: ghcr.io/netwerk-digitaal-erfgoed/indexer:20261022120000-abc1234 # {"$imagepolicy": "nde:my-app-index:tag"}
+    backoffLimit: 0
+    restartPolicy: Never
+```
+
+A Job takes every `cronjobs[]` setting except the schedule ones, including init containers and native sidecars. Three settings control the hook:
+
+- `hook` defaults to `pre-install,pre-upgrade`. Any [hook](https://helm.sh/docs/topics/charts_hooks/#the-available-hooks) works, for example `post-upgrade` for a Job that needs the new version running.
+- `hookDeletePolicy` defaults to `before-hook-creation`: the previous Job stays until just before its successor is created, so its logs remain readable.
+- `hookWeight` orders a release’s hooks, lowest first.
+
+Jobs are always hooks, because a Job’s pod template is immutable: a plain Job in a release would fail every upgrade that changes it.
+
+Things to plan for:
+
+- **The Job runs before the rest of the release exists.** On the first install, the release’s PVCs, ConfigMaps and Services are not there yet; on an upgrade, the Job sees the previous version of them. Put what the Job needs in a separate HelmRelease and give this one `dependsOn` on it.
+- **Helm waits within the HelmRelease’s `spec.timeout`**, five minutes by default. Raise it above the Job’s longest run, or the upgrade fails while the Job is still working.
+- **Every upgrade runs the Job**, including one that only changes an environment variable on another container.
+- **Set `backoffLimit: 0`, or `1` to absorb a network blip.** Kubernetes retries a failed Job six times by default, with growing delays, and the upgrade waits through every attempt. A Job that keeps failing then runs into `spec.timeout`, so the upgrade reports a timeout instead of the Job’s error while the Job retries on. Leave retrying to Flux: the HelmRelease’s `upgrade.remediation.retries` reruns the whole upgrade, hook included.
+
+A Job and a CronJob that run the same image can share one Flux image policy: give both the same `flux.name`, and the chart renders that policy once.
 
 ## StatefulSets
 

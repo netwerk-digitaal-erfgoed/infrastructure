@@ -21,16 +21,23 @@ spec:
 {{- end }}
 {{- end }}
 {{- /*
-  CronJobs carry a flat `image: repo:tag` string (not the containers' structured
-  image.repository/tag), so derive the repository by trimming the trailing tag.
-  Without this a cronjob's `# {"$imagepolicy": …}` marker references a policy that
-  never gets generated, and its image freezes at whatever tag was committed.
+  CronJobs and Jobs carry a flat `image: repo:tag` string (not the containers'
+  structured image.repository/tag), so derive the repository by trimming the
+  trailing tag. Without this a job's `# {"$imagepolicy": …}` marker references a
+  policy that never gets generated, and its image freezes at whatever tag was
+  committed. A CronJob and a Job that run the same image can share one policy
+  through flux.name, so each name is rendered once.
 */ -}}
-{{- range .Values.cronjobs }}
+{{- $rendered := dict }}
+{{- range concat .Values.cronjobs .Values.jobs }}
 {{- $fluxEnabled := ne ((.flux).enabled) false }}
-{{- if and $fluxEnabled .image }}
 {{- $fluxName := include "nde-app.fluxName" (list ((.flux).name) (include "nde-app.fullname" $) .name) }}
-{{- $repository := regexReplaceAll ":[^:/]+$" .image "" }}
+{{- $repository := regexReplaceAll ":[^:/]+$" (.image | default "") "" }}
+{{- if and $fluxEnabled .image (hasKey $rendered $fluxName) (ne (get $rendered $fluxName) $repository) }}
+{{- fail (printf "flux.name %s is shared by images from %s and %s; one policy can follow only one repository" $fluxName (get $rendered $fluxName) $repository) }}
+{{- end }}
+{{- if and $fluxEnabled .image (not (hasKey $rendered $fluxName)) }}
+{{- $_ := set $rendered $fluxName $repository }}
 ---
 apiVersion: image.toolkit.fluxcd.io/v1beta2
 kind: ImageRepository
