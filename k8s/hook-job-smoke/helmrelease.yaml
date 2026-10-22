@@ -21,11 +21,13 @@ spec:
     configMaps:
       - name: step
         data:
-          step: "2"
+          step: "3"
     jobs:
       - name: hook
         image: busybox:1.37
-        command: ["sh", "-c", "echo hook failing for step 2; exit 1"]
+        command: ["sh", "-c", "echo hook ran for step 3; exit 0"]
+        # Delete the Job once it succeeds, so removing the release leaves nothing behind.
+        hookDeletePolicy: before-hook-creation,hook-succeeded
         backoffLimit: 0
         restartPolicy: Never
         automountServiceAccountToken: false
