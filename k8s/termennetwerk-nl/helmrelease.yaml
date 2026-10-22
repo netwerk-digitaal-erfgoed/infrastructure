@@ -23,7 +23,7 @@ spec:
       - name: app
         image:
           repository: nginx
-          tag: "1.31.7-alpine" # {"$imagepolicy": "nde:termennetwerk-nl:tag"}
+          tag: "1.31.8-alpine" # {"$imagepolicy": "nde:termennetwerk-nl:tag"}
         port: 80
         flux:
           policy:
