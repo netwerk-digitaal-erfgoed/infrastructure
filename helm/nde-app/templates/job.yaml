@@ -1,0 +1,22 @@
+{{- /*
+  Every Job is a Helm hook. A Job’s pod template is immutable, so a plain Job in
+  the release would fail every upgrade that changes it; Helm instead deletes the
+  previous hook Job (before-hook-creation) and creates it anew.
+*/ -}}
+{{- range .Values.jobs }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "nde-app.fullname" $ }}-{{ required "jobs[].name is required" .name }}
+  labels:
+    {{- include "nde-app.labels" $ | nindent 4 }}
+  annotations:
+    helm.sh/hook: {{ .hook | default "pre-install,pre-upgrade" }}
+    helm.sh/hook-delete-policy: {{ .hookDeletePolicy | default "before-hook-creation" }}
+    {{- with .hookWeight }}
+    helm.sh/hook-weight: {{ . | quote }}
+    {{- end }}
+spec:
+  {{- include "nde-app.jobSpec" (list $ . "jobs") | trim | nindent 2 }}
+{{- end }}

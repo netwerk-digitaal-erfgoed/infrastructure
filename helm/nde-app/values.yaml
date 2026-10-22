@@ -147,6 +147,16 @@ cronjobs: []
   #   automountServiceAccountToken: false  # Optional: leave the pod without an API token
   #   initContainers: []           # Optional: init containers and native sidecars, as Kubernetes takes them
 
+# Jobs, run as Helm hooks: by default before the rest of the release is installed
+# or upgraded, which then waits for them to succeed. They take every cronjobs[]
+# setting except the schedule ones (schedule, timeZone, concurrencyPolicy, suspend).
+jobs: []
+  # - name: migrate          # Required, used in Job name
+  #   image: alpine:latest
+  #   hook: pre-install,pre-upgrade             # Optional, the default
+  #   hookDeletePolicy: before-hook-creation    # Optional, the default
+  #   hookWeight: 0                             # Optional: order among this release’s hooks
+
 # CNAME DNS records (via ExternalDNS); an IP address as target yields an A record
 cnames: []
   # - hostname: alias.example.com

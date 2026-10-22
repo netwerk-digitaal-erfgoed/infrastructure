@@ -56,6 +56,93 @@ Args: (fluxNameOverride, fullname, containerName)
 {{- end }}
 
 {{/*
+Render a Job spec – retries, deadline and pod template – from a cronjobs[] or jobs[] entry.
+Args: (root, job, valuesKey); valuesKey names the list in error messages.
+backoffLimit is checked with hasKey, not with: 0 is a meaningful limit that `with` would drop.
+*/}}
+{{- define "nde-app.jobSpec" -}}
+{{- $root := index . 0 -}}
+{{- $job := index . 1 -}}
+{{- $key := index . 2 -}}
+{{- if hasKey $job "backoffLimit" }}
+backoffLimit: {{ $job.backoffLimit }}
+{{- end }}
+{{- with $job.activeDeadlineSeconds }}
+activeDeadlineSeconds: {{ . }}
+{{- end }}
+template:
+  metadata:
+    {{- if $root.Values.backup.enabled }}
+    {{- $backupVols := include "nde-app.backupVolumeNames.cronjob" (list $root $job) }}
+    {{- if $backupVols }}
+    annotations:
+      backup.velero.io/backup-volumes: {{ $backupVols | quote }}
+    {{- end }}
+    {{- end }}
+    labels:
+      {{- include "nde-app.selectorLabels" $root | nindent 6 }}
+      app: {{ include "nde-app.fullname" $root }}-{{ $job.name }}
+  spec:
+    {{- if hasPrefix "ghcr.io" $job.image }}
+    imagePullSecrets:
+      - name: ghcr
+    {{- end }}
+    {{- with $job.priorityClassName }}
+    priorityClassName: {{ . }}
+    {{- end }}
+    {{- with $job.securityContext }}
+    securityContext:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with $job.nodeSelector }}
+    nodeSelector:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with $job.affinity }}
+    affinity:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- if hasKey $job "automountServiceAccountToken" }}
+    automountServiceAccountToken: {{ $job.automountServiceAccountToken }}
+    {{- end }}
+    {{- with $job.initContainers }}
+    initContainers:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    containers:
+      - name: {{ $job.name }}
+        image: {{ required (printf "%s[].image is required" $key) $job.image }}
+        {{- with $job.imagePullPolicy }}
+        imagePullPolicy: {{ . }}
+        {{- end }}
+        {{- with $job.command }}
+        command:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with $job.args }}
+        args:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with $job.env }}
+        env:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with $job.volumeMounts }}
+        volumeMounts:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with $job.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+    {{- with $job.volumes }}
+    volumes:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    restartPolicy: {{ $job.restartPolicy | default "OnFailure" }}
+{{- end }}
+
+{{/*
 Return the Velero pre-backup hook command, as a JSON array, that writes the dump.
 The dump goes to a temporary file first, so a failed dump leaves the previous one in place.
 */}}

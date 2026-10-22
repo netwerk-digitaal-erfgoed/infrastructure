@@ -34,14 +34,17 @@ spec:
 {{- end }}
 {{- end }}
 {{- /*
-  CronJobs need the same ImagePolicy as containers so their `# {"$imagepolicy": …}`
-  markers resolve; see flux-image-repository.yaml. The spec mirrors the container
+  CronJobs and Jobs need the same ImagePolicy as containers so their
+  `# {"$imagepolicy": …}` markers resolve; see flux-image-repository.yaml, which
+  also explains why each name is rendered once. The spec mirrors the container
   block above (it depends only on .flux and $fluxName, not on the workload kind).
 */ -}}
-{{- range .Values.cronjobs }}
+{{- $rendered := dict }}
+{{- range concat .Values.cronjobs .Values.jobs }}
 {{- $fluxEnabled := ne ((.flux).enabled) false }}
-{{- if and $fluxEnabled .image }}
 {{- $fluxName := include "nde-app.fluxName" (list ((.flux).name) (include "nde-app.fullname" $) .name) }}
+{{- if and $fluxEnabled .image (not (hasKey $rendered $fluxName)) }}
+{{- $_ := set $rendered $fluxName true }}
 {{- $policyType := (((.flux).policy).type) | default "numerical" }}
 ---
 apiVersion: image.toolkit.fluxcd.io/v1beta2
