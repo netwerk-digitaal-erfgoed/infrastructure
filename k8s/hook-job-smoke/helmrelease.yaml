@@ -21,11 +21,11 @@ spec:
     configMaps:
       - name: step
         data:
-          step: "1"
+          step: "2"
     jobs:
       - name: hook
         image: busybox:1.37
-        command: ["sh", "-c", "echo hook ran for step 1; exit 0"]
+        command: ["sh", "-c", "echo hook failing for step 2; exit 1"]
         backoffLimit: 0
         restartPolicy: Never
         automountServiceAccountToken: false
