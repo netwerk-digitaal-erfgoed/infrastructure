@@ -40,7 +40,7 @@ spec:
       - name: php-fpm
         image:
           repository: matomo
-          tag: "5.14.0-fpm-alpine" # {"$imagepolicy": "nde:matomo-php-fpm:tag"}
+          tag: "5.14.2-fpm-alpine" # {"$imagepolicy": "nde:matomo-php-fpm:tag"}
           # Docker rebuilds this tag in place when PHP gets a security fix (as for
           # CVE-2026-109618 and CVE-2026-109619), so never run a node’s cached copy.
           pullPolicy: Always
