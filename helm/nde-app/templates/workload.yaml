@@ -62,6 +62,11 @@ spec:
           {{- $needsGhcr = true }}
         {{- end }}
       {{- end }}
+      {{- range .Values.initContainers }}
+        {{- if hasPrefix "ghcr.io" .image }}
+          {{- $needsGhcr = true }}
+        {{- end }}
+      {{- end }}
       {{- if or .Values.imagePullSecrets $needsGhcr }}
       imagePullSecrets:
         {{- if .Values.imagePullSecrets }}
@@ -87,6 +92,10 @@ spec:
       {{- end }}
       {{- with .Values.affinity }}
       affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
