@@ -48,6 +48,9 @@ containers: []
 #         type: numerical  # or "semver"
 #         range: ""  # For semver, e.g. '~1.0' or '^1.0.0'
 
+# Init containers, passed to the pod as Kubernetes takes them (no image automation)
+initContainers: []
+
 # Image pull secrets (ghcr.io images auto-add ghcr secret)
 imagePullSecrets: []
 

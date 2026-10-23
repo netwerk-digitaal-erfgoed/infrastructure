@@ -3,7 +3,7 @@
 Generic Helm chart for deploying NDE applications. It supports:
 
 - Deployments and StatefulSets
-- Multi-container pods
+- Multi-container pods, with [init containers](#init-containers)
 - Ingress with automatic TLS certificates and HTTP-to-HTTPS redirects
 - Persistent volumes
 - [ConfigMaps](#configmap)
@@ -44,6 +44,10 @@ containers:
         type: semver
         range: "~10.11"  # Only patch updates
 ```
+
+## Init containers
+
+`initContainers` is passed to the Deployment’s or StatefulSet’s pod as is. Kubernetes runs each init container to completion, in order, before it starts the containers in `containers`, and the pod only becomes ready, and receives traffic, after that. An init container that fails is restarted until it succeeds, so the application doesn’t start until then. Flux image automation doesn’t apply to init containers: pin their image tag.
 
 ## CronJobs
 
