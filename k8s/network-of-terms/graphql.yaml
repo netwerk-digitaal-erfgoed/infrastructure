@@ -37,14 +37,15 @@ spec:
           httpGet:
             path: /graphiql
         # SURF’s default limit of 250m CPU throttled every query: each one parses RDF
-        # from many sources at once.
+        # from many sources at once. Node sizes its heap at about half the memory limit;
+        # at 512Mi, an all-sources search ran the heap out of memory.
         resources:
           requests:
             cpu: "250m"
-            memory: 256Mi
+            memory: 512Mi
           limits:
             cpu: "2"
-            memory: 512Mi
+            memory: 1Gi
     # The reconciliation release routes /reconcile, /preview and /extend on the same host.
     ingresses:
       - hosts:
