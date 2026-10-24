@@ -26,82 +26,6 @@ spec:
     backup:
       enabled: true
 
-    # One-off for the move to an index format of September 2026: the app container’s
-    # qlever-upgrade-index refuses an index with persisted updates, and only the old
-    # binary can fold them into the index. The pod is not ready while this runs, so
-    # no updates arrive in between. Does nothing once the index is upgraded; remove it
-    # after the upgrade.
-    initContainers:
-      - name: fold-updates
-        image: adfreiburg/qlever:commit-4d113e0
-        env:
-          - name: ACCESS_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: dataset-register-qlever
-                key: access-token
-        resources:
-          requests:
-            cpu: "2"
-            memory: 4Gi
-          limits:
-            cpu: "2"
-            memory: 12Gi
-        volumeMounts:
-          - name: data
-            mountPath: /data
-          - name: config
-            mountPath: /config/Qleverfile
-            subPath: Qleverfile
-        workingDir: /data
-        command:
-          - sh
-          - -c
-          - |
-            set -e
-            redact() { sed -u "s/$ACCESS_TOKEN/[redacted]/g"; }
-
-            if ! grep -Eq '"pull-request-number": *1572\b' dataset-register.meta-data.json; then
-              echo "Index is not in the old format, nothing to fold"
-              exit 0
-            fi
-
-            # Keep a copy of the index as it was before the upgrade.
-            if ! ls -d pre-upgrade.* >/dev/null 2>&1; then
-              # Copy to a temporary name first, so an interrupted copy isn’t taken for a backup.
-              backup_dir="pre-upgrade.$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-              rm -rf backup.tmp
-              mkdir backup.tmp
-              cp -a dataset-register.* backup.tmp/
-              mv backup.tmp "$backup_dir"
-              echo "Copied the index to $backup_dir"
-            fi
-
-            if [ ! -f dataset-register.update-triples ]; then
-              echo "No persisted updates to fold"
-              exit 0
-            fi
-
-            cp /config/Qleverfile Qleverfile
-            qlever start --access-token "$ACCESS_TOKEN" 2>&1 | redact
-            old_index_dir="previous.$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            qlever rebuild-index --access-token "$ACCESS_TOKEN" --keep-old-index-dirs newest --old-index-dir "$old_index_dir" 2>&1 | redact
-            qlever stop 2>&1 | redact
-
-            # Same checks as the nightly rebuild (https://github.com/ad-freiburg/qlever/issues/2806).
-            if [ ! -f dataset-register.meta-data.json ]; then
-              echo "ERROR: index missing after rebuild, restoring from $old_index_dir"
-              mv "$old_index_dir"/dataset-register.* .
-              mv "$old_index_dir"/Qleverfile . 2>/dev/null || true
-              exit 1
-            fi
-            if [ ! -d "$old_index_dir" ]; then
-              echo "ERROR: rebuild failed, the index still has its persisted updates"
-              exit 1
-            fi
-            mv dataset-register.update-triples "$old_index_dir"/
-            echo "Folded the persisted updates into the index"
-
     containers:
       - name: app
         image:
@@ -168,17 +92,6 @@ spec:
               qlever start --access-token "$ACCESS_TOKEN" 2>&1 | redact
               qlever log 2>&1 | redact &
             }
-
-            # The fold-updates init container has left the index without persisted updates.
-            if grep -Eq '"pull-request-number": *1572\b' dataset-register.meta-data.json; then
-              echo "Upgrading the index to the current format at $(date)"
-              qlever-upgrade-index dataset-register 2>&1 | redact
-              # A failed upgrade leaves the index untouched; the new server can’t load it.
-              if grep -Eq '"pull-request-number": *1572\b' dataset-register.meta-data.json; then
-                echo "FATAL: index upgrade failed at $(date)"
-                exit 1
-              fi
-            fi
 
             start_server
 
