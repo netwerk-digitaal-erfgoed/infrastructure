@@ -83,6 +83,28 @@ spec:
         # emptyDir, so the sidecar runs the unmodified upstream QLever image.
         # See https://ldelements.org/reference/task-runner-http#kubernetes.
         initContainers:
+          # One-off for the index format QLever changed on 1 September 2026: the
+          # importer reuses a dataset’s cached index while its data is unchanged,
+          # and the qlever sidecar can’t load one built before that date. Removing
+          # the cache marker makes the importer build the index again. Remove
+          # after the upgrade.
+          - name: invalidate-old-indexes
+            image: adfreiburg/qlever:commit-6fd6171141
+            command:
+              - sh
+              - -c
+              - |
+                find /app/imports -name data.meta-data.json \
+                  -exec grep -lE '"pull-request-number": *1572\b' {} + |
+                  while read -r metadata; do
+                    cache_info="$(dirname "$metadata")/data.cache-info.json"
+                    if [ -f "$cache_info" ]; then
+                      rm "$cache_info"
+                      echo "Invalidated the cached index in $(dirname "$metadata")"
+                    fi
+                  done
+            volumeMounts:
+              - {name: imports, mountPath: /app/imports}
           - name: copy-task-agent
             # Flux moves this tag to new patch releases of the agent; see
             # task-agent-image.yaml for why only patches. Its minor must match
@@ -98,7 +120,7 @@ spec:
             # The QLever version @lde/sparql-qlever is tested against. This,
             # not QLEVER_IMAGE in the DKG repository’s .env (local Docker-mode
             # runs only), is the QLever production runs.
-            image: adfreiburg/qlever:commit-a14e0a0
+            image: adfreiburg/qlever:commit-6fd6171141
             restartPolicy: Always
             command: ['/agent/task-agent']
             # Kubelet’s own probes connect to the pod IP, and the agent only
