@@ -46,7 +46,7 @@ spec:
       - name: app
         image:
           repository: adfreiburg/qlever
-          tag: commit-4d113e0
+          tag: commit-6fd6171141
         flux:
           enabled: false
         port: 7001
@@ -159,6 +159,12 @@ spec:
               echo "No index yet, building initial index at $(date)"
               seed_if_empty
               qlever index || echo "Initial index build failed"
+            # One-off for the index format QLever changed on 1 September 2026: the
+            # server can’t load an index built before it. Remove after the upgrade.
+            elif grep -Eq '"pull-request-number": *1572\b' index.meta-data.json; then
+              echo "Index is in the old format, rebuilding at $(date)"
+              seed_if_empty
+              qlever index --overwrite-existing || echo "Index rebuild failed"
             fi
 
             start_server
