@@ -18,7 +18,11 @@ spec:
         size: 500Gi
     cronjobs:
       - name: app
-        schedule: "0 2 * * *"
+        # Not between 02:00 and 03:00: the clocks skip that hour in March and
+        # repeat it in October, when a second run would replace the first. Not
+        # at 01:00 either, when the serving QLever rebuilds (qlever.yaml) and
+        # the skip gate can’t reach it.
+        schedule: "0 3 * * *"
         timeZone: Europe/Amsterdam
         # Replace, not Forbid: if a previous run is still going when the next
         # one is due, terminate it and start fresh rather than skipping the new
