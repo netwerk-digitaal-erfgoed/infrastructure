@@ -159,12 +159,6 @@ spec:
               echo "No index yet, building initial index at $(date)"
               seed_if_empty
               qlever index || echo "Initial index build failed"
-            # One-off for the index format QLever changed on 1 September 2026: the
-            # server can’t load an index built before it. Remove after the upgrade.
-            elif grep -Eq '"pull-request-number": *1572\b' index.meta-data.json; then
-              echo "Index is in the old format, rebuilding at $(date)"
-              seed_if_empty
-              qlever index --overwrite-existing || echo "Index rebuild failed"
             fi
 
             start_server
@@ -339,8 +333,6 @@ spec:
             MEMORY_FOR_QUERIES = 6G
             CACHE_MAX_SIZE     = 2G
             TIMEOUT            = 120s
-            # Read-only: no updates are ever applied to this store.
-            PERSIST_UPDATES    = false
 
             [runtime]
             SYSTEM = native
