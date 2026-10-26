@@ -18,7 +18,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-persons-graphql
-          tag: 20261015102415-27ff4ab # {"$imagepolicy": "nde:network-of-persons-graphql:tag"}
+          tag: 20261026102752-23b0e36 # {"$imagepolicy": "nde:network-of-persons-graphql:tag"}
         port: 3123
         env:
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
