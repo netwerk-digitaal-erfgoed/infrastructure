@@ -87,6 +87,29 @@ spec:
         # emptyDir, so the sidecar runs the unmodified upstream QLever image.
         # See https://ldelements.org/reference/task-runner-http#kubernetes.
         initContainers:
+          # One-off for reading Schema.org’s JSON-LD context as the NDE context
+          # (netwerk-digitaal-erfgoed/dataset-knowledge-graph#561): the importer
+          # reuses a dump’s N-Quads conversion, and the index built from it, until
+          # the dump is downloaded again, so an unchanged JSON-LD dump would keep
+          # the string literals Schema.org’s own context produced. Removing both
+          # makes the next run convert and index every dump again. Remove after
+          # that run.
+          - name: clear-jsonld-conversions
+            image: adfreiburg/qlever:commit-6fd6171141
+            command:
+              - find
+              - /app/imports
+              - (
+              - -name
+              - '*.preprocessed.nq'
+              - -o
+              - -name
+              - data.cache-info.json
+              - )
+              - -print
+              - -delete
+            volumeMounts:
+              - {name: imports, mountPath: /app/imports}
           - name: copy-task-agent
             # Flux moves this tag to new patch releases of the agent; see
             # task-agent-image.yaml for why only patches. Its minor must match
