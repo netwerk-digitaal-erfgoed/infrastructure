@@ -18,7 +18,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-persons-reconciliation
-          tag: 20261026102751-23b0e36 # {"$imagepolicy": "nde:network-of-persons-reconciliation:tag"}
+          tag: 20261029102430-7e1c928 # {"$imagepolicy": "nde:network-of-persons-reconciliation:tag"}
         port: 3123
         env:
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
