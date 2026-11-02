@@ -1,0 +1,71 @@
+# Redirects statistieken.netwerkdigitaalerfgoed.nl to SURF’s Grafana, keeping
+# the path, so people have an NDE address for the dashboards.
+#
+# A 302 rather than a 301: the target belongs to SURF and may move, and
+# browsers cache a 301 indefinitely.
+#
+# The redirect runs in nginx rather than as an ingress annotation because
+# cert-manager adds its HTTP-01 challenge path to this ingress, and a redirect
+# annotation would redirect the challenge too.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: statistieken
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: nginx
+          tag: "1.31.8-alpine" # {"$imagepolicy": "nde:statistieken:tag"}
+        port: 80
+        flux:
+          policy:
+            type: semver
+            pattern: '^(?P<version>\d+\.\d+\.\d+)-alpine$'
+            extract: '$version'
+            range: "~1"
+        # Probe a path that does not redirect: the kubelet would otherwise
+        # follow the 302 to the external website.
+        livenessProbe:
+          httpGet:
+            path: /healthz
+        readinessProbe:
+          httpGet:
+            path: /healthz
+        volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/conf.d
+    volumes:
+      - name: nginx-config
+        configMap:
+          name: statistieken-nginx
+    configMaps:
+      - name: nginx
+        data:
+          default.conf: |
+            server {
+              listen 80 default_server;
+
+              location = /healthz {
+                access_log off;
+                return 200;
+              }
+
+              location / {
+                return 302 https://nde.monitoring.k8s.ms4.surfsara.nl$request_uri;
+              }
+            }
+    ingresses:
+      - hosts:
+          - statistieken.netwerkdigitaalerfgoed.nl
