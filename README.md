@@ -172,7 +172,7 @@ SURF manages the network, so the address can change; check it again before relyi
   Keep attribute values bounded: the Prometheus is shared with other tenants.
   Metrics from before the move to SURF on 29 September 2026 are archived in the private `metrics-archive` bucket of the [object store](#object-storage), whose README explains how to restore them. Daily totals of the application metrics are public at https://files.nde.nl/metrics/README.md.
 - **Logs**: Collected through [Loki](https://grafana.com/oss/loki/)
-- **Dashboard**: [Grafana](https://nde.monitoring.k8s.ms4.surfsara.nl) (behind login)
+- **Dashboard**: [Grafana](https://statistieken.netwerkdigitaalerfgoed.nl), which redirects to SURF’s Grafana (behind login)
 
 ## Additional services
 
