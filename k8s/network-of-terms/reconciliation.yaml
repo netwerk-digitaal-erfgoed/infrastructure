@@ -19,7 +19,7 @@ spec:
       - name: app
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/network-of-terms-reconciliation
-          tag: 20261105121534-28272a0 # {"$imagepolicy": "nde:network-of-terms-reconciliation:tag"}
+          tag: 20261105130107-3abff85 # {"$imagepolicy": "nde:network-of-terms-reconciliation:tag"}
         port: 3123
         env:
           - name: GTAA_CREDENTIALS
