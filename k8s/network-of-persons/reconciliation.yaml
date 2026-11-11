@@ -30,7 +30,7 @@ spec:
             value: 'true'
           # The preview links to the person’s own IRI: there is no lookup page for persons.
           - name: VIEW_URL_TEMPLATE
-            value: '{uri}'
+            value: '{+uri}'
         readinessProbe:
           httpGet:
             path: /reconcile
