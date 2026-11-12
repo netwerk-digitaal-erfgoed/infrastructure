@@ -54,3 +54,5 @@ spec:
             pathType: Prefix
           - path: /extend
             pathType: Prefix
+          - path: /suggest
+            pathType: Prefix
