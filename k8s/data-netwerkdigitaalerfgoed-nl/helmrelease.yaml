@@ -77,8 +77,8 @@ spec:
 
               location = /dataset-knowledge-graph {
                 add_header Vary Accept always;
-                # CONSTRUCT { ?s ?p ?o } WHERE { GRAPH <https://data.netwerkdigitaalerfgoed.nl/dkg/description> { ?s ?p ?o } }
-                return 303 $dkg_host/dataset-knowledge-graph?query=CONSTRUCT%20%7B%20%3Fs%20%3Fp%20%3Fo%20%7D%20WHERE%20%7B%20GRAPH%20%3Chttps%3A%2F%2Fdata.netwerkdigitaalerfgoed.nl%2Fdkg%2Fdescription%3E%20%7B%20%3Fs%20%3Fp%20%3Fo%20%7D%20%7D;
+                # CONSTRUCT { ?s ?p ?o } WHERE { GRAPH <https://data.netwerkdigitaalerfgoed.nl/dataset-knowledge-graph/description> { ?s ?p ?o } }
+                return 303 $dkg_host/dataset-knowledge-graph?query=CONSTRUCT%20%7B%20%3Fs%20%3Fp%20%3Fo%20%7D%20WHERE%20%7B%20GRAPH%20%3Chttps%3A%2F%2Fdata.netwerkdigitaalerfgoed.nl%2Fdataset-knowledge-graph%2Fdescription%3E%20%7B%20%3Fs%20%3Fp%20%3Fo%20%7D%20%7D;
               }
 
               location / {
