@@ -173,6 +173,9 @@ SURF manages the network, so the address can change; check it again before relyi
   Metrics from before the move to SURF on 29 September 2026 are archived in the private `metrics-archive` bucket of the [object store](#object-storage), whose README explains how to restore them. Daily totals of the application metrics are public at https://files.nde.nl/metrics/README.md.
 - **Logs**: Collected through [Loki](https://grafana.com/oss/loki/)
 - **Dashboard**: [Grafana](https://statistieken.netwerkdigitaalerfgoed.nl), which redirects to SURF’s Grafana (behind login)
+- **Alerting**: Grafana alert rules live in [`k8s/grafana-alerting`](k8s/grafana-alerting) and notify the Mattermost channel Storingen.
+  A CronJob applies them through Grafana’s provisioning API, which locks them in the Grafana UI, so change them here.
+  The application-log rule fires on any line an app logs at `error` or `fatal` (pino level 50/60): log a failing external system as `warn`.
 
 ## Additional services
 
