@@ -91,12 +91,12 @@ spec:
           - name: MM_FILESETTINGS_AMAZONS3ACCESSKEYID
             valueFrom:
               secretKeyRef:
-                name: s3
+                name: mattermost-s3
                 key: key
           - name: MM_FILESETTINGS_AMAZONS3SECRETACCESSKEY
             valueFrom:
               secretKeyRef:
-                name: s3
+                name: mattermost-s3
                 key: secret
     ingresses:
       - hosts:
