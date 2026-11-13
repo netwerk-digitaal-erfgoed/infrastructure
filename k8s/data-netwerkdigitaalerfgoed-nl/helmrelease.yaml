@@ -1,0 +1,90 @@
+# Makes IRIs under data.netwerkdigitaalerfgoed.nl dereference.
+#
+# https://data.netwerkdigitaalerfgoed.nl/dataset-knowledge-graph is the Dataset
+# Knowledge Graph’s dataset IRI and its registration URL in the Dataset Register.
+# It answers with a 303 to a fixed CONSTRUCT over the description graph the DKG
+# pipeline publishes after every run, so the description (and its dateModified)
+# changes without this IRI changing.
+#
+# The redirect runs in nginx rather than as an ingress annotation because it
+# negotiates on Accept, which the cluster’s Traefik cannot match on here: RDF
+# clients such as the Register get the CONSTRUCT result from the SPARQL endpoint,
+# browsers get the same query in the QLever UI. A client asking for RDF wins even
+# when it also accepts HTML, as rdf-dereference (used by the Register) does.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: data-netwerkdigitaalerfgoed-nl
+  namespace: nde
+spec:
+  serviceAccountName: nde
+  interval: 30m
+  chart:
+    spec:
+      chart: helm/nde-app
+      reconcileStrategy: Revision
+      sourceRef:
+        kind: GitRepository
+        name: nde
+  values:
+    containers:
+      - name: app
+        image:
+          repository: nginx
+          tag: "1.31.8-alpine" # {"$imagepolicy": "nde:data-netwerkdigitaalerfgoed-nl:tag"}
+        port: 80
+        flux:
+          policy:
+            type: semver
+            pattern: '^(?P<version>\d+\.\d+\.\d+)-alpine$'
+            extract: '$version'
+            range: "~1"
+        # Probe a path that does not redirect: the kubelet would otherwise
+        # follow the 303 to the external endpoint.
+        livenessProbe:
+          httpGet:
+            path: /healthz
+        readinessProbe:
+          httpGet:
+            path: /healthz
+        volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/conf.d
+    volumes:
+      - name: nginx-config
+        configMap:
+          name: data-netwerkdigitaalerfgoed-nl-nginx
+    configMaps:
+      - name: nginx
+        data:
+          default.conf: |
+            # Which host serves the query: the SPARQL endpoint for RDF, the
+            # QLever UI for browsers. First matching regex wins, so RDF media
+            # types come before text/html.
+            map $http_accept $dkg_host {
+              default                                                                                    https://sparql.netwerkdigitaalerfgoed.nl;
+              "~*(text/turtle|application/n-triples|application/n-quads|application/trig|application/ld\+json|application/rdf\+xml)" https://sparql.netwerkdigitaalerfgoed.nl;
+              "~*text/html"                                                                              https://qlever.netwerkdigitaalerfgoed.nl;
+            }
+
+            server {
+              listen 80 default_server;
+
+              location = /healthz {
+                access_log off;
+                return 200;
+              }
+
+              location = /dataset-knowledge-graph {
+                add_header Vary Accept always;
+                # CONSTRUCT { ?s ?p ?o } WHERE { GRAPH <https://data.netwerkdigitaalerfgoed.nl/dataset-knowledge-graph/description> { ?s ?p ?o } }
+                return 303 $dkg_host/dataset-knowledge-graph?query=CONSTRUCT%20%7B%20%3Fs%20%3Fp%20%3Fo%20%7D%20WHERE%20%7B%20GRAPH%20%3Chttps%3A%2F%2Fdata.netwerkdigitaalerfgoed.nl%2Fdataset-knowledge-graph%2Fdescription%3E%20%7B%20%3Fs%20%3Fp%20%3Fo%20%7D%20%7D;
+              }
+
+              location / {
+                return 404;
+              }
+            }
+    ingresses:
+      - hosts:
+          - data.netwerkdigitaalerfgoed.nl
