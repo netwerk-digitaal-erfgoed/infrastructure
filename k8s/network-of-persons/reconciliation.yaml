@@ -57,3 +57,5 @@ spec:
             pathType: Prefix
           - path: /suggest
             pathType: Prefix
+          - path: /view
+            pathType: Prefix
