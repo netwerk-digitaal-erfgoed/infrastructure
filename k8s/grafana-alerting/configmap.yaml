@@ -1,0 +1,512 @@
+# Alert rule groups applied to Grafana by the grafana-alerting CronJob (cronjob.yaml). One key per
+# rule group, named <group>.json, holding the body of Grafana’s provisioning API
+# (PUT /api/v1/provisioning/folder/{folder}/rule-groups/{group}).
+apiVersion: v1
+data:
+  ApplicationLogs.json: |-
+    {
+      "title": "ApplicationLogs",
+      "folderUid": "fg0jbe1l5b3lse",
+      "interval": 60,
+      "rules": [
+        {
+          "uid": "nde-app-error-logs",
+          "title": "Errors in application logs",
+          "orgID": 1,
+          "folderUID": "fg0jbe1l5b3lse",
+          "ruleGroup": "ApplicationLogs",
+          "condition": "B",
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "loki",
+              "relativeTimeRange": {
+                "from": 900,
+                "to": 0
+              },
+              "model": {
+                "refId": "A",
+                "expr": "sum by (service_name) (count_over_time({namespace=\"nde\"} |~ `\"level\":(50|60)[,}]` [15m])) > 0",
+                "queryType": "instant"
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "model": {
+                "refId": "B",
+                "type": "threshold",
+                "expression": "A",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "0s",
+          "annotations": {
+            "summary": "{{ $labels.service_name }} is logging errors.",
+            "description": "The app logged {{ $values.A.Value }} line(s) at level error or fatal in the last 15 minutes. By convention, error means a person must look; a failing external system is logged as warn."
+          },
+          "labels": {},
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "Mattermost Storingen",
+            "repeat_interval": "24h"
+          }
+        }
+      ]
+    }
+  Datasetregister.json: |-
+    {
+      "title": "Datasetregister",
+      "folderUid": "fg0jbe1l5b3lse",
+      "interval": 60,
+      "rules": [
+        {
+          "uid": "bg1aefcq6w8aoc",
+          "title": "Dataset Register is losing datasets",
+          "orgID": 1,
+          "folderUID": "fg0jbe1l5b3lse",
+          "ruleGroup": "Datasetregister",
+          "condition": "B",
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              },
+              "model": {
+                "refId": "A",
+                "expr": "max(datasets) / max(datasets offset 6h)",
+                "instant": true,
+                "range": false
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "model": {
+                "refId": "B",
+                "type": "threshold",
+                "expression": "A",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "lt",
+                      "params": [
+                        0.95
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "noDataState": "NoData",
+          "execErrState": "Error",
+          "for": "30m",
+          "annotations": {
+            "summary": "The Dataset Register counts more than 5% fewer datasets than 6 hours ago.",
+            "description": "Current count relative to 6 hours ago: {{ humanizePercentage $values.A.Value }}. Check the crawler logs for deleted registrations (“was deleted during its crawl”) and descriptions that became invalid."
+          },
+          "labels": {},
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "Mattermost Storingen",
+            "repeat_interval": "24h"
+          }
+        }
+      ]
+    }
+  Kubernetes.json: |-
+    {
+      "title": "Kubernetes",
+      "folderUid": "fg0jbe1l5b3lse",
+      "interval": 60,
+      "rules": [
+        {
+          "uid": "nde-cronjob-overdue",
+          "title": "CronJob overdue",
+          "orgID": 1,
+          "folderUID": "fg0jbe1l5b3lse",
+          "ruleGroup": "Kubernetes",
+          "condition": "B",
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              },
+              "model": {
+                "refId": "A",
+                "expr": "(time() - kube_cronjob_status_last_successful_time{namespace=\"nde\"}) > 2 * (kube_cronjob_next_schedule_time{namespace=\"nde\"} - kube_cronjob_status_last_schedule_time{namespace=\"nde\"}) + 3600",
+                "instant": true,
+                "range": false
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "model": {
+                "refId": "B",
+                "type": "threshold",
+                "expression": "A",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "15m",
+          "annotations": {
+            "summary": "CronJob {{ $labels.cronjob }} has not succeeded for too long.",
+            "description": "Its last successful run is longer ago than twice its schedule interval plus an hour. Check the logs of its latest Jobs."
+          },
+          "labels": {},
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "Mattermost Storingen",
+            "repeat_interval": "24h"
+          }
+        },
+        {
+          "uid": "nde-job-failed",
+          "title": "Job failed",
+          "orgID": 1,
+          "folderUID": "fg0jbe1l5b3lse",
+          "ruleGroup": "Kubernetes",
+          "condition": "B",
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              },
+              "model": {
+                "refId": "A",
+                "expr": "(kube_job_status_failed{namespace=\"nde\"} > 0) and on (namespace, job_name) ((time() - kube_job_created{namespace=\"nde\"}) < 86400)",
+                "instant": true,
+                "range": false
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "model": {
+                "refId": "B",
+                "type": "threshold",
+                "expression": "A",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "0s",
+          "annotations": {
+            "summary": "Job {{ $labels.job_name }} failed.",
+            "description": "The Job ended with an error. Check its logs."
+          },
+          "labels": {},
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "Mattermost Storingen",
+            "repeat_interval": "24h"
+          }
+        },
+        {
+          "uid": "nde-pod-restart-loop",
+          "title": "Pod restart loop",
+          "orgID": 1,
+          "folderUID": "fg0jbe1l5b3lse",
+          "ruleGroup": "Kubernetes",
+          "condition": "B",
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              },
+              "model": {
+                "refId": "A",
+                "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"nde\"}[1h]) > 3",
+                "instant": true,
+                "range": false
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "model": {
+                "refId": "B",
+                "type": "threshold",
+                "expression": "A",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "0s",
+          "annotations": {
+            "summary": "Container {{ $labels.container }} in pod {{ $labels.pod }} keeps restarting.",
+            "description": "More than three restarts in the last hour."
+          },
+          "labels": {},
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "Mattermost Storingen",
+            "repeat_interval": "24h"
+          }
+        },
+        {
+          "uid": "nde-container-oom-killed",
+          "title": "Container OOM-killed",
+          "orgID": 1,
+          "folderUID": "fg0jbe1l5b3lse",
+          "ruleGroup": "Kubernetes",
+          "condition": "B",
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              },
+              "model": {
+                "refId": "A",
+                "expr": "(kube_pod_container_status_last_terminated_reason{namespace=\"nde\", reason=\"OOMKilled\"} == 1) and on (namespace, pod, container) (increase(kube_pod_container_status_restarts_total{namespace=\"nde\"}[1h]) > 0)",
+                "instant": true,
+                "range": false
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "model": {
+                "refId": "B",
+                "type": "threshold",
+                "expression": "A",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "0s",
+          "annotations": {
+            "summary": "Container {{ $labels.container }} in pod {{ $labels.pod }} ran out of memory.",
+            "description": "The container exceeded its memory limit and was restarted (OOMKilled)."
+          },
+          "labels": {},
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "Mattermost Storingen",
+            "repeat_interval": "24h"
+          }
+        },
+        {
+          "uid": "nde-deployment-unavailable",
+          "title": "Deployment unavailable",
+          "orgID": 1,
+          "folderUID": "fg0jbe1l5b3lse",
+          "ruleGroup": "Kubernetes",
+          "condition": "B",
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              },
+              "model": {
+                "refId": "A",
+                "expr": "kube_deployment_status_replicas_unavailable{namespace=\"nde\"} > 0",
+                "instant": true,
+                "range": false
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "model": {
+                "refId": "B",
+                "type": "threshold",
+                "expression": "A",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "15m",
+          "annotations": {
+            "summary": "Deployment {{ $labels.deployment }} has unavailable replicas.",
+            "description": "One or more replicas have been unavailable for 15 minutes."
+          },
+          "labels": {},
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "Mattermost Storingen",
+            "repeat_interval": "24h"
+          }
+        },
+        {
+          "uid": "nde-statefulset-not-ready",
+          "title": "StatefulSet not ready",
+          "orgID": 1,
+          "folderUID": "fg0jbe1l5b3lse",
+          "ruleGroup": "Kubernetes",
+          "condition": "B",
+          "data": [
+            {
+              "refId": "A",
+              "datasourceUid": "prometheus",
+              "relativeTimeRange": {
+                "from": 600,
+                "to": 0
+              },
+              "model": {
+                "refId": "A",
+                "expr": "(kube_statefulset_replicas{namespace=\"nde\"} - kube_statefulset_status_replicas_ready{namespace=\"nde\"}) > 0",
+                "instant": true,
+                "range": false
+              }
+            },
+            {
+              "refId": "B",
+              "datasourceUid": "__expr__",
+              "relativeTimeRange": {
+                "from": 0,
+                "to": 0
+              },
+              "model": {
+                "refId": "B",
+                "type": "threshold",
+                "expression": "A",
+                "conditions": [
+                  {
+                    "evaluator": {
+                      "type": "gt",
+                      "params": [
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "noDataState": "OK",
+          "execErrState": "Error",
+          "for": "15m",
+          "annotations": {
+            "summary": "StatefulSet {{ $labels.statefulset }} has replicas that are not ready.",
+            "description": "One or more replicas have not been ready for 15 minutes."
+          },
+          "labels": {},
+          "isPaused": false,
+          "notification_settings": {
+            "receiver": "Mattermost Storingen",
+            "repeat_interval": "24h"
+          }
+        }
+      ]
+    }
+kind: ConfigMap
+metadata:
+  name: grafana-alert-rules
+  namespace: nde
