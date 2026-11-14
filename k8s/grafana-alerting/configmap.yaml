@@ -3,9 +3,9 @@
 # (PUT /api/v1/provisioning/folder/{folder}/rule-groups/{group}).
 apiVersion: v1
 data:
-  Applicatielogs.json: |-
+  ApplicationLogs.json: |-
     {
-      "title": "Applicatielogs",
+      "title": "ApplicationLogs",
       "folderUid": "fg0jbe1l5b3lse",
       "interval": 60,
       "rules": [
@@ -14,7 +14,7 @@ data:
           "title": "Errors in application logs",
           "orgID": 1,
           "folderUID": "fg0jbe1l5b3lse",
-          "ruleGroup": "Applicatielogs",
+          "ruleGroup": "ApplicationLogs",
           "condition": "B",
           "data": [
             {
@@ -58,8 +58,8 @@ data:
           "execErrState": "Error",
           "for": "0s",
           "annotations": {
-            "summary": "{{ $labels.service_name }} logt fouten.",
-            "description": "De app logde in het afgelopen kwartier {{ $values.A.Value }} regel(s) op niveau error of fatal. Afspraak: error betekent dat iemand moet kijken; een storing bij een externe bron is warn. Bekijk de logs met /surf-logs."
+            "summary": "{{ $labels.service_name }} is logging errors.",
+            "description": "The app logged {{ $values.A.Value }} line(s) at level error or fatal in the last 15 minutes. By convention, error means a person must look; a failing external system is logged as warn."
           },
           "labels": {},
           "isPaused": false,
@@ -78,7 +78,7 @@ data:
       "rules": [
         {
           "uid": "bg1aefcq6w8aoc",
-          "title": "Datasetregister verliest datasets",
+          "title": "Dataset Register is losing datasets",
           "orgID": 1,
           "folderUID": "fg0jbe1l5b3lse",
           "ruleGroup": "Datasetregister",
@@ -126,8 +126,8 @@ data:
           "execErrState": "Error",
           "for": "30m",
           "annotations": {
-            "summary": "Het Datasetregister telt meer dan 5% minder datasets dan 6 uur geleden.",
-            "description": "Huidig aantal ten opzichte van 6 uur geleden: {{ humanizePercentage $values.A.Value }}. Controleer de crawler-logs op verwijderde registraties (“was deleted during its crawl”) en ongeldig geworden beschrijvingen."
+            "summary": "The Dataset Register counts more than 5% fewer datasets than 6 hours ago.",
+            "description": "Current count relative to 6 hours ago: {{ humanizePercentage $values.A.Value }}. Check the crawler logs for deleted registrations (“was deleted during its crawl”) and descriptions that became invalid."
           },
           "labels": {},
           "isPaused": false,
@@ -194,8 +194,8 @@ data:
           "execErrState": "Error",
           "for": "15m",
           "annotations": {
-            "summary": "CronJob {{ $labels.cronjob }} heeft al te lang geen geslaagde run.",
-            "description": "De laatste geslaagde run is langer geleden dan twee keer het schema-interval plus een uur. Bekijk de logs van de laatste Jobs met /surf-logs."
+            "summary": "CronJob {{ $labels.cronjob }} has not succeeded for too long.",
+            "description": "Its last successful run is longer ago than twice its schedule interval plus an hour. Check the logs of its latest Jobs."
           },
           "labels": {},
           "isPaused": false,
@@ -254,8 +254,8 @@ data:
           "execErrState": "Error",
           "for": "0s",
           "annotations": {
-            "summary": "Job {{ $labels.job_name }} is mislukt.",
-            "description": "De Job eindigde met een fout. Bekijk zijn logs met /surf-logs."
+            "summary": "Job {{ $labels.job_name }} failed.",
+            "description": "The Job ended with an error. Check its logs."
           },
           "labels": {},
           "isPaused": false,
@@ -314,8 +314,8 @@ data:
           "execErrState": "Error",
           "for": "0s",
           "annotations": {
-            "summary": "Container {{ $labels.container }} in pod {{ $labels.pod }} herstart steeds.",
-            "description": "Meer dan drie herstarts in het afgelopen uur."
+            "summary": "Container {{ $labels.container }} in pod {{ $labels.pod }} keeps restarting.",
+            "description": "More than three restarts in the last hour."
           },
           "labels": {},
           "isPaused": false,
@@ -374,8 +374,8 @@ data:
           "execErrState": "Error",
           "for": "0s",
           "annotations": {
-            "summary": "Container {{ $labels.container }} in pod {{ $labels.pod }} is gestopt wegens geheugengebrek.",
-            "description": "De container overschreed zijn geheugenlimiet en is herstart (OOMKilled)."
+            "summary": "Container {{ $labels.container }} in pod {{ $labels.pod }} ran out of memory.",
+            "description": "The container exceeded its memory limit and was restarted (OOMKilled)."
           },
           "labels": {},
           "isPaused": false,
@@ -434,8 +434,8 @@ data:
           "execErrState": "Error",
           "for": "15m",
           "annotations": {
-            "summary": "Deployment {{ $labels.deployment }} heeft onbeschikbare replica’s.",
-            "description": "Een of meer replica’s zijn al 15 minuten niet beschikbaar."
+            "summary": "Deployment {{ $labels.deployment }} has unavailable replicas.",
+            "description": "One or more replicas have been unavailable for 15 minutes."
           },
           "labels": {},
           "isPaused": false,
@@ -494,8 +494,8 @@ data:
           "execErrState": "Error",
           "for": "15m",
           "annotations": {
-            "summary": "StatefulSet {{ $labels.statefulset }} heeft replica’s die niet klaar zijn.",
-            "description": "Een of meer replica’s zijn al 15 minuten niet ready."
+            "summary": "StatefulSet {{ $labels.statefulset }} has replicas that are not ready.",
+            "description": "One or more replicas have not been ready for 15 minutes."
           },
           "labels": {},
           "isPaused": false,
