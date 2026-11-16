@@ -41,7 +41,7 @@ jobs:
         uses: orhun/git-cliff-action@v4
         with:
           config: helm/cliff.toml
-          args: --include-path helm/nde-app/** --unreleased --bump --strip all
+          args: --include-path 'helm/nde-app/**' --unreleased --bump --strip all
 
       # Nothing to release leaves the version at the latest tag (or empty when
       # no commit since then counts). Never push over a published version:
