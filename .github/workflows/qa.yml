@@ -25,7 +25,7 @@ jobs:
       # The version and notes that merging this pull request would release
       # (see nde-app.yml); nothing is pushed.
       - name: Preview the nde-app release
-        uses: orhun/git-cliff-action@v4
+        uses: orhun/git-cliff-action@v4.9.1
         with:
           config: helm/cliff.toml
           args: --include-path 'helm/nde-app/**' --unreleased --bump --strip all

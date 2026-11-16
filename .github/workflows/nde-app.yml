@@ -38,7 +38,7 @@ jobs:
 
       - name: Compute the version and release notes
         id: cliff
-        uses: orhun/git-cliff-action@v4
+        uses: orhun/git-cliff-action@v4.9.1
         with:
           config: helm/cliff.toml
           args: --include-path 'helm/nde-app/**' --unreleased --bump --strip all
@@ -69,5 +69,15 @@ jobs:
         run: |
           helm package helm/nde-app --version "$VERSION" --app-version "$VERSION"
           echo "$GH_TOKEN" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          # A push whose release step failed leaves the version published but
+          # untagged, so check the registry too before pushing.
+          if helm show chart "$CHART_REPOSITORY/nde-app" --version "$VERSION" > /dev/null 2>&1; then
+            echo "nde-app $VERSION is already published but has no $TAG tag; tag it by hand." >&2
+            exit 1
+          fi
           helm push "nde-app-$VERSION.tgz" "$CHART_REPOSITORY"
-          gh release create "$TAG" --target "$GITHUB_SHA" --title "nde-app $VERSION" --notes-file "$NOTES"
+          # Tag the last commit that touched the chart: with --include-path,
+          # git-cliff ignores a tag on any other commit, and would compute this
+          # version again next time.
+          target=$(git log -1 --format=%H -- helm/nde-app)
+          gh release create "$TAG" --target "$target" --title "nde-app $VERSION" --notes-file "$NOTES"

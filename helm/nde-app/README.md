@@ -14,7 +14,7 @@ Generic Helm chart for deploying NDE applications. It supports:
 
 ## Versions
 
-The HelmReleases in this repository use the chart straight from `helm/nde-app` on `master`. Other clusters use a published version instead: every `feat` or `fix` commit touching the chart, and every breaking change, releases one to `oci://ghcr.io/netwerk-digitaal-erfgoed/charts/nde-app`, with release notes under the repository’s releases (`nde-app-v*`). While on 0.x, a breaking change bumps the minor version and anything else the patch, so mark a breaking change with `!` or a `BREAKING CHANGE:` footer.
+The HelmReleases in this repository use the chart straight from `helm/nde-app` on `master`. Other clusters use a published version instead: every `feat` or `fix` commit touching the chart, and every breaking change, releases one to `oci://ghcr.io/netwerk-digitaal-erfgoed/charts/nde-app`, with release notes under the repository’s releases (`nde-app-v*`). While on 0.x, a breaking change bumps the minor version and anything else the patch, so mark a breaking change with `!` or a `BREAKING CHANGE:` footer. Pull requests are squash-merged, so what counts is the pull request’s title and description, which become the commit; the release preview in a pull request’s checks reads its individual commits instead. The package is public, so a cluster pulls it without credentials.
 
 ```yaml
 apiVersion: source.toolkit.fluxcd.io/v1
@@ -88,7 +88,7 @@ Two related settings:
 - `cronjobs[].restartPolicy` defaults to `OnFailure`, which restarts a failed container in the same pod. Set `Never` when the job controls a sidecar: a restarted job container would find the sidecar still running what the failed one started.
 - `cronjobs[].automountServiceAccountToken: false` leaves the pod without a Kubernetes API token, for jobs that never call the API.
 
-To run a job on dedicated nodes, set `cronjobs[].nodeSelector` to their label and `cronjobs[].tolerations` to their taint, both passed to the pod as is:
+To run a job on dedicated nodes, set `nodeSelector` to their label and `tolerations` to their taint, both passed to the pod as is. This works for `cronjobs[]` and `jobs[]` alike:
 
 ```yaml
 cronjobs:
