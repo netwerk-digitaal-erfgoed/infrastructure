@@ -1,0 +1,73 @@
+name: Release nde-app
+
+# Publishes the nde-app chart to GHCR as an OCI artifact whenever a feat or fix
+# commit, or a breaking change, touching it lands on master. The version comes
+# from those commits (helm/cliff.toml); Chart.yaml stays at 0.0.0, so a
+# release commits nothing back. The HelmReleases in k8s/ keep using the chart
+# from this repository directly; the published versions are for other clusters.
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - helm/nde-app/**
+      - helm/cliff.toml
+      - .github/workflows/nde-app.yml
+  workflow_dispatch:
+
+# Two merges in quick succession must not compute the same version.
+concurrency:
+  group: nde-app-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  CHART_REPOSITORY: oci://ghcr.io/netwerk-digitaal-erfgoed/charts
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # The version is computed from all commits since the last release tag.
+          fetch-depth: 0
+
+      - name: Compute the version and release notes
+        id: cliff
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: helm/cliff.toml
+          args: --include-path helm/nde-app/** --unreleased --bump --strip all
+
+      # Nothing to release leaves the version at the latest tag (or empty when
+      # no commit since then counts). Never push over a published version:
+      # OCI tags can be overwritten, and a consumer’s pinned chart would change.
+      - name: Decide whether to release
+        id: release
+        env:
+          TAG: ${{ steps.cliff.outputs.version }}
+        run: |
+          if [ -z "$TAG" ] || [ "$TAG" = null ] || git rev-parse -q --verify "refs/tags/$TAG" > /dev/null; then
+            echo "Nothing to release."
+          else
+            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+            echo "version=${TAG#nde-app-v}" >> "$GITHUB_OUTPUT"
+            echo "Releasing $TAG."
+          fi
+
+      - name: Publish the chart
+        if: steps.release.outputs.tag
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+          TAG: ${{ steps.release.outputs.tag }}
+          NOTES: ${{ steps.cliff.outputs.changelog }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          helm package helm/nde-app --version "$VERSION" --app-version "$VERSION"
+          echo "$GH_TOKEN" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          helm push "nde-app-$VERSION.tgz" "$CHART_REPOSITORY"
+          gh release create "$TAG" --target "$GITHUB_SHA" --title "nde-app $VERSION" --notes-file "$NOTES"

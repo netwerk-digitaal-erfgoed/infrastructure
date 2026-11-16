@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          # The release preview below reads every commit since the last tag.
+          fetch-depth: 0
 
       - name: Install kubeconform
         run: |
@@ -18,6 +21,14 @@ jobs:
 
       - name: Lint Helm chart
         run: helm lint helm/nde-app
+
+      # The version and notes that merging this pull request would release
+      # (see nde-app.yml); nothing is pushed.
+      - name: Preview the nde-app release
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: helm/cliff.toml
+          args: --include-path helm/nde-app/** --unreleased --bump --strip all
 
       - name: Validate HelmReleases
         run: |
