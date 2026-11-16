@@ -80,6 +80,9 @@ spec:
             pathType: Prefix
           - path: /changes
             pathType: Prefix
+          # The in-site SPARQL editor (LDForge). /en/query is covered by /en.
+          - path: /query
+            pathType: Prefix
           - path: /_app
             pathType: Prefix
           - path: /en
