@@ -88,6 +88,20 @@ Two related settings:
 - `cronjobs[].restartPolicy` defaults to `OnFailure`, which restarts a failed container in the same pod. Set `Never` when the job controls a sidecar: a restarted job container would find the sidecar still running what the failed one started.
 - `cronjobs[].automountServiceAccountToken: false` leaves the pod without a Kubernetes API token, for jobs that never call the API.
 
+To run a job on dedicated nodes, set `cronjobs[].nodeSelector` to their label and `cronjobs[].tolerations` to their taint, both passed to the pod as is:
+
+```yaml
+cronjobs:
+  - name: index
+    nodeSelector:
+      k8s.scaleway.com/pool-name: indexer
+    tolerations:
+      - key: lol/indexer
+        operator: Equal
+        value: 'true'
+        effect: NoSchedule
+```
+
 ## Jobs
 
 `jobs[]` runs a Job before the rest of the release is installed or upgraded, the way a database migration runs before the new application version starts. Each entry is a [Helm hook](https://helm.sh/docs/topics/charts_hooks/): Helm creates the Job, waits for it to succeed, and only then applies the release’s other resources. If the Job fails, the upgrade fails and everything else stays at the previous version.
