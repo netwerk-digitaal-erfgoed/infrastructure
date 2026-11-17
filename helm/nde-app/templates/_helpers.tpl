@@ -60,6 +60,18 @@ Render a Job spec – retries, deadline and pod template – from a cronjobs[] o
 Args: (root, job, valuesKey); valuesKey names the list in error messages.
 backoffLimit is checked with hasKey, not with: 0 is a meaningful limit that `with` would drop.
 */}}
+{{/*
+API version of Flux’s image automation resources: v1 where the cluster serves
+it (Flux 2.7 and later; 2.10 dropped v1beta2), v1beta2 on older clusters.
+*/}}
+{{- define "nde-app.imageApiVersion" -}}
+{{- if .Capabilities.APIVersions.Has "image.toolkit.fluxcd.io/v1" -}}
+image.toolkit.fluxcd.io/v1
+{{- else -}}
+image.toolkit.fluxcd.io/v1beta2
+{{- end -}}
+{{- end }}
+
 {{- define "nde-app.jobSpec" -}}
 {{- $root := index . 0 -}}
 {{- $job := index . 1 -}}
