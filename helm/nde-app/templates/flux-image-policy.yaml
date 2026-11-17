@@ -4,7 +4,7 @@
 {{- $fluxName := include "nde-app.fluxName" (list ((.flux).name) (include "nde-app.fullname" $) .name) }}
 {{- $policyType := (((.flux).policy).type) | default "numerical" }}
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: {{ include "nde-app.imageApiVersion" $ }}
 kind: ImagePolicy
 metadata:
   name: {{ $fluxName }}
@@ -47,7 +47,7 @@ spec:
 {{- $_ := set $rendered $fluxName true }}
 {{- $policyType := (((.flux).policy).type) | default "numerical" }}
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: {{ include "nde-app.imageApiVersion" $ }}
 kind: ImagePolicy
 metadata:
   name: {{ $fluxName }}

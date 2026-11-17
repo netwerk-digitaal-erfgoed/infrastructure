@@ -3,7 +3,7 @@
 {{- if $fluxEnabled }}
 {{- $fluxName := include "nde-app.fluxName" (list ((.flux).name) (include "nde-app.fullname" $) .name) }}
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: {{ include "nde-app.imageApiVersion" $ }}
 kind: ImageRepository
 metadata:
   name: {{ $fluxName }}
@@ -39,7 +39,7 @@ spec:
 {{- if and $fluxEnabled .image (not (hasKey $rendered $fluxName)) }}
 {{- $_ := set $rendered $fluxName $repository }}
 ---
-apiVersion: image.toolkit.fluxcd.io/v1beta2
+apiVersion: {{ include "nde-app.imageApiVersion" $ }}
 kind: ImageRepository
 metadata:
   name: {{ $fluxName }}
