@@ -102,6 +102,10 @@ template:
     affinity:
       {{- toYaml . | nindent 6 }}
     {{- end }}
+    {{- with $job.tolerations }}
+    tolerations:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
     {{- if hasKey $job "automountServiceAccountToken" }}
     automountServiceAccountToken: {{ $job.automountServiceAccountToken }}
     {{- end }}

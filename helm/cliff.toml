@@ -1,0 +1,33 @@
+# git-cliff configuration for releasing the nde-app chart; see
+# .github/workflows/nde-app.yml. Only feat and fix commits, and breaking
+# changes of any type, touching helm/nde-app release a new version.
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+protect_breaking_commits = true
+tag_pattern = "^nde-app-v[0-9]"
+commit_parsers = [
+  { message = "^[a-z]+(\\(.+\\))?!:", group = "Breaking changes" },
+  { footer = "^BREAKING[ -]CHANGE", group = "Breaking changes" },
+  { message = "^feat", group = "Features" },
+  { message = "^fix", group = "Fixes" },
+  { message = ".*", skip = true },
+]
+
+[bump]
+# While on 0.x, a breaking change bumps the minor and a feature the patch.
+features_always_bump_minor = false
+breaking_always_bump_major = false
+initial_tag = "nde-app-v0.1.0"
+
+[changelog]
+body = """
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group }}
+{% for commit in commits %}
+- {% if commit.breaking %}**Breaking:** {% endif %}{{ commit.message | split(pat="\n") | first | trim }}\
+{% endfor %}
+{% endfor %}
+"""
+trim = true

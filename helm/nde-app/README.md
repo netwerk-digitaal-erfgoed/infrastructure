@@ -12,6 +12,36 @@ Generic Helm chart for deploying NDE applications. It supports:
 - [CNAME DNS records](#cname-dns-records)
 - [Volume backups](#velero-volume-backups)
 
+## Versions
+
+The HelmReleases in this repository use the chart straight from `helm/nde-app` on `master`. Other clusters use a published version instead: every `feat` or `fix` commit touching the chart, and every breaking change, releases one to `oci://ghcr.io/netwerk-digitaal-erfgoed/charts/nde-app`, with release notes under the repository’s releases (`nde-app-v*`). While on 0.x, a breaking change bumps the minor version and anything else the patch, so mark a breaking change with `!` or a `BREAKING CHANGE:` footer. Pull requests are squash-merged, so what counts is the pull request’s title and description, which become the commit; the release preview in a pull request’s checks reads its individual commits instead. The package is public, so a cluster pulls it without credentials.
+
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: nde-app
+spec:
+  url: oci://ghcr.io/netwerk-digitaal-erfgoed/charts/nde-app
+  ref:
+    tag: 0.1.0
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  interval: 1h
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: my-app
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: nde-app
+  values: {}
+```
+
 ## Flux Image Automation
 
 Flux image automation is **enabled by default** for all containers. This automatically updates image tags when new versions are pushed.
@@ -57,6 +87,20 @@ Two related settings:
 
 - `cronjobs[].restartPolicy` defaults to `OnFailure`, which restarts a failed container in the same pod. Set `Never` when the job controls a sidecar: a restarted job container would find the sidecar still running what the failed one started.
 - `cronjobs[].automountServiceAccountToken: false` leaves the pod without a Kubernetes API token, for jobs that never call the API.
+
+To run a job on dedicated nodes, set `nodeSelector` to their label and `tolerations` to their taint, both passed to the pod as is. This works for `cronjobs[]` and `jobs[]` alike:
+
+```yaml
+cronjobs:
+  - name: index
+    nodeSelector:
+      k8s.scaleway.com/pool-name: indexer
+    tolerations:
+      - key: lol/indexer
+        operator: Equal
+        value: 'true'
+        effect: NoSchedule
+```
 
 ## Jobs
 
