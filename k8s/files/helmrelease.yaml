@@ -72,12 +72,12 @@ spec:
               }
 
               location / {
-                # The object store addresses a public bucket as
-                # <tenant>:<bucket>; the tenant is NDE’s account there.
+                # NDE’s IAM account at the object store addresses a public
+                # bucket as /<bucket>/<key>, without a tenant prefix.
                 # $request_uri keeps the path and query string as the client
                 # sent them, so encoded characters survive the redirect.
                 if ($request_uri ~ ^/(.+)$) {
-                  return 302 https://objectstore.surf.nl/8cb3d6bf7f53479183d9f64c6c80a82f:$1;
+                  return 302 https://objectstore.surf.nl/$1;
                 }
               }
             }

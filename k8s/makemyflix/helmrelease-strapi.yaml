@@ -75,12 +75,12 @@ spec:
           - name: S3_KEY
             valueFrom:
               secretKeyRef:
-                name: s3
+                name: makemyflix-s3
                 key: key
           - name: S3_SECRET
             valueFrom:
               secretKeyRef:
-                name: s3
+                name: makemyflix-s3
                 key: secret
         # SURF’s default limit of 256M is too low for Strapi to start: on
         # 2026-10-12 a new pod was OOM-killed on every start and crash-looped.
