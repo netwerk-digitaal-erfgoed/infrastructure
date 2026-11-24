@@ -27,7 +27,7 @@ spec:
       - name: app
         image:
           repository: nginx
-          tag: "1.31.9-alpine" # {"$imagepolicy": "nde:statistieken:tag"}
+          tag: "1.31.10-alpine" # {"$imagepolicy": "nde:statistieken:tag"}
         port: 80
         flux:
           policy:
