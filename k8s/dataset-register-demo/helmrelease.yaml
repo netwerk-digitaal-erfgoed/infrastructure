@@ -28,7 +28,7 @@ spec:
       - name: php
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/registry-demo-php-fpm
-          tag: 20261120093459-5618497 # {"$imagepolicy": "nde:dataset-register-demo-php:tag"}
+          tag: 20261124115542-53456cf # {"$imagepolicy": "nde:dataset-register-demo-php:tag"}
         port: 9000
         volumeMounts:
           - mountPath: /datasetdescriptions
