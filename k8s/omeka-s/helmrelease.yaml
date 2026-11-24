@@ -23,7 +23,7 @@ spec:
       - name: nginx
         image:
           repository: ghcr.io/netwerk-digitaal-erfgoed/omeka-s-nginx
-          tag: 20261120093506-56f8fb7 # {"$imagepolicy": "nde:omeka-s-nginx:tag"}
+          tag: 20261124190833-10a4727 # {"$imagepolicy": "nde:omeka-s-nginx:tag"}
         port: 80
         env:
           - name: RESTART_TRIGGER
