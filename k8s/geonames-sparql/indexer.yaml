@@ -110,7 +110,7 @@ spec:
             #    user (UID 1000) – the same UID as the server – so the index it writes is
             #    already server-owned; no root needed.
             - name: build-text-index
-              image: netwerkdigitaalerfgoed/fuseki:6.2.0 # {"$imagepolicy": "nde:geonames-sparql"}
+              image: netwerkdigitaalerfgoed/fuseki:6.3.0 # {"$imagepolicy": "nde:geonames-sparql"}
               resources:
                 requests:
                   cpu: "1"

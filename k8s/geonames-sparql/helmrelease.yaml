@@ -31,7 +31,7 @@ spec:
       - name: app
         image:
           repository: netwerkdigitaalerfgoed/fuseki
-          tag: "6.2.0" # {"$imagepolicy": "nde:geonames-sparql:tag"}
+          tag: "6.3.0" # {"$imagepolicy": "nde:geonames-sparql:tag"}
         # Fuseki Main does not auto-load $FUSEKI_BASE/config.ttl – it must be
         # passed explicitly via --config. Without this, Fuseki starts admin-only
         # with no datasets and /sparql returns 404.
@@ -128,7 +128,6 @@ spec:
                   values:
                     - ms4-k8s-prod-md-16core-cz47g-htxfv-zbzhr
                     - ms4-k8s-prod-md-16core-cz47g-htxfv-6l7vq
-
     securityContext:
       fsGroup: 100
     volumes:
